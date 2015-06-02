@@ -9,7 +9,6 @@ Overview
 This directory tree contains the materials for the initial version of an openMDAO "Driver" object that wraps
 Sandia Lab's "DAKOTA" optimization and analysis code.  There are three different functionalities:
 
-
 1. An interface to DAKOTA, in "library mode", that allows passing an MPI communicator and a "void *" object
 to DAKOTA. This is still in C++.
 
