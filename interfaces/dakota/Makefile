@@ -20,9 +20,9 @@
 #CXX = /opt/local/bin/g++-mp-4.5 
 ####CXX = /Users/pgraf/opt/mpich2-1.2.1p1.gfortran-mp-4.5/bin/mpic++
 #CXX = g++
-CXX = g++-5
+#CXX = g++-5
 #CXX = gcc-mp-4.3
-#CXX = mpic++
+CXX = mpic++
 
 LD = ld
 

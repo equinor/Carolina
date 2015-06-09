@@ -75,7 +75,7 @@
 #include <boost/python/numeric.hpp>
 #include <boost/python/extract.hpp>
 #ifndef WINDOWS
-#include <boost/mpi.hpp>
+//#include <boost/mpi.hpp>
 #endif
 namespace bp = boost::python;
 namespace bpn = boost::python::numeric;
@@ -427,7 +427,7 @@ python_convert(const StringMultiArray& src, PyObject** dst)
       return(false);
   }
   for (int i=0; i<sz; ++i)
-    PyList_SetItem(*dst, i, PyString_FromString(src[i]));
+    PyList_SetItem(*dst, i, PyString_FromString(src[i].c_str()));
 
   return(true);
 }
@@ -446,11 +446,11 @@ python_convert(const StringMultiArray& c_src, const StringMultiArray& di_src,
     return(false);
   }
   for (int i=0; i<c_sz; ++i)
-    PyList_SetItem(*dst, i, PyString_FromString(c_src[i]));
+    PyList_SetItem(*dst, i, PyString_FromString(c_src[i].c_str()));
   for (int i=0; i<di_sz; ++i)
-    PyList_SetItem(*dst, c_sz+i, PyString_FromString(di_src[i]));
+    PyList_SetItem(*dst, c_sz+i, PyString_FromString(di_src[i].c_str()));
   for (int i=0; i<dr_sz; ++i)
-    PyList_SetItem(*dst, c_sz+di_sz+i, PyString_FromString(dr_src[i]));
+    PyList_SetItem(*dst, c_sz+di_sz+i, PyString_FromString(dr_src[i].c_str()));
 
   return(true);
 }

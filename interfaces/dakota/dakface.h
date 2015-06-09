@@ -53,7 +53,7 @@
 #include "DirectApplicInterface.hpp"
 
 #ifndef WINDOWS
-#include "mpi.h"
+//#include "mpi.h"
 #else
 #define MPI_Comm int
 #define MPI_COMM_WORLD 0
