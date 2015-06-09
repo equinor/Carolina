@@ -28,16 +28,17 @@
    NOTE: some cleanup of includes, etc. still to do relating to common Mac/linux/windows builds.
 */
 
-#include "system_defs.h"
-#include "global_defs.h"
+#include "dakota_system_defs.hpp"
+#include "dakota_global_defs.hpp"
+#include "dakota_data_types.hpp"
 
-#include "ParallelLibrary.H"
-#include "ProblemDescDB.H"
-#include "DakotaStrategy.H"
-#include "DakotaModel.H"
-#include "DakotaInterface.H"
-//#include "PluginSerialDirectApplicInterface.H"
-//#include "PluginParallelDirectApplicInterface.H"
+#include "ParallelLibrary.hpp"
+#include "ProblemDescDB.hpp"
+#include "DakotaStrategy.hpp"
+#include "DakotaModel.hpp"
+#include "DakotaInterface.hpp"
+#include "PluginSerialDirectApplicInterface.hpp"
+#include "PluginParallelDirectApplicInterface.hpp"
 
 // eventually use only _WIN32 here
 //#if defined(_WIN32) || defined(_MSC_VER) || defined(__MINGW32__)
@@ -45,12 +46,12 @@
 #include <windows.h>
 #endif
 
-#include "ParallelLibrary.H"
-#include "CommandLineHandler.H"
-#include "ProblemDescDB.H"
-#include "DakotaStrategy.H"
+#include "ParallelLibrary.hpp"
+#include "CommandLineHandler.hpp"
+#include "ProblemDescDB.hpp"
+#include "DakotaStrategy.hpp"
 #ifdef DAKOTA_TRACKING
-#include "TrackerHTTP.H"
+#include "TrackerHTTP.hpp"
 #endif
 
 //#define MPI_DEBUG
@@ -61,7 +62,7 @@
 #include <unistd.h>
 #endif
 
-#include "DirectApplicInterface.H"
+#include "DirectApplicInterface.hpp"
 
 
 #include <Python.h>

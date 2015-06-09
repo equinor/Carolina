@@ -20,13 +20,13 @@
 #CXX = /opt/local/bin/g++-mp-4.5 
 ####CXX = /Users/pgraf/opt/mpich2-1.2.1p1.gfortran-mp-4.5/bin/mpic++
 #CXX = g++
-#CXX = g++-4.2
+CXX = g++-5
 #CXX = gcc-mp-4.3
-CXX = mpic++
+#CXX = mpic++
 
 LD = ld
 
-INCLUDE_DIR = -I/opt/local/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/site-packages/numpy/core/include/ -I/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/include/python2.7 -I/usr/local/include -I/usr/local/Dakota/include -I/opt/X11/include/X11 -I/opt/X11/include
+INCLUDE_DIR = -I/usr/local/Cellar/boost/1.58.0/include/boost/predef/os/ -I/opt/local/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/site-packages/numpy/core/include/ -I/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/include/python2.7 -I/usr/local/include -I/usr/local/Dakota/include -I/opt/X11/include/X11 -I/opt/X11/include -I/Library/Python/2.7/site-packages/numpy/core/include -I/usr/local/dakota_darwin/include -I/usr/local/Dakota/dakota-6.2.0.src/src -I/usr/local/Cellar/boost/1.58.0/include/boost/predef/os -I/usr/local/Dakota/src -I/usr/local/Dakota/dakota-6.2.0.src/src/
 
 DAK_INCDIR = -I/usr/local/Dakota/ -I/usr/local//Dakota/include
 

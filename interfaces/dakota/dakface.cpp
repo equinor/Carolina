@@ -21,7 +21,7 @@
 // We will use DAKOTA in library mode as described at
 // http://dakota.sandia.gov/docs/dakota/5.2/html-dev/DakLibrary.html
 
-#include "system_defs.h"
+#include "system_defs.hpp"
 #include "global_defs.h"
 
 #include "ParallelLibrary.H"
