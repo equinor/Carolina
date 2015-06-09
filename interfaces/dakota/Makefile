@@ -43,11 +43,11 @@ LIBS =  -lboost_python -lboost_mpi -lboost_system
 #COMPILER_LIBS = -L/opt/local/lib/gcc45/gcc/i386-apple-darwin9/4.5.0 -L/opt/local/lib/gcc45/gcc/i386-apple-darwin9/4.5.0/../../.. /opt/local/lib/gcc45/libgfortran.dylib -lm -lgcc_s.10.5 -lgcc_ext.10.5 -lSystem -ldl
 
 #COMPILER_LIBS = -L/usr/lib/gcc/i686-apple-darwin9/4.0.1/ -lm -lgcc  -lSystem -ldl   -L/opt/local/lib/gcc45/gcc/i386-apple-darwin9/4.5.0/../../.. /opt/local/lib/gcc45/libgfortran.dylib  -lgcc_ext.10.5
-COMPILER_LIBS = -L/usr/local/lib/gcc/5/gcc/x86_64-apple-darwin13.4.0/5.1.0/ lm -lgcc  -lSystem -ldl   -L/usr/local/Cellar/gcc/5.1.0/lib/gcc/5/i386 /usr/local/Cellar/gcc/5.1.0/lib/gcc/5/i386/libgfortran.dylib  -lgcc_ext.10.5
+COMPILER_LIBS = -L/usr/local/lib/gcc/5/gcc/x86_64-apple-darwin13.4.0/5.1.0/ -lm -lgcc  -lSystem -ldl   -L/usr/local/Cellar/gcc/5.1.0/lib/gcc/5/i386 /usr/local/Cellar/gcc/5.1.0/lib/gcc/5/i386/libgfortran.dylib  -lgcc_ext.10.5
 
 
 # DAKOTA_LIBS = -L/Users/pgraf/root/dakota/lib/ -ldakota -llhs -lnewmat -lnidr -lopt -lpecos -lconmin -lsparsegrid -lteuchos 
-DAKOTA_LIBS = -L/usr/local/Dakota/li -ldakota -llhs -lnewmat -lnidr -lopt -lpecos -lconmin -lsparsegrid -lteuchos 
+DAKOTA_LIBS = -L/usr/local/Dakota_source/lib -ldakota -llhs -lnewmat -lnidr -lopt -lpecos -lconmin -lsparsegrid -lteuchos 
 DAKOTA = $(DAKOTA_LIBS) -L/usr/X11/lib -lSM -lICE -llapack -lblas $(COMPILER_LIBS)
 
 #-L/opt/local/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/config -lpython2.6 -ldl
