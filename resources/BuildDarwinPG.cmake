@@ -21,7 +21,7 @@
 #    
 #      mkdir build 
 #      cd build
-#      cmake -C ../BuildDarwinPG.cmake ../.
+#      cmake -C ../BuildDarwinPG.cmake ../. -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING
 #      cd src
 #      make  
 ##############################################################################
