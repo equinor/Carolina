@@ -13,6 +13,12 @@
 #    limitations under the License.
 # 
 # ++==++==++==++==++==++==++==++==++==++==
+#
+# Julian Quick Summer 2015
+# 
+# DAKOTA driver Makefule configured for OSX
+#
+# ++==++==++==++==++==++==++==++==++==++==
 #CC = /opt/local/bin/g++-mp-4.5 
 #CC = mpicc
 ####CC = /Users/pgraf/opt/mpich2-1.2.1p1.gfortran-mp-4.5/bin/mpic++
@@ -26,9 +32,9 @@ CXX = mpic++
 
 LD = ld
 
-INCLUDE_DIR = -I/usr/local/Cellar/boost/1.58.0/include/boost/predef/os/ -I/opt/local/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/site-packages/numpy/core/include/ -I/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/include/python2.7 -I/usr/local/include -I/usr/local/Dakota/include -I/opt/X11/include/X11 -I/opt/X11/include -I/Library/Python/2.7/site-packages/numpy/core/include -I/usr/local/dakota_darwin/include -I/usr/local/Dakota/dakota-6.2.0.src/src -I/usr/local/Cellar/boost/1.58.0/include/boost/predef/os -I/usr/local/Dakota/src -I/usr/local/Dakota/dakota-6.2.0.src/src/
+INCLUDE_DIR = -I/usr/local/Cellar/boost/1.58.0/include/boost/predef/os/ -I/opt/local/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/site-packages/numpy/core/include/ -I/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/include/python2.7 -I/usr/local/include -I/opt/X11/include/X11 -I/opt/X11/include -I/Library/Python/2.7/site-packages/numpy/core/include -I/usr/local/dakota_darwin/include -I/usr/local/Dakota_source/src -I/usr/local/Cellar/boost/1.58.0/include/boost/predef/os 
 
-DAK_INCDIR = -I/usr/local/Dakota/ -I/usr/local//Dakota/include
+DAK_INCDIR = -I/usr/local/dakota_darwin/include 
 
 LIB_DIR = -L/usr/lib 
 LIB_PY = /usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/Python
@@ -43,11 +49,13 @@ LIBS =  -lboost_python -lboost_mpi -lboost_system
 #COMPILER_LIBS = -L/opt/local/lib/gcc45/gcc/i386-apple-darwin9/4.5.0 -L/opt/local/lib/gcc45/gcc/i386-apple-darwin9/4.5.0/../../.. /opt/local/lib/gcc45/libgfortran.dylib -lm -lgcc_s.10.5 -lgcc_ext.10.5 -lSystem -ldl
 
 #COMPILER_LIBS = -L/usr/lib/gcc/i686-apple-darwin9/4.0.1/ -lm -lgcc  -lSystem -ldl   -L/opt/local/lib/gcc45/gcc/i386-apple-darwin9/4.5.0/../../.. /opt/local/lib/gcc45/libgfortran.dylib  -lgcc_ext.10.5
-COMPILER_LIBS = -L/usr/local/lib/gcc/5/gcc/x86_64-apple-darwin13.4.0/5.1.0/ -lm -lgcc  -lSystem -ldl   -L/usr/local/Cellar/gcc/5.1.0/lib/gcc/5/i386 /usr/local/Cellar/gcc/5.1.0/lib/gcc/5/i386/libgfortran.dylib  -lgcc_ext.10.5
+COMPILER_LIBS = -L/usr/local/lib/gcc/5/gcc/x86_64-apple-darwin13.4.0/5.1.0/ -lm -lgcc  -lSystem -ldl   -L/usr/local/Cellar/gcc/5.1.0/lib/gcc/5/ -L/usr/local/Cellar/gcc/5.1.0/lib/gcc/5/i386 /usr/local/Cellar/gcc/5.1.0/lib/gcc/5/i386/libgfortran.dylib  -lgcc_ext.10.5
+COMPILER_LIBS = -L/usr/local/lib/gcc/5/gcc/x86_64-apple-darwin13.4.0/5.1.0/ -lm -lgcc  -lSystem -ldl   -L/usr/local/Cellar/gcc/5.1.0/lib/gcc/5/ -L/usr/local/Cellar/gcc/5.1.0/lib/gcc/5/i386 /usr/local/Cellar/gcc/5.1.0/lib/gcc/5/i386/libgfortran.dylib  -lgcc_ext.10.5
 
 
 # DAKOTA_LIBS = -L/Users/pgraf/root/dakota/lib/ -ldakota -llhs -lnewmat -lnidr -lopt -lpecos -lconmin -lsparsegrid -lteuchos 
-DAKOTA_LIBS = -L/usr/local/Dakota_source/lib -ldakota -llhs -lnewmat -lnidr -lopt -lpecos -lconmin -lsparsegrid -lteuchos 
+DAKOTA_LIBS = -L/usr/local/dakota_darwin/lib -ldakota_src -llhs -lnidr -lpecos -lconmin -lsparsegrid -lteuchos 
+#DAKOTA_LIBS = -L/usr/local/dakota_darwin/lib -ldakota_src -llhs -lnewmat -lnidr -lopt -lpecos -lconmin -lsparsegrid -lteuchos 
 DAKOTA = $(DAKOTA_LIBS) -L/usr/X11/lib -lSM -lICE -llapack -lblas $(COMPILER_LIBS)
 
 #-L/opt/local/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/config -lpython2.6 -ldl
@@ -74,16 +82,16 @@ all: dakota_py test_binding_py
 #old_dakota_py
 
 twisted_dakota: $(OBJS_TDAKOTA)
-	$(CXX) $(LIBLDFLAGS) $(DAKOTA) $(OBJS_TDAKOTA) $(LIB_DIR)  $(LIB_PY) $(LIBS)  -o tdakota
+	$(CXX) -march=i386 $(LIBLDFLAGS) $(DAKOTA) $(OBJS_TDAKOTA) $(LIB_DIR)  $(LIB_PY) $(LIBS)  -o tdakota
 
 dakota_py: $(OBJS_DAKOTA)
-	$(CXX) $(LIBLDFLAGSDYLD) $(DAKOTA) $(OBJS_DAKOTA) $(LIB_DIR) $(LIB_PY) $(LIBS)  -o _dakota.so
+	$(CXX) -march=i386 $(LIBLDFLAGSDYLD) $(DAKOTA) $(OBJS_DAKOTA) $(LIB_DIR) $(LIB_PY) $(LIBS)  -o _dakota.so
 
 old_dakota_py: $(OBJS_OLDDAKOTA)
-	$(CXX) $(LIBLDFLAGSDYLD) $(DAKOTA) $(OBJS_OLDDAKOTA) $(LIB_DIR) $(LIB_PY) $(LIBS)  -o _olddakota.so
+	$(CXX) -march=i386 $(LIBLDFLAGSDYLD) $(DAKOTA) $(OBJS_OLDDAKOTA) $(LIB_DIR) $(LIB_PY) $(LIBS)  -o _olddakota.so
 
 test_binding_py: $(OBJS_TESTBINDING)
-	$(CXX) $(LIBLDFLAGSDYLD) $(LIB_DIR) $(LIB_PY)  $(OBJS_TESTBINDING) $(LIBS)  -o _testbinding.so
+	$(CXX) -march=i386 $(LIBLDFLAGSDYLD) $(LIB_DIR) $(LIB_PY)  $(OBJS_TESTBINDING) $(LIBS)  -o _testbinding.so
 
 
 .f.o:
