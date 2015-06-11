@@ -53,7 +53,7 @@ COMPILER_LIBS = -L/usr/local/Cellar/gcc/5.1.0/lib/gcc/5 -lm -lgcc  -lSystem -ldl
 
 
 # DAKOTA_LIBS = -L/Users/pgraf/root/dakota/lib/ -ldakota -llhs -lnewmat -lnidr -lopt -lpecos -lconmin -lsparsegrid -lteuchos 
-DAKOTA_LIBS = -L/usr/local/Dakota_source/packages -L/Library/Python/2.7/site-packages/pyDAKOTA-6.2_1-py2.7-macosx-10.9-intel.egg/ -ldakota -llhs -lnidr -lpecos -lconmin -lsparsegrid -lteuchos 
+DAKOTA_LIBS = -L/usr/local/Dakota_source/lib -L/Library/Python/2.7/site-packages/pyDAKOTA-6.2_1-py2.7-macosx-10.9-intel.egg/ -ldakota -llhs -lnidr -lpecos -lconmin -lsparsegrid -lteuchos 
 #DAKOTA_LIBS = -L/usr/local/Dakota_source/build4/src -ldakota_src -llhs -lnewmat -lnidr -lopt -lpecos -lconmin -lsparsegrid -lteuchos 
 #DAKOTA_LIBS = -L/usr/local/Dakota_source/build4/src -ldakota_src  
 #DAKOTA = $(DAKOTA_LIBS) -L/usr/X11/lib -lSM -lICE -llapack -lblas $(COMPILER_LIBS)
