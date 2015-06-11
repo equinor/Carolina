@@ -21,9 +21,9 @@
 #    
 #      mkdir build 
 #      cd build
-#      cmake -C ../BuildDarwinPG.cmake ../.
+#      cmake -C ../BuildDarwinPG.cmake ../. -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING 
 #      cd src
-#      make -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING 
+#      make
 ##############################################################################
 
 set( CTEST_BUILD_NAME "dakota_mac" )
