@@ -67,7 +67,7 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
     Dakota::register_signal_handlers();
 
     // Have abort_handler() throw an exception rather than aborting the process.
-    Dakota::abort_mode = Dakota::ABORT_THROWS;
+    //Dakota::abort_mode = Dakota::ABORT_THROWS;
 
     initialized = true;
   }

@@ -34,7 +34,7 @@
 
 #include "ParallelLibrary.hpp"
 #include "ProblemDescDB.hpp"
-#include "DakotaStrategy.hpp"
+//#include "DakotaStrategy.hpp"
 #include "DakotaModel.hpp"
 #include "DakotaInterface.hpp"
 #include "PluginSerialDirectApplicInterface.hpp"
@@ -49,7 +49,7 @@
 #include "ParallelLibrary.hpp"
 #include "CommandLineHandler.hpp"
 #include "ProblemDescDB.hpp"
-#include "DakotaStrategy.hpp"
+//#include "DakotaStrategy.hpp"
 #ifdef DAKOTA_TRACKING
 #include "TrackerHTTP.hpp"
 #endif
