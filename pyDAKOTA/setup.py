@@ -13,6 +13,8 @@
 #    limitations under the License.
 #
 # ++==++==++==++==++==++==++==++==++==++==
+# OSX
+#    ARCHFLAGS='-arch x86_64' python setup.py
 """
 Build pyDAKOTA Python 'egg' for cygwin, darwin, linux, or win32 platforms.
 Assumes DAKOTA has been installed.  The egg will include all libraries
@@ -195,7 +197,7 @@ else:
 
 sources = ['dakface.cpp', 'dakota_python_binding.cpp']
 
-include_dirs = [dakota_include, numpy_include, dakota_lib]
+include_dirs = [dakota_include, numpy_include]
 if BOOST_INCDIR:
     include_dirs.append(BOOST_INCDIR)
 
@@ -210,7 +212,6 @@ if LAPACK_LIBDIR:
     library_dirs.append(LAPACK_LIBDIR)
 if FORTRAN_LIBDIR:
     library_dirs.append(FORTRAN_LIBDIR)
-    library_dirs.append('/usr/local/lib/python2.7/site-packages/pyDAKOTA-6.2.post1-py2.7-macosx-10.9-intel.egg')
 
 # Drop '-l' from Dakota_LIBRARIES if necessary.
 dakota_libs = dakota_macros['Dakota_LIBRARIES']
