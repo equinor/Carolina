@@ -171,7 +171,9 @@ elif sys.platform == 'darwin':
     # Possibly something related to i386/x86_64 architecture builds.
     # (DAKOTA libraries are only i386)
     BOOST_INCDIR = '/usr/local/Cellar/boost/1.58.0/include'
-    BOOST_LIBDIR = '/usr/local/Cellar/boost/1.58.0/li'
+    BOOST_LIBDIR = '/usr/local/Cellar/boost/1.58.0/lib'
+    # egg_dir=None
+    FORTRAN_LIBDIR = '/usr/local/Cellar/gcc/5.1.0/lib/gcc/5'
     EXTRA_LIBS = ['gfortran', 'Xm.3']
     EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.dylib'))
     EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.dylib')))
@@ -183,7 +185,7 @@ else:
     BOOST_LIBDIR = '/home/ec2-user/boost_1_49_0/stage/lib'
     LD_FLAGS = ['-Wl,-z origin',
                 '-Wl,-rpath=${ORIGIN}:${ORIGIN}/../'+egg_dir]
-    EXTRA_LIBS = ['gfortran',
+    EXTRA_LIBS = ['gfortran'
                  ] # 'SM', 'ICE', 'Xext', 'Xm', 'Xt', 'X11', 'Xpm', 'Xmu']
     EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.so'))
     EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.so*')))
@@ -208,6 +210,7 @@ if LAPACK_LIBDIR:
     library_dirs.append(LAPACK_LIBDIR)
 if FORTRAN_LIBDIR:
     library_dirs.append(FORTRAN_LIBDIR)
+    library_dirs.append('/usr/local/lib/python2.7/site-packages/pyDAKOTA-6.2.post1-py2.7-macosx-10.9-intel.egg')
 
 # Drop '-l' from Dakota_LIBRARIES if necessary.
 dakota_libs = dakota_macros['Dakota_LIBRARIES']
