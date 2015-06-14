@@ -15,6 +15,7 @@
 # ++==++==++==++==++==++==++==++==++==++==
 # OSX
 #    ARCHFLAGS='-arch x86_64' python setup.py
+#    cp /usr/local/Dakota_dariwn/bin/libXm.3.dylib /usr/local/Dakota_source/bin/.
 """
 Build pyDAKOTA Python 'egg' for cygwin, darwin, linux, or win32 platforms.
 Assumes DAKOTA has been installed.  The egg will include all libraries
