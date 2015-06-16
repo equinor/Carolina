@@ -50,6 +50,7 @@ set (DAKOTA_PYTHON ON)
 set(PYTHON_INCLUDE_DIRS "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/include/python2.7")
 #set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib")
 set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/lib")
+set(PYTHON_NUMARRAY_INCLUDE_DIR "/usr/local/lib/python2.7/site-packages/numpy/core/include")
 
 ### no mpi:
 #set( DAKOTA_HAVE_MPI OFF
@@ -97,7 +98,7 @@ set(HAVE_X_GRAPHICS OFF CACHE BOOL "Disable dependency on X libraries" FORCE)
 ##############################################################################
 
 set( CMAKE_INSTALL_PREFIX
-     "/usr/local/dakota_darwin"
+     "/usr/local/dakota"
      CACHE PATH "Path to Dakota installation" )
 
 ##############################################################################
@@ -107,23 +108,24 @@ set( CMAKE_INSTALL_PREFIX
 # define appropriate paths.
 ##############################################################################
 set(BOOST_ROOT
-    "/usr/local/Cellar/boost/1.58.0"
+    "/usr/local/opt/boost150"
     CACHE PATH "Use non-standard Boost install" FORCE)
+
 #set( Boost_NO_SYSTEM_PATHS TRUE
 #     CACHE BOOL "Supress search paths other than BOOST_ROOT" FORCE)
 
 set(BOOST_INCLUDEDIR
-  "/usr/local/Cellar/boost/1.58.0/include"
+  "/usr/local/opt/boost150/include"
   CACHE PATH "Use Boost installed here" FORCE)
 
 set(BOOST_LIBRARYDIR
-  "/usr/local/Cellar/boost/1.58.0/lib"
+  "/usr/local/opt/boost150/lib"
   CACHE PATH "Use Boost installed here" FORCE)
 
 # boost patches
-SET ( CMAKE_CXX_FLAGS "-stdlib=libc++" )
-add_definitions ( -DBOOST_SIGNALS_NO_DEPRECATION_WARNING )
-set ( Boost_COMPILER "mpic++" )
+#SET ( CMAKE_CXX_FLAGS "-libstdc=libc++" )
+#add_definitions ( -DBOOST_SIGNALS_NO_DEPRECATION_WARNING )
+#set ( Boost_COMPILER "mpic++" )
 
 ##########################################################################
 # Set up Internal CMake paths first. Then call automated build file.
