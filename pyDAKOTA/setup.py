@@ -173,8 +173,8 @@ elif sys.platform == 'darwin':
     # The symbol exists in the OpenMPI libraries in DYLD_LIBRARY_PATH.
     # Possibly something related to i386/x86_64 architecture builds.
     # (DAKOTA libraries are only i386)
-    BOOST_INCDIR = '/usr/local/Cellar/boost/1.58.0/include'
-    BOOST_LIBDIR = '/usr/local/Cellar/boost/1.58.0/lib'
+    BOOST_INCDIR = '/usr/local/opt/boost155/include'
+    BOOST_LIBDIR = '/usr/local/opt/boost155/lib'
     # egg_dir=None
     FORTRAN_LIBDIR = '/usr/local/Cellar/gcc/5.1.0/lib/gcc/5'
     EXTRA_LIBS = ['gfortran', 'Xm.3']
@@ -223,6 +223,7 @@ if dakota_libs[0].startswith('-l'):
 external_libs = [
     'boost_regex', 'boost_filesystem', 'boost_serialization', 'boost_system',
     'boost_signals', 'boost_python', 'lapack', 'blas']
+#external_libs=['lapack', 'blas']
 
 if NEED_MPI:
     external_libs.append('boost_mpi')
