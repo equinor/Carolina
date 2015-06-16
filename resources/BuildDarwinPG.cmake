@@ -1,4 +1,4 @@
-##############################################################################
+
 #
 # CTest Automated Build Variables for Darwin
 #
@@ -21,7 +21,7 @@
 #    
 #      mkdir build 
 #      cd build
-#      cmake -C ../BuildDarwinPG.cmake ../. -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING 
+#      cmake -C ../BuildDarwinPG.cmake -C ../FindNumpy.cmake ../. -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING 
 #      cd src
 #      make  
 ##############################################################################
@@ -49,8 +49,9 @@ set( DAKOTA_DEBUG ON )
 set (DAKOTA_PYTHON ON)
 set(PYTHON_INCLUDE_DIRS "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/include/python2.7")
 #set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib")
-set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/lib")
-set(PYTHON_NUMARRAY_INCLUDE_DIR "/usr/local/lib/python2.7/site-packages/numpy/core/include")
+set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/lib/python2.7")
+set(NUMPY_PATH "/usr/local/lib/python2.7/site-packages")
+set(/usr/local/lib/python2.7/site-packages)
 
 ### no mpi:
 #set( DAKOTA_HAVE_MPI OFF
