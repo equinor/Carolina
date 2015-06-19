@@ -64,12 +64,12 @@ This file implements a simple boost based python binding for the dakota library.
     argv[argc++] = errfile; \
   }
 
-int run_dakota(char *infile, char *outfile, char *errfile, PyObject exc)
+int run_dakota(char *infile, char *outfile, char *errfile, PyObject *exc)
 {
   MAKE_ARGV
 
   void *tmp_exc = NULL;
-  if (exc)
+  if (PyBool_Check(exc))
     tmp_exc = &exc;
 
   return all_but_actual_main(argc, argv, tmp_exc);
@@ -80,7 +80,7 @@ int run_dakota_mpi(char *infile, MPI_Comm &_mpi,
 #else
 int run_dakota_mpi(char *infile, int &_mpi,
 #endif
-                   char *outfile, char *errfile, PyObject exc)
+                   char *outfile, char *errfile, PyObject *exc)
 {
   MAKE_ARGV
   MPI_Comm comm = MPI_COMM_WORLD;
@@ -88,7 +88,7 @@ int run_dakota_mpi(char *infile, int &_mpi,
     comm = _mpi;
 
   void *tmp_exc = NULL;
-  if (exc)
+  if (PyBool_Check(exc))
     tmp_exc = &exc;
 
   return all_but_actual_main_mpi(argc, argv, comm, tmp_exc);

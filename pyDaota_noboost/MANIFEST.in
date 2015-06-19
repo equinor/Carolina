@@ -1,13 +1,15 @@
 include lib3po.dylib
 include libamplsolver.dylib
+include libanalyzer.dylib
+include libbose.dylib
 include libcolin.dylib
 include libconmin.dylib
 include libcport.dylib
-include libdakota_dll_api.dylib
+include libdace.dylib
 include libdakota_src.dylib
 include libdakota_src_fortran.dylib
-include libddace.dylib
 include libdfftpack.dylib
+include libdll_api.dylib
 include libdream.dylib
 include libeutils.dylib
 include libfsudace.dylib
@@ -16,8 +18,8 @@ include libinterfaces.dylib
 include libjega.dylib
 include libjega_fe.dylib
 include liblhs.dylib
-include liblhs_mod.dylib
-include liblhs_mods.dylib
+include libmod.dylib
+include libmods.dylib
 include libmoga.dylib
 include libncsuopt.dylib
 include libnidr.dylib
@@ -27,6 +29,8 @@ include libpebbl.dylib
 include libpecos.dylib
 include libpecos_src.dylib
 include libpsuade.dylib
+include librandom.dylib
+include libsampling.dylib
 include libscolib.dylib
 include libsoga.dylib
 include libsurfpack.dylib
@@ -38,7 +42,6 @@ include libtinyxml.dylib
 include libutilib.dylib
 include libutilities.dylib
 include libboost_filesystem.dylib
-include libboost_program_options.dylib
 include libboost_regex.dylib
 include libboost_serialization.dylib
 include libboost_signals.dylib
@@ -55,3 +58,4 @@ include libopen-pal.6.dylib
 include libopen-rte.7.dylib
 include libquadmath.0.dylib
 include libstdc++.6.dylib
+include libXm.3.dylib

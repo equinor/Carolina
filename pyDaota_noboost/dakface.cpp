@@ -35,6 +35,7 @@
   extern "C" void fpinit_ASL();
 #endif
 
+#include <boost/system/system_error.hpp>
 
 static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc);
 
@@ -84,16 +85,16 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
   try {
     env->execute();
   }
- catch (const std::exception& ex) {
- //catch (boost::system::system_error& se) {
+ catch (boost::system::system_error& se) {
    retval = se.code().value();
     if (PyErr_Occurred()) {
       PyObject *type = NULL, *value = NULL, *traceback = NULL;
       PyErr_Fetch(&type, &value, &traceback);
       PyObject *tmp = (PyObject *)exc;
-      PyObject_SetAttrString(tmp->ptr(), "type", type);
-      PyObject_SetAttrString(tmp->ptr(), "value", value);
-      PyObject_SetAttrString(tmp->ptr(), "traceback", traceback);
+      PyObject_SetAttrString(tmp, "type", type);
+      PyObject_SetAttrString(tmp, "value", value);
+      PyObject_SetAttrString(tmp, "traceback", traceback);
+//        std::cout << "\n\nPyErr_Occured\n\n";
     }
   }
 
