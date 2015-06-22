@@ -119,3 +119,14 @@ void translator(const int& exc)
 //  def("run_dakota_mpi", run_dakota_mpi, "run dakota mpi");
 //}
 ////////
+
+static PyMethodDef pydakota_methods[] = {
+    {"run_dakota", run_dakota, METH_VARARGS},
+    {"run_dakota_mpi", run_dakota_mpi, METH_VARARGS},
+    };
+
+void initmyModule(void)
+{
+    // Init module.
+    (void) Py_InitModule("pyDAKOTA", pydakota_methods);
+}
