@@ -6,24 +6,46 @@
 # Julian Quick Summer 2015 
 # 
 # This is intended for building the DAKOTA library on the OSX system
-# This was tested using the following C environment:
+# This was tested using the following environment:
 #
+#      export HOMEBREW_CC=gcc-4.9
+#      export HOMEBREW_CXX=g++-4.9
+#      alias gcc="gcc-4.9"
+#      alias g++="g++-4.9"
 #      brew install gcc --without-multilib
-#      export HOMEBREW_CC=gcc-5
-#      export HOMEBREW_CXX=g++-5
-#      brew install openmpi --build-from-source --C++11
+#      brew install openmpi --build-from-source
+#      brew edit boost155 
+#         change such that `--layout=system`  (this removes the -mt flags to boost extensions)
+#      brew install boost155 --with-python --with-mpi --without-single
 #
 #   INSTRUCTIONS
 #   ------------
 # Use this file to build DAKOTA from source: https://dakota.sandia.gov/download.html
 # Download and decompress the source file, cd into that directory, 
-# then cp <this file> into this directory. Copy and paste the following commands to build DAKOTA.
+# then cp <this file> into this directory (referenced in this document as dakota_source_files). 
+# Copy and paste the following commands to build DAKOTA (using the osx environment previousely described).
 #    
+#      vim packages/surfpack/src/surfaces/RadialBasisFunctionModel.h --> <REMOVE PROTECTED STATUS OF "RadialBasisFunction">
+#      vim src/CMakeLists.txt --> flip dakota_python to on on line 256 
+#
+#      mkdir /usr/local/dakota
 #      mkdir build 
 #      cd build
-#      cmake -C ../BuildDarwinPG.cmake -C ../FindNumpy.cmake ../. -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING 
-#      cd src
-#      make  
+#      cmake -C ../BuildDarwinPG.cmake ../. -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING 
+#      make -j 4
+#      make install
+
+#     add the following to ~/.bash_profile:
+#             export PATH=$PATH:/usr/local/dakota/bin:/usr/local/dakota/test:/usr/local/dakota/lib
+#             export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/usr/local/dakota/bin:/usr/local/dakota/lib
+
+#     Gotcha: if libXm.3 can't be found-
+#             download dakota darwin release from https://dakota.sandia.gov/download.html
+#             cp ~/Downloads/dakota_darwin/bin/libXm.3.dylib /usr/local/dakota/bin/.  (or to another relevant include path)
+#             dakota_source_files/build $ rm -rf *
+#             dakota_source_files/build $ cmake -C ../BuildDarwinPG.cmake ../. -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING 
+#             dakota_source_files/build $ make -j 4
+#             dakota_source_files/build $ make install
 ##############################################################################
 
 set( CTEST_BUILD_NAME "dakota_mac" )
