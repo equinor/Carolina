@@ -131,18 +131,18 @@ set( CMAKE_INSTALL_PREFIX
 # define appropriate paths.
 ##############################################################################
 set(BOOST_ROOT
-    "/usr/local/opt/boost150"
+    "/usr/local/Cellar/boost155/1.55.0_1"
     CACHE PATH "Use non-standard Boost install" FORCE)
 
 #set( Boost_NO_SYSTEM_PATHS TRUE
 #     CACHE BOOL "Supress search paths other than BOOST_ROOT" FORCE)
 
 set(BOOST_INCLUDEDIR
-  "/usr/local/opt/boost150/include"
+  "/usr/local/Cellar/boost155/1.55.0_1/include"
   CACHE PATH "Use Boost installed here" FORCE)
 
 set(BOOST_LIBRARYDIR
-  "/usr/local/opt/boost150/lib"
+  "/usr/local/Cellar/boost155/1.55.0_1/lib"
   CACHE PATH "Use Boost installed here" FORCE)
 
 # boost patches
