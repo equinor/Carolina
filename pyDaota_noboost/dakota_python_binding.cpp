@@ -119,14 +119,40 @@ void translator(const int& exc)
 //  def("run_dakota_mpi", run_dakota_mpi, "run dakota mpi");
 //}
 ////////
-
-static PyMethodDef pydakota_methods[] = {
-    {"run_dakota", run_dakota, METH_VARARGS},
-    {"run_dakota_mpi", run_dakota_mpi, METH_VARARGS},
-    };
-
-void initmyModule(void)
+static PyObject * wrap_dak_mpi(PyObject *, PyObject *args)
 {
-    // Init module.
-    (void) Py_InitModule("pyDAKOTA", pydakota_methods);
+
+   #ifdef DAKOTA_HAVE_MPI
+   int run_dakota_mpi(char *infile, MPI_Comm &_mpi,
+   char parslings = "sMssO";
+   #else
+   int run_dakota_mpi(char *infile, int &_mpi,
+   char parslings = "sissO";
+   #endif
+       char *outfile, char *errfile, PyObject *exc)
+
+    if(!PyArg_ParseTuple(args, parslings, &infile, &_mpi, &outfile, &errfile, &exc))
+        return NULL;
+    return Py_BuildValue("i", run_dakota_with_mpi(infile, &_mpi, outfile, errfile, exc));
+}
+
+static PyObject * wrap_dak(PyObject *, PyObject *args) 
+{
+    char *infile, char *outfile, *errfile;
+    PyObject *exc;
+    if(!PyArg_ParseTuple(args, "sssO", &infile, &outfile, &errfile, &exc))
+        return NULL;
+    return Py_BuildValue("i", run_dakota(infile, outfile, errfile, exc));
+}
+
+static PyMethodDef dak_methods[] = 
+{
+    {"run_dakota", (PyCFunction) wrap_dak, METH_VARARGS},
+    {"run_dakota_with_mpi", (PyCFunction) wrap_dak_mpi, METH_VARARGS},
+    {NULL, NULL}
+};
+
+void initpyDakota_noboost(void)
+{
+    (void) Py_Init("pyDakota_noboost", myModule_methods);
 }
