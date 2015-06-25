@@ -42,7 +42,7 @@ import weakref
 if sys.platform in ('cygwin', 'win32'):
     os.environ['LC_ALL'] = 'C'
 
-import pyDakota_noboost
+import pyDAKOTA
 
 # Hard-coded assumption regarding availability of MPI.
 if sys.platform in ('cygwin', 'win32'):

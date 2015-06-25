@@ -17,7 +17,7 @@
 #    ARCHFLAGS='-arch x86_64' python setup.py
 #    cp /usr/local/Dakota_dariwn/bin/libXm.3.dylib /usr/local/Dakota_source/bin/.
 """
-Build pyDakota_noboost Python 'egg' for cygwin, darwin, linux, or win32 platforms.
+Build pyDAKOTA Python 'egg' for cygwin, darwin, linux, or win32 platforms.
 Assumes DAKOTA has been installed.  The egg will include all libraries
 included in the DAKOTA installation.
 
@@ -73,7 +73,7 @@ else:
     sys.exit(1)
 
 wrapper_version = '1'
-egg_dir = 'pyDakota_noboost_noboost-%s_%s-py%s-%s.egg' % (dakota_version, wrapper_version,
+egg_dir = 'pyDAKOTA_noboost-%s_%s-py%s-%s.egg' % (dakota_version, wrapper_version,
                                           sys.version[0:3], get_build_platform())
 
 # Assuming standard prefix-based install.
@@ -167,8 +167,8 @@ elif sys.platform == 'win32':
 
 elif sys.platform == 'darwin':
     # This builds an egg, but it doesn't load:
-    #   ImportError: dlopen(/Users/setowns1/OpenMDAO-Framework/devenv/lib/python2.7/site-packages/pyDakota_noboost-5.3.1_1-py2.7-macosx-10.6-intel.egg/pyDakota_noboost.so, 2): Symbol not found: __ZN3MPI3Win4FreeEv
-    #   Referenced from: /Users/setowns1/OpenMDAO-Framework/devenv/lib/python2.7/site-packages/pyDakota_noboost-5.3.1_1-py2.7-macosx-10.6-intel.egg/pyDakota_noboost.so
+    #   ImportError: dlopen(/Users/setowns1/OpenMDAO-Framework/devenv/lib/python2.7/site-packages/pyDAKOTA-5.3.1_1-py2.7-macosx-10.6-intel.egg/pyDAKOTA.so, 2): Symbol not found: __ZN3MPI3Win4FreeEv
+    #   Referenced from: /Users/setowns1/OpenMDAO-Framework/devenv/lib/python2.7/site-packages/pyDAKOTA-5.3.1_1-py2.7-macosx-10.6-intel.egg/pyDAKOTA.so
     #   Expected in: flat namespace
     # The symbol exists in the OpenMPI libraries in DYLD_LIBRARY_PATH.
     # Possibly something related to i386/x86_64 architecture builds.
@@ -185,7 +185,7 @@ elif sys.platform == 'darwin':
 
 else:
     # This LD_FLAGS stuff avoids having to set LD_LIBRARY_PATH to access
-    # the other (not pyDakota_noboost.so) shared libraries that are part of the egg.
+    # the other (not pyDAKOTA.so) shared libraries that are part of the egg.
     BOOST_INCDIR = '/home/ec2-user/include'
     BOOST_LIBDIR = '/home/ec2-user/boost_1_49_0/stage/lib'
     LD_FLAGS = ['-Wl,-z origin',
@@ -250,7 +250,7 @@ if EGG_LIBS:
             manifest.write('include %s\n' % os.path.basename(lib))
     data_files = [('', EGG_LIBS)]
 
-pyDakota_noboost = Extension(name='pyDakota_noboost',
+pyDAKOTA = Extension(name='pyDAKOTA',
                      sources=sources,
                      include_dirs=include_dirs,
                      define_macros=define_macros,
@@ -260,11 +260,11 @@ pyDakota_noboost = Extension(name='pyDakota_noboost',
                      libraries=libraries,
                      language='c++')
 
-setup(name='pyDakota_noboost',
+setup(name='pyDAKOTA',
       version='%s-%s' % (dakota_version, wrapper_version),
       description='A Python wrapper for DAKOTA',
       py_modules=['dakota', 'test_dakota'],
-      ext_modules=[pyDakota_noboost],
+      ext_modules=[pyDAKOTA],
       zip_safe=False,
       data_files=data_files)
 
