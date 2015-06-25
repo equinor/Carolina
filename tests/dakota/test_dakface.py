@@ -13,7 +13,7 @@
 #    limitations under the License.
 # 
 # ++==++==++==++==++==++==++==++==++==++==
-import twister.interfaces.dakota._dakota as _dakota
+import pyDAKOTA
 
 class AnObj(object):
     """ test object to show we can pass an object through our DAKOTA interface """
@@ -59,10 +59,10 @@ def test_rundak():
     """ run dakota to solve rosenbrock all driven from python """
     __have_mpi__ = False
     if (not __have_mpi__):
-        _dakota.run_dakota_data("test_dakface.in", AnObj())
+        pyDAKOTA.run_dakota("test_dakface.in", "daktest.out", "daktesterrors.log", AnObj())
     else:
         from boost.mpi import world
-        _dakota.run_dakota_mpi_data("test_dakface.in", world, AnObj())
+        pyDAKOTA.run_dakota_mpi("test_dakface.in", world, "daktest.out", "daktesterrors.log", AnObj())
     print "made it back from dakota call"
     
 if __name__=="__main__":
