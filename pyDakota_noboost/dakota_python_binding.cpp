@@ -124,21 +124,21 @@ static PyObject * wrap_dak_mpi(PyObject *, PyObject *args)
 
    #ifdef DAKOTA_HAVE_MPI
    char parslings[6] = "sOssO";
-   char *infile; MPI_Comm &_mpi;
+   char *infile; MPI_Comm _mpi;
    #else
    char parslings[7] = "sissO";
-   char *infile; int &_mpi;
+   char *infile; int _mpi;
    #endif
        char *outfile, *errfile; PyObject *exc;
 
     if(!PyArg_ParseTuple(args, parslings, &infile, &_mpi, &outfile, &errfile, &exc))
         return NULL;
-    return Py_BuildValue("i", run_dakota_with_mpi(infile, _mpi, outfile, errfile, exc));
+    return Py_BuildValue("i", run_dakota_mpi(infile, _mpi, outfile, errfile, exc));
 }
 
 static PyObject * wrap_dak(PyObject *, PyObject *args) 
 {
-    char *infile, char *outfile, *errfile;
+    char *infile, *outfile, *errfile;
     PyObject *exc;
     if(!PyArg_ParseTuple(args, "sssO", &infile, &outfile, &errfile, &exc))
         return NULL;
@@ -154,5 +154,5 @@ static PyMethodDef dak_methods[] =
 
 extern "C" void initpyDAKOTA(void)
 {
-    (void) Py_Init("pyDAKOTA", dak_methods);
+    (void) Py_InitModule("pyDAKOTA", dak_methods);
 }

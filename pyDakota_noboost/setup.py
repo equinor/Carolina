@@ -175,8 +175,8 @@ elif sys.platform == 'darwin':
     # (DAKOTA libraries are only i386)
     #BOOST_INCDIR = '/usr/local/Cellar/boost150/1.50.0/include'
     #BOOST_LIBDIR = '/usr/local/Cellar/boost150/1.50.0/lib'
-    BOOST_INCDIR = '/usr/local/opt/boost155/include'
-    BOOST_LIBDIR = '/usr/local/opt/boost155/lib'
+    BOOST_INCDIR = '/usr/local/Cellar/boost155/1.55.0_1/include/boost'
+    BOOST_LIBDIR = '/usr/local/Cellar/boost155/1.55.0_1/lib'
     # egg_dir=None
     FORTRAN_LIBDIR = '/usr/local/Cellar/gcc/5.1.0/lib/gcc/5'
     EXTRA_LIBS = ['gfortran', 'Xm.3']
@@ -222,10 +222,9 @@ if dakota_libs[0].startswith('-l'):
     dakota_libs = [name[2:] for name in dakota_libs]
 
 # From Makefile.export.Dakota Dakota_TPL_LIBRARIES.
-#external_libs = [
-#    'boost_regex', 'boost_filesystem', 'boost_serialization', 'boost_system',
-#    'boost_signals', 'boost_python', 'lapack', 'blas']
-external_libs = ['lapack', 'blas']
+external_libs = [
+    'boost_regex', 'boost_filesystem', 'boost_serialization', 'boost_system',
+    'boost_signals', 'lapack', 'blas']
 
 if NEED_MPI:
     external_libs.append('boost_mpi')
