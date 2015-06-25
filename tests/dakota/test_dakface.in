@@ -16,9 +16,9 @@
 # DAKOTA INPUT FILE - dakota_python_rosenbrock.in
 # demonstrate the Python interface using list or numpy
 
-strategy,
-	single_method
-	tabular_graphics_data
+#strategy,
+#	single_method
+#	tabular_graphics_data
 
 method,						
 #	optpp_q_newton				#0,#1

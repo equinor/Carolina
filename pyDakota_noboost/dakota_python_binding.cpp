@@ -121,12 +121,11 @@ void translator(const int& exc)
 ////////
 static PyObject * wrap_dak_mpi(PyObject *, PyObject *args)
 {
-
    #ifdef DAKOTA_HAVE_MPI
-   char parslings[6] = "sOssO";
+   char parslings[7] = "sO!ssO";
    char *infile; MPI_Comm _mpi;
    #else
-   char parslings[7] = "sissO";
+   char parslings[6] = "sissO";
    char *infile; int _mpi;
    #endif
        char *outfile, *errfile; PyObject *exc;
