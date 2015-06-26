@@ -73,7 +73,7 @@ else:
     sys.exit(1)
 
 wrapper_version = '1'
-egg_dir = 'pyDAKOTA_noboost-%s_%s-py%s-%s.egg' % (dakota_version, wrapper_version,
+egg_dir = 'pyDAKOTA-%s_%s-py%s-%s.egg' % (dakota_version, wrapper_version,
                                           sys.version[0:3], get_build_platform())
 
 # Assuming standard prefix-based install.
@@ -223,11 +223,11 @@ if dakota_libs[0].startswith('-l'):
 
 # From Makefile.export.Dakota Dakota_TPL_LIBRARIES.
 external_libs = [
-    'boost_regex', 'boost_filesystem', 'boost_serialization', 'boost_system',
-    'boost_signals', 'lapack', 'blas']
+    'boost_regex-mt', 'boost_filesystem-mt', 'boost_serialization-mt', 'boost_system-mt',
+    'boost_signals-mt', 'lapack', 'blas']
 
 if NEED_MPI:
-    external_libs.append('boost_mpi')
+    external_libs.append('boost_mpi-mt')
     os.environ['CC'] = 'mpicxx'  # Force compiler command.
 
 # Munge boost library names as necessary.
