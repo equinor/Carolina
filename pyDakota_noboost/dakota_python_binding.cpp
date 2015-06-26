@@ -68,11 +68,11 @@ int run_dakota(char *infile, char *outfile, char *errfile, PyObject *exc)
 {
   MAKE_ARGV
 
-  void *tmp_exc = NULL;
-  if (PyBool_Check(exc))
-    tmp_exc = &exc;
+//  void *tmp_exc = NULL;
+//  if (PyBool_Check(exc))
+//    tmp_exc = &exc;
 
-  return all_but_actual_main(argc, argv, tmp_exc);
+  return all_but_actual_main(argc, argv, &exc);
 }
 
 #ifdef DAKOTA_HAVE_MPI
@@ -122,7 +122,7 @@ void translator(const int& exc)
 static PyObject * wrap_dak_mpi(PyObject *, PyObject *args)
 {
    #ifdef DAKOTA_HAVE_MPI
-   char parslings[7] = "sO!ssO";
+   char parslings[7] = "sOssO";
    char *infile; MPI_Comm _mpi;
    #else
    char parslings[6] = "sissO";
@@ -139,9 +139,10 @@ static PyObject * wrap_dak(PyObject *, PyObject *args)
 {
     char *infile, *outfile, *errfile;
     PyObject *exc;
+    //  void import_array(void);  // numpy interface 
     if(!PyArg_ParseTuple(args, "sssO", &infile, &outfile, &errfile, &exc))
         return NULL;
-    return Py_BuildValue("i", run_dakota(infile, outfile, errfile, exc));
+    return Py_BuildValue("i", run_dakota(infile, outfile, errfile,exc));
 }
 
 static PyMethodDef dak_methods[] = 
