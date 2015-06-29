@@ -173,7 +173,7 @@ elif sys.platform == 'darwin':
     # The symbol exists in the OpenMPI libraries in DYLD_LIBRARY_PATH.
     # Possibly something related to i386/x86_64 architecture builds.
     # (DAKOTA libraries are only i386)
-    BOOST_INCDIR = '/usr/local/Cellar/boost155/1.55.0_1/include/boost'
+    BOOST_INCDIR = '/usr/local/Cellar/boost155/1.55.0_1/include'
     BOOST_LIBDIR = '/usr/local/Cellar/boost155/1.55.0_1/lib'
     # egg_dir=None
     FORTRAN_LIBDIR = '/usr/local/Cellar/gcc/5.1.0/lib/gcc/5'
