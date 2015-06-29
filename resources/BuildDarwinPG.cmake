@@ -68,12 +68,13 @@ set( DAKOTA_CTEST_REGEXP "dakota_*" )
 set( DAKOTA_DEBUG ON )
 
 # turn python on!
-set (DAKOTA_PYTHON ON)
+set(DAKOTA_PYTHON ON CACHE BOOL "python on" FORCE)
+set( PYTHON_LIBRARY /usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config/libpython2.7.dylib CACHE FILEPATH "python libs")
+set( PYTHON_INCLUDE_PATH /usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/include/python2.7 CACHE FILEPATH "python include")
 set(PYTHON_INCLUDE_DIRS "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/include/python2.7")
 #set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib")
 set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/lib/python2.7")
 set(NUMPY_PATH "/usr/local/lib/python2.7/site-packages")
-set(/usr/local/lib/python2.7/site-packages)
 
 ### no mpi:
 #set( DAKOTA_HAVE_MPI OFF
@@ -93,6 +94,10 @@ set( DAKOTA_HAVE_MPI ON
      CACHE BOOL "Always build with MPI enabled" FORCE)
 set( CMAKE_CXX_COMPILER "mpic++"
      CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
+set( MPI_LIBRARY
+     "/usr/local/Cellar/open-mpi/1.8.4_1/lib/libmpi.dylib"
+     CACHE FILEPATH "Use installed MPI library" FORCE)
+
 
 # Location where cmake first looks for cmake modules.
 #message("got here 1")
