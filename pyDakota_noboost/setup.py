@@ -175,7 +175,7 @@ elif sys.platform == 'darwin':
     # (DAKOTA libraries are only i386)
     #BOOST_INCDIR = '/usr/local/Cellar/boost150/1.50.0/include'
     #BOOST_LIBDIR = '/usr/local/Cellar/boost150/1.50.0/lib'
-    BOOST_INCDIR = '/usr/local/Cellar/boost155/1.55.0_1/include/boost'
+    BOOST_INCDIR = '/usr/local/Cellar/boost155/1.55.0_1/include'
     BOOST_LIBDIR = '/usr/local/Cellar/boost155/1.55.0_1/lib'
     # egg_dir=None
     FORTRAN_LIBDIR = '/usr/local/Cellar/gcc/5.1.0/lib/gcc/5'
