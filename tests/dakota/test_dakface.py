@@ -59,6 +59,7 @@ def test_rundak():
     """ run dakota to solve rosenbrock all driven from python """
     __have_mpi__ = False
     if (not __have_mpi__):
+        print 'no mpi, running run_dakota'
         pyDAKOTA.run_dakota("test_dakface.in", "daktest.out", "daktesterrors.log", AnObj())
     else:
         from boost.mpi import world
