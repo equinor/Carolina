@@ -130,19 +130,20 @@ static PyObject * wrap_dak_mpi(PyObject *, PyObject *args)
    #endif
        char *outfile, *errfile; PyObject *exc;
 
-    if(!PyArg_ParseTuple(args, parslings, &infile, &_mpi, &outfile, &errfile, &exc))
+    if(!PyArg_ParseTuple(args, parslings, &infile, _mpi, &outfile, &errfile, exc))
         return NULL;
     return Py_BuildValue("i", run_dakota_mpi(infile, _mpi, outfile, errfile, exc));
 }
 
+#include <iostream>
 static PyObject * wrap_dak(PyObject *, PyObject *args) 
 {
     char *infile, *outfile, *errfile;
-    PyObject *exc;
-    //  void import_array(void);  // numpy interface 
+    PyObject* exc;
     if(!PyArg_ParseTuple(args, "sssO", &infile, &outfile, &errfile, &exc))
         return NULL;
-    return Py_BuildValue("i", run_dakota(infile, outfile, errfile,exc));
+    std::cout<<" "; // inelegant patch, avoiding malloc error
+    return Py_BuildValue("i", run_dakota(infile, outfile, errfile, exc));
 }
 
 static PyMethodDef dak_methods[] = 
