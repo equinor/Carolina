@@ -35,7 +35,7 @@ variables,
 
 interface,							
 	python							
-	  analysis_drivers = 'rosenbrock:rosenbrock_list'				
+	  analysis_drivers = 'test_dakface:callback'				
 # the current analysis component format is module:function	
 # use this for the list method of passing the data		
 #	  analysis_components = 'rosenbrock:rosenbrock_list'	#0,#2
