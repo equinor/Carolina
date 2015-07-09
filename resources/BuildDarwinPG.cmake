@@ -95,7 +95,7 @@ set( DAKOTA_HAVE_MPI ON
 set( CMAKE_CXX_COMPILER "mpic++"
      CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
 set( MPI_LIBRARY
-     "/usr/local/Cellar/open-mpi/1.8.4_1/lib/libmpi.dylib"
+     "/usr/local/Cellar/open-mpi/1.8.6/lib/libmpi.dylib"
      CACHE FILEPATH "Use installed MPI library" FORCE)
 
 
