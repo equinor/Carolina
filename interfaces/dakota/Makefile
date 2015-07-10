@@ -13,12 +13,6 @@
 #    limitations under the License.
 # 
 # ++==++==++==++==++==++==++==++==++==++==
-#
-# Julian Quick Summer 2015
-# 
-# DAKOTA driver Makefule configured for OSX
-#
-# ++==++==++==++==++==++==++==++==++==++==
 #CC = /opt/local/bin/g++-mp-4.5 
 #CC = mpicc
 ####CC = /Users/pgraf/opt/mpich2-1.2.1p1.gfortran-mp-4.5/bin/mpic++
@@ -26,37 +20,33 @@
 #CXX = /opt/local/bin/g++-mp-4.5 
 ####CXX = /Users/pgraf/opt/mpich2-1.2.1p1.gfortran-mp-4.5/bin/mpic++
 #CXX = g++
-#CXX = g++-5
+#CXX = g++-4.2
 #CXX = gcc-mp-4.3
 CXX = mpic++
 
 LD = ld
 
-INCLUDE_DIR = -I/usr/local/Cellar/boost/1.58.0/include/boost/predef/os/ -I/opt/local/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/site-packages/numpy/core/include/ -I/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/include/python2.7 -I/usr/local/include -I/opt/X11/include/X11 -I/opt/X11/include -I/Library/Python/2.7/site-packages/numpy/core/include -I/usr/local/Dakota_source/include -I/usr/local/Dakota_source/src -I/usr/local/Cellar/boost/1.58.0/include/boost/predef/os 
+INCLUDE_DIR = -I/opt/local/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/site-packages/numpy/core/include/ -I/opt/local/Library/Frameworks/Python.framework//Versions/2.6/include/python2.6 -I/Users/pgraf/root/include -I/Users/pgraf/root/dakota/include/
 
-DAK_INCDIR = -I/usr/local/Dakota_source/include 
+DAK_INCDIR = -I/Users/pgraf/opt/Dakota/Dakota_NREL//packages/nidr -I/Users/pgraf/opt/Dakota/Dakota_NREL/ -I/Users/pgraf/opt/Dakota/Dakota_NREL/include
 
-LIB_DIR = -L/usr/lib 
-LIB_PY = /usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/Python
+LIB_DIR = -L/Users/pgraf/root/lib 
+LIB_PY = /opt/local/Library/Frameworks/Python.framework/Versions/2.6/Python
 LIBS =  -lboost_python -lboost_mpi -lboost_system
 
 # -lpython2.6
 # -L/opt/local/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/config
 
-# LIBMODEOBJ = /Users/pgraf/opt/Dakota/Dakota_NREL/src/library_mode.o
+LIBMODEOBJ = /Users/pgraf/opt/Dakota/Dakota_NREL/src/library_mode.o
 #LIBMODEOBJ = 
 
 #COMPILER_LIBS = -L/opt/local/lib/gcc45/gcc/i386-apple-darwin9/4.5.0 -L/opt/local/lib/gcc45/gcc/i386-apple-darwin9/4.5.0/../../.. /opt/local/lib/gcc45/libgfortran.dylib -lm -lgcc_s.10.5 -lgcc_ext.10.5 -lSystem -ldl
 
-COMPILER_LIBS = -L/usr/local/Cellar/gcc/5.1.0/lib/gcc/5 -lm -lgcc  -lSystem -ldl   -L/opt/local/lib/gcc45/gcc/i386-apple-darwin9/4.5.0/../../.. -L/usr/local/Cellar/gcc/5.1.0/lib/gcc/5/libgfortran.dylib -L/usr/local/Cellar/gcc/5.1.0/lib/gcc/5  -lgcc_ext.10.5
-#COMPILER_LIBS = -L/usr/local/lib/gcc/5/gcc/x86_64-apple-darwin13.4.0/5.1.0/ -lm -lgcc  -lSystem -ldl /usr/local/Cellar/gcc/5.1.0/lib/gcc/5/gcc/x86_64-apple-darwin13.4.0/5.1.0//libgfortranbegin.a  -lgcc_ext.10.5
+COMPILER_LIBS = -L/usr/lib/gcc/i686-apple-darwin9/4.0.1/ -lm -lgcc  -lSystem -ldl   -L/opt/local/lib/gcc45/gcc/i386-apple-darwin9/4.5.0/../../.. /opt/local/lib/gcc45/libgfortran.dylib  -lgcc_ext.10.5
 
 
-# DAKOTA_LIBS = -L/Users/pgraf/root/dakota/lib/ -ldakota -llhs -lnewmat -lnidr -lopt -lpecos -lconmin -lsparsegrid -lteuchos 
-DAKOTA_LIBS = -L/usr/local/Dakota_source/lib -L/Library/Python/2.7/site-packages/pyDAKOTA-6.2_1-py2.7-macosx-10.9-intel.egg/ -ldakota -llhs -lnidr -lpecos -lconmin -lsparsegrid -lteuchos 
-#DAKOTA_LIBS = -L/usr/local/Dakota_source/build4/src -ldakota_src -llhs -lnewmat -lnidr -lopt -lpecos -lconmin -lsparsegrid -lteuchos 
-#DAKOTA_LIBS = -L/usr/local/Dakota_source/build4/src -ldakota_src  
-#DAKOTA = $(DAKOTA_LIBS) -L/usr/X11/lib -lSM -lICE -llapack -lblas $(COMPILER_LIBS)
+DAKOTA_LIBS = -L/Users/pgraf/root/dakota/lib/ -ldakota -llhs -lnewmat -lnidr -lopt -lpecos -lconmin -lsparsegrid -lteuchos 
+DAKOTA = $(DAKOTA_LIBS) -L/usr/X11/lib -lSM -lICE -llapack -lblas $(COMPILER_LIBS)
 
 #-L/opt/local/Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/config -lpython2.6 -ldl
 

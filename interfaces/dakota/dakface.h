@@ -16,14 +16,14 @@
 #ifndef _DAKFACE_H_
 #define _DAKFACE_H_
 
-#include "dakota_system_defs.hpp"
-#include "dakota_global_defs.hpp"
+#include "system_defs.h"
+#include "global_defs.h"
 
-#include "ParallelLibrary.hpp"
-#include "ProblemDescDB.hpp"
-//#include "DakotaStrategy.hpp"
-#include "DakotaModel.hpp"
-#include "DakotaInterface.hpp"
+#include "ParallelLibrary.H"
+#include "ProblemDescDB.H"
+#include "DakotaStrategy.H"
+#include "DakotaModel.H"
+#include "DakotaInterface.H"
 //#include "PluginSerialDirectApplicInterface.H"
 //#include "PluginParallelDirectApplicInterface.H"
 
@@ -34,12 +34,12 @@
 #include <windows.h>
 #endif
 */
-#include "ParallelLibrary.hpp"
-#include "CommandLineHandler.hpp"
-#include "ProblemDescDB.hpp"
-//#include "DakotaStrategy.hpp"
+#include "ParallelLibrary.H"
+#include "CommandLineHandler.H"
+#include "ProblemDescDB.H"
+#include "DakotaStrategy.H"
 #ifdef DAKOTA_TRACKING
-#include "TrackerHTTP.hpp"
+#include "TrackerHTTP.H"
 #endif
 
 //#define MPI_DEBUG
@@ -50,10 +50,10 @@
 #include <unistd.h>
 #endif
 
-#include "DirectApplicInterface.hpp"
+#include "DirectApplicInterface.H"
 
 #ifndef WINDOWS
-//#include "mpi.h"
+#include "mpi.h"
 #else
 #define MPI_Comm int
 #define MPI_COMM_WORLD 0

@@ -28,17 +28,16 @@
    NOTE: some cleanup of includes, etc. still to do relating to common Mac/linux/windows builds.
 */
 
-#include "dakota_system_defs.hpp"
-#include "dakota_global_defs.hpp"
-#include "dakota_data_types.hpp"
+#include "system_defs.h"
+#include "global_defs.h"
 
-#include "ParallelLibrary.hpp"
-#include "ProblemDescDB.hpp"
-//#include "DakotaStrategy.hpp"
-#include "DakotaModel.hpp"
-#include "DakotaInterface.hpp"
-#include "PluginSerialDirectApplicInterface.hpp"
-#include "PluginParallelDirectApplicInterface.hpp"
+#include "ParallelLibrary.H"
+#include "ProblemDescDB.H"
+#include "DakotaStrategy.H"
+#include "DakotaModel.H"
+#include "DakotaInterface.H"
+//#include "PluginSerialDirectApplicInterface.H"
+//#include "PluginParallelDirectApplicInterface.H"
 
 // eventually use only _WIN32 here
 //#if defined(_WIN32) || defined(_MSC_VER) || defined(__MINGW32__)
@@ -46,12 +45,12 @@
 #include <windows.h>
 #endif
 
-#include "ParallelLibrary.hpp"
-#include "CommandLineHandler.hpp"
-#include "ProblemDescDB.hpp"
-//#include "DakotaStrategy.hpp"
+#include "ParallelLibrary.H"
+#include "CommandLineHandler.H"
+#include "ProblemDescDB.H"
+#include "DakotaStrategy.H"
 #ifdef DAKOTA_TRACKING
-#include "TrackerHTTP.hpp"
+#include "TrackerHTTP.H"
 #endif
 
 //#define MPI_DEBUG
@@ -62,7 +61,7 @@
 #include <unistd.h>
 #endif
 
-#include "DirectApplicInterface.hpp"
+#include "DirectApplicInterface.H"
 
 
 #include <Python.h>
@@ -75,7 +74,7 @@
 #include <boost/python/numeric.hpp>
 #include <boost/python/extract.hpp>
 #ifndef WINDOWS
-//#include <boost/mpi.hpp>
+#include <boost/mpi.hpp>
 #endif
 namespace bp = boost::python;
 namespace bpn = boost::python::numeric;
@@ -427,7 +426,7 @@ python_convert(const StringMultiArray& src, PyObject** dst)
       return(false);
   }
   for (int i=0; i<sz; ++i)
-    PyList_SetItem(*dst, i, PyString_FromString(src[i].c_str()));
+    PyList_SetItem(*dst, i, PyString_FromString(src[i]));
 
   return(true);
 }
@@ -446,11 +445,11 @@ python_convert(const StringMultiArray& c_src, const StringMultiArray& di_src,
     return(false);
   }
   for (int i=0; i<c_sz; ++i)
-    PyList_SetItem(*dst, i, PyString_FromString(c_src[i].c_str()));
+    PyList_SetItem(*dst, i, PyString_FromString(c_src[i]));
   for (int i=0; i<di_sz; ++i)
-    PyList_SetItem(*dst, c_sz+i, PyString_FromString(di_src[i].c_str()));
+    PyList_SetItem(*dst, c_sz+i, PyString_FromString(di_src[i]));
   for (int i=0; i<dr_sz; ++i)
-    PyList_SetItem(*dst, c_sz+di_sz+i, PyString_FromString(dr_src[i].c_str()));
+    PyList_SetItem(*dst, c_sz+di_sz+i, PyString_FromString(dr_src[i]));
 
   return(true);
 }

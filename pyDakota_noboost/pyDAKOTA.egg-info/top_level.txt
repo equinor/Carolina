@@ -1,3 +1,0 @@
-dakota
-test_dakota
-pyDAKOTA

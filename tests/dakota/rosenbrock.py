@@ -73,4 +73,3 @@ def rosenbrock_numpy(**kwargs):
 
 
     return(retval)
-

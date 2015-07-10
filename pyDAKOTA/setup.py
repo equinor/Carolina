@@ -13,9 +13,6 @@
 #    limitations under the License.
 #
 # ++==++==++==++==++==++==++==++==++==++==
-# OSX
-#    ARCHFLAGS='-arch x86_64' python setup.py
-#    cp /usr/local/Dakota_dariwn/bin/libXm.3.dylib /usr/local/Dakota_source/bin/.
 """
 Build pyDAKOTA Python 'egg' for cygwin, darwin, linux, or win32 platforms.
 Assumes DAKOTA has been installed.  The egg will include all libraries
@@ -134,6 +131,7 @@ EGG_LIBS = []
 # Set True to include MPI support.
 NEED_MPI = '-DDAKOTA_HAVE_MPI' in dakota_macros['Dakota_DEFINES']
 
+include_dirs = [dakota_include, numpy_include]
 
 if sys.platform == 'cygwin':  # Only tested with DAKOTA 5.3.
     BOOST_LIBFMT = '%s-mt'
@@ -173,11 +171,11 @@ elif sys.platform == 'darwin':
     # The symbol exists in the OpenMPI libraries in DYLD_LIBRARY_PATH.
     # Possibly something related to i386/x86_64 architecture builds.
     # (DAKOTA libraries are only i386)
-    BOOST_INCDIR = '/usr/local/Cellar/boost155/1.55.0_1/include'
-    BOOST_LIBDIR = '/usr/local/Cellar/boost155/1.55.0_1/lib'
-    # egg_dir=None
-    FORTRAN_LIBDIR = '/usr/local/Cellar/gcc/5.1.0/lib/gcc/5'
-    EXTRA_LIBS = ['gfortran', 'Xm.3']
+    include_dirs.append('/usr/local/Cellar/boost-python/1.58.0/lib')
+    BOOST_INCDIR = '/usr/local/Cellar/boost/1.58.0/include'
+    BOOST_LIBDIR = '/usr/local/Cellar/boost/1.58.0/lib'
+    EXTRA_LIBS = ['gfortran.3', 'Xm.3']
+    #EXTRA_LIBS = ['gfortran.3', 'Xm.3']
     EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.dylib'))
     EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.dylib')))
 
@@ -188,7 +186,7 @@ else:
     BOOST_LIBDIR = '/home/ec2-user/boost_1_49_0/stage/lib'
     LD_FLAGS = ['-Wl,-z origin',
                 '-Wl,-rpath=${ORIGIN}:${ORIGIN}/../'+egg_dir]
-    EXTRA_LIBS = ['gfortran'
+    EXTRA_LIBS = ['gfortran',
                  ] # 'SM', 'ICE', 'Xext', 'Xm', 'Xt', 'X11', 'Xpm', 'Xmu']
     EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.so'))
     EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.so*')))
@@ -198,7 +196,6 @@ else:
 
 sources = ['dakface.cpp', 'dakota_python_binding.cpp']
 
-include_dirs = [dakota_include, numpy_include]
 if BOOST_INCDIR:
     include_dirs.append(BOOST_INCDIR)
 
@@ -223,7 +220,6 @@ if dakota_libs[0].startswith('-l'):
 external_libs = [
     'boost_regex', 'boost_filesystem', 'boost_serialization', 'boost_system',
     'boost_signals', 'boost_python', 'lapack', 'blas']
-#external_libs=['lapack', 'blas']
 
 if NEED_MPI:
     external_libs.append('boost_mpi')

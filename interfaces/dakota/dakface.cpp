@@ -21,14 +21,14 @@
 // We will use DAKOTA in library mode as described at
 // http://dakota.sandia.gov/docs/dakota/5.2/html-dev/DakLibrary.html
 
-#include "dakota_system_defs.hpp"
-#include "dakota_global_defs.hpp"
+#include "system_defs.h"
+#include "global_defs.h"
 
-#include "ParallelLibrary.hpp"
-#include "ProblemDescDB.hpp"
-//#include "DakotaStrategy.hpp"
-#include "DakotaModel.hpp"
-#include "DakotaInterface.hpp"
+#include "ParallelLibrary.H"
+#include "ProblemDescDB.H"
+#include "DakotaStrategy.H"
+#include "DakotaModel.H"
+#include "DakotaInterface.H"
 //#include "PluginSerialDirectApplicInterface.H"
 //#include "PluginParallelDirectApplicInterface.H"
 
@@ -46,12 +46,12 @@
 #endif
 #endif
 
-#include "ParallelLibrary.hpp"
-#include "CommandLineHandler.hpp"
-#include "ProblemDescDB.hpp"
-//#include "DakotaStrategy.hpp"
+#include "ParallelLibrary.H"
+#include "CommandLineHandler.H"
+#include "ProblemDescDB.H"
+#include "DakotaStrategy.H"
 #ifdef DAKOTA_TRACKING
-#include "TrackerHTTP.hpp"
+#include "TrackerHTTP.H"
 #endif
 
 //#define MPI_DEBUG
@@ -62,11 +62,11 @@
 #include <unistd.h>
 #endif
 
-//#ifndef WINDOWS
-#include "macmpi.h"
-//#endif
+#ifndef WINDOWS
+#include "mpi.h"
+#endif
 
-#include "DirectApplicInterface.hpp"
+#include "DirectApplicInterface.H"
 
 
 #include <Python.h>
