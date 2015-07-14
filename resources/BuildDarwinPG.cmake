@@ -5,46 +5,25 @@
 # Julian Quick Summer 2015 
 # 
 # This is intended for building the DAKOTA library on the OSX system
-# This was tested using the following environment:
+# This was tested using the following C environment:
 #
+#      brew install gcc --without-multilib
+#      brew install openmpi --C11 (layout=system)
 #      export HOMEBREW_CC=gcc-4.9
 #      export HOMEBREW_CXX=g++-4.9
-#      alias gcc="gcc-4.9"
-#      alias g++="g++-4.9"
-#      brew install gcc --without-multilib
-#      brew install openmpi --build-from-source
-#      brew edit boost155 
-#         change such that `--layout=system`  (this removes the -mt flags to boost extensions)
-#      brew install boost155 --with-python --with-mpi --without-single
+#      brew install boost --C11 --with-mpi --withput-single (layout=system)
 #
 #   INSTRUCTIONS
 #   ------------
 # Use this file to build DAKOTA from source: https://dakota.sandia.gov/download.html
 # Download and decompress the source file, cd into that directory, 
-# then cp <this file> into this directory (referenced in this document as dakota_source_files). 
-# Copy and paste the following commands to build DAKOTA (using the osx environment previousely described).
+# then cp <this file> into this directory. Copy and paste the following commands to build DAKOTA.
 #    
-#      vim packages/surfpack/src/surfaces/RadialBasisFunctionModel.h --> <REMOVE PROTECTED STATUS OF "RadialBasisFunction">
-#      vim src/CMakeLists.txt --> flip dakota_python to on on line 256 
-#
-#      mkdir /usr/local/dakota
 #      mkdir build 
 #      cd build
-#      cmake -C ../BuildDarwinPG.cmake ../. -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING 
-#      make -j 4
-#      make install
-
-#     add the following to ~/.bash_profile:
-#             export PATH=$PATH:/usr/local/dakota/bin:/usr/local/dakota/test:/usr/local/dakota/lib
-#             export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/usr/local/dakota/bin:/usr/local/dakota/lib
-
-#     Gotcha: if libXm.3 can't be found-
-#             download dakota darwin release from https://dakota.sandia.gov/download.html
-#             cp ~/Downloads/dakota_darwin/bin/libXm.3.dylib /usr/local/dakota/bin/.  (or to another relevant include path)
-#             dakota_source_files/build $ rm -rf *
-#             dakota_source_files/build $ cmake -C ../BuildDarwinPG.cmake ../. -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING 
-#             dakota_source_files/build $ make -j 4
-#             dakota_source_files/build $ make install
+#      cmake -C ../BuildDarwinPG.cmake -C ../FindNumpy.cmake ../. -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING 
+#      cd src
+#      make  
 ##############################################################################
 
 set( CTEST_BUILD_NAME "dakota_mac" )
@@ -67,13 +46,10 @@ set( DAKOTA_CTEST_REGEXP "dakota_*" )
 set( DAKOTA_DEBUG ON )
 
 # turn python on!
-set(DAKOTA_PYTHON ON CACHE BOOL "python on" FORCE)
-set( PYTHON_LIBRARY /usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/lib/python2.7/config/libpython2.7.dylib CACHE FILEPATH "python libs")
-set( PYTHON_INCLUDE_PATH /usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/include/python2.7 CACHE FILEPATH "python include")
-set(PYTHON_INCLUDE_DIRS "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/include/python2.7")
+set (DAKOTA_PYTHON ON)
+set(PYTHON_INCLUDE_DIRS "/usr/local/Cellar/python/2.7.10_1/Frameworks/Python.framework/Versions/2.7/include/python2.7")
 #set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib")
-set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/lib/python2.7")
-set(NUMPY_PATH "/usr/local/lib/python2.7/site-packages")
+set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10_1/Frameworks/Python.framework/Versions/2.7/lib/python2.7")
 
 ### no mpi:
 #set( DAKOTA_HAVE_MPI OFF
@@ -93,10 +69,6 @@ set( DAKOTA_HAVE_MPI ON
      CACHE BOOL "Always build with MPI enabled" FORCE)
 set( CMAKE_CXX_COMPILER "mpic++"
      CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
-set( MPI_LIBRARY
-     "/usr/local/Cellar/open-mpi/1.8.6/lib/libmpi.dylib"
-     CACHE FILEPATH "Use installed MPI library" FORCE)
-
 
 # Location where cmake first looks for cmake modules.
 #message("got here 1")
@@ -114,7 +86,7 @@ set( CMAKE_Fortran_COMPILER "mpif90"
      CACHE FILEPATH "MPI Fortran compiler wrapper" FORCE)
 set( MPI_LIBRARY
      #"/Users/pgraf/root/mpich/lib/libmpich.a"
-     "/usr/local/Cellar/open-mpi/1.8.4_1/lib"
+     "/usr/local/Cellar/open-mpi/1.8.6/lib"
      CACHE FILEPATH "Use installed MPI library" FORCE)
 
 
@@ -135,24 +107,28 @@ set( CMAKE_INSTALL_PREFIX
 # define appropriate paths.
 ##############################################################################
 set(BOOST_ROOT
-    "/usr/local/Cellar/boost155/1.55.0_1"
+    "/usr/local/opt/boost/1.58.0"
     CACHE PATH "Use non-standard Boost install" FORCE)
 
 #set( Boost_NO_SYSTEM_PATHS TRUE
 #     CACHE BOOL "Supress search paths other than BOOST_ROOT" FORCE)
 
 set(BOOST_INCLUDEDIR
-  "/usr/local/Cellar/boost155/1.55.0_1/include"
+  "/usr/local/opt/boost/1.58.0/include"
   CACHE PATH "Use Boost installed here" FORCE)
 
 set(BOOST_LIBRARYDIR
-  "/usr/local/Cellar/boost155/1.55.0_1/lib"
+  "/usr/local/opt/boost/1.58.0/lib"
   CACHE PATH "Use Boost installed here" FORCE)
 
 # boost patches
-#SET ( CMAKE_CXX_FLAGS "-libstdc=libc++" )
+SET ( CMAKE_CXX_FLAGS "-arch x86_64 -libstdc=libc++ -stdlib=libc++" )
+set(LIBCXX -stdlib=libc++)
+set (LIBSTDCXX -stdlib=libstdc++)
+
+
 #add_definitions ( -DBOOST_SIGNALS_NO_DEPRECATION_WARNING )
-#set ( Boost_COMPILER "mpic++" )
+set ( Boost_COMPILER "mpic++" )
 
 ##########################################################################
 # Set up Internal CMake paths first. Then call automated build file.
@@ -161,3 +137,4 @@ set(BOOST_LIBRARYDIR
 #include( ${CTEST_SCRIPT_DIRECTORY}/utilities/DakotaSetupBuildEnv.cmake )
 #include( common_build )
 ##########################################################################
+
