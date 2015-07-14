@@ -7,6 +7,7 @@
 # This is intended for building the DAKOTA library on the OSX system
 # This was tested using the following C environment:
 #
+#      brew install gcc49 --without-multilib
 #      brew install gcc --without-multilib
 #      brew install openmpi --C11 (layout=system)
 #      export HOMEBREW_CC=gcc-4.9
