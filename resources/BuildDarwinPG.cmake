@@ -23,8 +23,14 @@
 #      mkdir build 
 #      cd build
 #      cmake -C ../BuildDarwinPG.cmake -C ../FindNumpy.cmake ../. -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING 
-#      cd src
 #      make  
+#      make install
+# 
+#  gotchas: 
+#     - Some systems may require packages/surfpack/src/surfaces/RadialBasisFunctionModel.h 
+#      RadialBasisFunction to not be protected
+#     - Some packages may require libXm.3 - cp this from dakota's prebuilt darwin tarball
+#       to dakota/bin after successful installation
 ##############################################################################
 
 set( CTEST_BUILD_NAME "dakota_mac" )
