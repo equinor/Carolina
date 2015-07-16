@@ -7,7 +7,6 @@
 # This is intended for building the DAKOTA library on the OSX system
 # This was tested using the following C environment:
 #
-#      brew install gcc49 --without-multilib
 #      brew install gcc --without-multilib
 #      brew install openmpi --C11 (layout=system)
 #      export HOMEBREW_CC=gcc-4.9
@@ -23,14 +22,8 @@
 #      mkdir build 
 #      cd build
 #      cmake -C ../BuildDarwinPG.cmake -C ../FindNumpy.cmake ../. -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING 
+#      cd src
 #      make  
-#      make install
-# 
-#  gotchas: 
-#     - Some systems may require packages/surfpack/src/surfaces/RadialBasisFunctionModel.h 
-#      RadialBasisFunction to not be protected
-#     - Some packages may require libXm.3 - cp this from dakota's prebuilt darwin tarball
-#       to dakota/bin after successful installation
 ##############################################################################
 
 set( CTEST_BUILD_NAME "dakota_mac" )
@@ -53,7 +46,7 @@ set( DAKOTA_CTEST_REGEXP "dakota_*" )
 set( DAKOTA_DEBUG ON )
 
 # turn python on!
-set (DAKOTA_PYTHON ON)
+set (DAKOTA_PYTHON ON CACHE FILEPATH "python interface on" FORCE)
 set(PYTHON_INCLUDE_DIRS "/usr/local/Cellar/python/2.7.10_1/Frameworks/Python.framework/Versions/2.7/include/python2.7")
 #set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib")
 set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10_1/Frameworks/Python.framework/Versions/2.7/lib/python2.7")
