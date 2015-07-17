@@ -46,10 +46,12 @@ set( DAKOTA_CTEST_REGEXP "dakota_*" )
 set( DAKOTA_DEBUG ON )
 
 # turn python on!
-set (DAKOTA_PYTHON ON CACHE FILEPATH "python interface on" FORCE)
-set(PYTHON_INCLUDE_DIRS "/usr/local/Cellar/python/2.7.10_1/Frameworks/Python.framework/Versions/2.7/include/python2.7")
+set (DAKOTA_PYTHON ON CACHE BOOL "python interface on" FORCE)
+set(PYTHON_INCLUDE_DIRS "/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/include/python2.7" CACHE FILEPATH  "py inc" FORCE)
+set(PYTHON_INCLUDE_PATH "/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/include/python2.7" CACHE FILEPATH  "py inc" FORCE)
 #set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib")
-set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10_1/Frameworks/Python.framework/Versions/2.7/lib/python2.7")
+set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/python2.7" CACHE FILEPATH "py libs" FORCE)
+set(PYTHON_LIBRARY "/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/python2.7" CACHE FILEPATH "py libs" FORCE)
 
 ### no mpi:
 #set( DAKOTA_HAVE_MPI OFF
