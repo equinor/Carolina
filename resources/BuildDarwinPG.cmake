@@ -50,8 +50,8 @@ set (DAKOTA_PYTHON ON CACHE BOOL "python interface on" FORCE)
 set(PYTHON_INCLUDE_DIRS "/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/include/python2.7" CACHE FILEPATH  "py inc" FORCE)
 set(PYTHON_INCLUDE_PATH "/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/include/python2.7" CACHE FILEPATH  "py inc" FORCE)
 #set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib")
-set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/python2.7" CACHE FILEPATH "py libs" FORCE)
-set(PYTHON_LIBRARY "/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/python2.7" CACHE FILEPATH "py libs" FORCE)
+set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib" CACHE FILEPATH "py libs" FORCE)
+set(PYTHON_LIBRARY "/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib" CACHE FILEPATH "py libs" FORCE)
 
 ### no mpi:
 #set( DAKOTA_HAVE_MPI OFF
@@ -109,18 +109,18 @@ set( CMAKE_INSTALL_PREFIX
 # define appropriate paths.
 ##############################################################################
 set(BOOST_ROOT
-    "/usr/local/opt/boost/1.58.0"
+    "/usr/local/opt/boost"
     CACHE PATH "Use non-standard Boost install" FORCE)
 
 #set( Boost_NO_SYSTEM_PATHS TRUE
 #     CACHE BOOL "Supress search paths other than BOOST_ROOT" FORCE)
 
 set(BOOST_INCLUDEDIR
-  "/usr/local/opt/boost/1.58.0/include"
+  "/usr/local/opt/boost/include"
   CACHE PATH "Use Boost installed here" FORCE)
 
 set(BOOST_LIBRARYDIR
-  "/usr/local/opt/boost/1.58.0/lib"
+  "/usr/local/opt/boost/lib"
   CACHE PATH "Use Boost installed here" FORCE)
 
 # boost patches
