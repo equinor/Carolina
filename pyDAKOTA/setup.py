@@ -132,6 +132,7 @@ EGG_LIBS = []
 NEED_MPI = '-DDAKOTA_HAVE_MPI' in dakota_macros['Dakota_DEFINES']
 
 include_dirs = [dakota_include, numpy_include]
+library_dirs = [dakota_lib, dakota_bin]
 
 if sys.platform == 'cygwin':  # Only tested with DAKOTA 5.3.
     BOOST_LIBFMT = '%s-mt'
@@ -172,6 +173,7 @@ elif sys.platform == 'darwin':
     # Possibly something related to i386/x86_64 architecture builds.
     # (DAKOTA libraries are only i386)
     include_dirs.append('/usr/local/Cellar/boost-python/1.58.0/lib')
+    library_dirs.append('/usr/local/Cellar/boost-python/1.58.0/lib')
     BOOST_INCDIR = '/usr/local/Cellar/boost/1.58.0/include'
     BOOST_LIBDIR = '/usr/local/Cellar/boost/1.58.0/lib'
     EXTRA_LIBS = ['gfortran.3', 'Xm.3']
@@ -203,7 +205,6 @@ if BOOST_INCDIR:
 define_macros = [(name[2:], None) for name in dakota_macros['Dakota_DEFINES']]
 
 # Some DAKOTA distributions (i.e. cygwin) put libraries in 'bin'.
-library_dirs = [dakota_lib, dakota_bin]
 if BOOST_LIBDIR:
     library_dirs.append(BOOST_LIBDIR)
 if LAPACK_LIBDIR:
