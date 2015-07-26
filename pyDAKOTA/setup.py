@@ -172,6 +172,9 @@ elif sys.platform == 'darwin':
     # The symbol exists in the OpenMPI libraries in DYLD_LIBRARY_PATH.
     # Possibly something related to i386/x86_64 architecture builds.
     # (DAKOTA libraries are only i386)
+    os.environ['CC'] = 'g++-5'  # Force compiler command.
+    os.environ['CXX'] = 'g++-5'  # Force compiler command.
+    NEED_MPI=False
     include_dirs.append('/usr/local/Cellar/boost-python/1.58.0/lib')
     library_dirs.append('/usr/local/Cellar/boost-python/1.58.0/lib')
     BOOST_INCDIR = '/usr/local/Cellar/boost/1.58.0/include'
@@ -223,8 +226,8 @@ external_libs = [
     'boost_signals', 'boost_python', 'lapack', 'blas']
 
 if NEED_MPI:
-    external_libs.append('boost_mpi')
     os.environ['CC'] = 'mpicxx'  # Force compiler command.
+    external_libs.append('boost_mpi')
 
 # Munge boost library names as necessary.
 if BOOST_LIBFMT:

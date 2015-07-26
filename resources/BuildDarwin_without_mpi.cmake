@@ -10,7 +10,7 @@
 #      brew install gcc --without-multilib
 #      export HOMEBREW_CC=gcc-5
 #      export HOMEBREW_CXX=g++-5
-#      brew install boost --c++11 --with-mpi --withput-single (layout=system)
+#      brew install boost --c++11 --without-single (change layout=system)
 #      brew install boost-python --c++11
 #
 #   INSTRUCTIONS
@@ -54,23 +54,23 @@ set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framew
 set(PYTHON_LIBRARY "/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib" CACHE FILEPATH "py libs" FORCE)
 
 ### no mpi:
-#set( DAKOTA_HAVE_MPI OFF
-#     CACHE BOOL "Always build with MPI enabled" FORCE)
-#set( CMAKE_C_COMPILER "gcc-mp-4.5"
-#     CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
-#set( CMAKE_CXX_COMPILER "g++-mp-4.5"
-#     CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
-#set( CMAKE_Fortran_COMPILER "gfortran-mp-4.5"
-#     CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
+set( DAKOTA_HAVE_MPI OFF
+     CACHE BOOL "Always build with MPI enabled" FORCE)
+set( CMAKE_C_COMPILER "gcc-5"
+     CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
+set( CMAKE_CXX_COMPILER "g++-5"
+     CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
+set( CMAKE_Fortran_COMPILER "gfortran-5"
+     CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
 
 
 ### yes mpi
-set( CMAKE_C_COMPILER "mpicc"
-     CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
-set( DAKOTA_HAVE_MPI ON
-     CACHE BOOL "Always build with MPI enabled" FORCE)
-set( CMAKE_CXX_COMPILER "mpic++"
-     CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
+#set( CMAKE_C_COMPILER "mpicc"
+#     CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
+#set( DAKOTA_HAVE_MPI ON
+#     CACHE BOOL "Always build with MPI enabled" FORCE)
+#set( CMAKE_CXX_COMPILER "mpic++"
+#     CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
 
 # Location where cmake first looks for cmake modules.
 #message("got here 1")
@@ -84,12 +84,12 @@ set( CMAKE_CXX_COMPILER "mpic++"
 
 #message("got here 2")
 
-set( CMAKE_Fortran_COMPILER "mpif90" 
-     CACHE FILEPATH "MPI Fortran compiler wrapper" FORCE)
-set( MPI_LIBRARY
+#set( CMAKE_Fortran_COMPILER "mpif90" 
+#     CACHE FILEPATH "MPI Fortran compiler wrapper" FORCE)
+#set( MPI_LIBRARY
      #"/Users/pgraf/root/mpich/lib/libmpich.a"
-     "/usr/local/Cellar/open-mpi/1.8.6/lib"
-     CACHE FILEPATH "Use installed MPI library" FORCE)
+#     "/usr/local/Cellar/open-mpi/1.8.6/lib"
+#     CACHE FILEPATH "Use installed MPI library" FORCE)
 
 
 # Disable optional X graphics
@@ -130,7 +130,7 @@ set (LIBSTDCXX -stdlib=libstdc++)
 
 
 #add_definitions ( -DBOOST_SIGNALS_NO_DEPRECATION_WARNING )
-set ( Boost_COMPILER "mpic++" )
+set ( Boost_COMPILER "g++-5" )
 
 ##########################################################################
 # Set up Internal CMake paths first. Then call automated build file.
