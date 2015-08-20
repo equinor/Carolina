@@ -1,0 +1,1 @@
+there is no clang support for the DAKOTA libraries, which is cumbersome on OSX (as clang is the default compiler). Because of this, all of DAKOTA's dependancies must be build using a gcc compiler. including boost libraries. 
