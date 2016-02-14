@@ -146,8 +146,6 @@ class DakotaInput(object):
                     #ident = str(id(data))
                     #_USER_DATA[comm.Get_rank()][ident] = data
                     _USER_DATA[comm.Get_rank()][ident] = data
-                    print 'storring ',ident, ' in weakref wich is now ',[o for o in _USER_DATA[comm.Get_rank()].keys()]
-                    
                     out.write("\t  analysis_components = '%s'\n" % ident)
 
 
@@ -248,18 +246,15 @@ def dakota_callback(**kwargs):
     =================== ==============================================
 
     """
-    print 'calling DAKOTA back'
     acs = kwargs['analysis_components']
     if not acs:
         msg = 'dakota_callback (%s): No analysis_components' % os.getpid()
         logging.error(msg)
         raise RuntimeError(msg)
 
-    ident = acs[0]
+    # ident = acs[0]
     ident = _IDS[comm.Get_rank()]
-    print 'fetching ',ident, 'di is ', _USER_DATA[comm.Get_rank()]
     try:
-        print comm.Get_rank()
         driver = fetch_data(ident, _USER_DATA)
     except KeyError:
         import time
