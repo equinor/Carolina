@@ -100,17 +100,17 @@ class TestDriver(DakotaBase):
         retval = dict()
         try:
             if asv[0] & 1:
-                f = array([100*f0*f0+f1*f1])
+                f = [100*f0*f0+f1*f1]
                 retval['fns'] = f
 
             if asv[0] & 2:
-                g = array([[-400*f0*x[0] - 2*f1, 200*f0]])
+                g = [[-400*f0*x[0] - 2*f1, 200*f0]]
                 retval['fnGrads'] = g
 
             if asv[0] & 4:
                 fx = x[1]-3*x[0]*x[0]
-                h = array([[[-400*fx + 2, -400*x[0]],
-                            [-400*x[0],    200     ]]])
+                h = [[[-400*fx + 2, -400*x[0]],
+                            [-400*x[0],    200     ]]]
                 retval['fnHessians'] = h
 
             if self.force_exception:

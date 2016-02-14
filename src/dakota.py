@@ -43,6 +43,9 @@ if sys.platform in ('cygwin', 'win32'):
     os.environ['LC_ALL'] = 'C'
 
 import pyDAKOTA
+import pyDAKOTA
+from mpi4py import MPI
+comm = MPI.COMM_WORLD
 
 # Hard-coded assumption regarding availability of MPI.
 if sys.platform in ('cygwin', 'win32'):
@@ -60,7 +63,7 @@ class DakotaBase(object):
     def __init__(self):
         self.input = DakotaInput()
 
-    def run_dakota(self, infile='dakota.in', mpi_comm=None, use_mpi=False,
+    def run_dakota(self, infile='dakota.in', mpi_comm=None, use_mpi=True,
                    stdout=None, stderr=None):
         """
         Write `self.input` to `infile`, providing `self` as `data`.
@@ -105,6 +108,7 @@ class DakotaInput(object):
             "  descriptors   'x1' 'x2'",
         ]
         self.interface = [
+        #    "python asynchronous evaluation_concurrency = %i" % comm.Get_size(),
             "python",
             "  numpy",
             "  analysis_drivers = 'dakota:dakota_callback'",
@@ -138,6 +142,7 @@ class DakotaInput(object):
                                                ' analysis_components and data')
                     ident = str(id(data))
                     _USER_DATA[ident] = data
+                    print 'storring ',ident, ' in weakref wich is now ',[o for o in _USER_DATA.keys()]
                     out.write("\t  analysis_components = '%s'\n" % ident)
 
 
@@ -155,7 +160,8 @@ class _ExcInfo(object):
         self.traceback = None
 
 
-def run_dakota(infile, mpi_comm=None, use_mpi=False, stdout=None, stderr=None):
+def run_dakota(infile, mpi_comm=None, use_mpi=True, stdout=None, stderr=None):
+#def run_dakota(infile, mpi_comm=None, use_mpi=False, stdout=None, stderr=None):
     """
     Run DAKOTA with `infile`.
 
@@ -236,6 +242,7 @@ def dakota_callback(**kwargs):
     =================== ==============================================
 
     """
+    print 'calling DAKOTA back'
     acs = kwargs['analysis_components']
     if not acs:
         msg = 'dakota_callback (%s): No analysis_components' % os.getpid()
@@ -243,13 +250,19 @@ def dakota_callback(**kwargs):
         raise RuntimeError(msg)
 
     ident = acs[0]
+    print 'fetching ',ident
     try:
         driver = fetch_data(ident)
     except KeyError:
-        msg = 'dakota_callback (%s): ident %s not found in user data' \
-              % (os.getpid(), ident)
-        logging.error(msg)
-        raise RuntimeError(msg)
+        import time
+        time.sleep(2)
+        try:
+            driver = fetch_data(ident)
+        except KeyError:
+            msg = 'dakota_callback (%s): ident %s not found in user data' \
+                  % (os.getpid(), ident)
+            logging.error(msg)
+            raise RuntimeError(msg)
 
     return driver.dakota_callback(**kwargs)
 

@@ -99,7 +99,7 @@ with open(os.path.join(dakota_install, 'include',
 
 
 # Set to a list of any special compiler flags required.
-CXX_FLAGS = []
+CXX_FLAGS = ["-w"]
 
 # Set to a list of any special linker flags required.
 LD_FLAGS = []
@@ -172,11 +172,7 @@ elif sys.platform == 'darwin':
     # The symbol exists in the OpenMPI libraries in DYLD_LIBRARY_PATH.
     # Possibly something related to i386/x86_64 architecture builds.
     # (DAKOTA libraries are only i386)
-    #os.environ['CC'] = 'g++-5'  # Force compiler command.
-    #os.environ['CXX'] = 'g++-5'  # Force compiler command.
-    NEED_MPI=False
     include_dirs.append('/usr/local/Cellar/boost-python/1.58.0/lib')
-    library_dirs.append('/usr/local/Cellar/boost-python/1.58.0/lib')
     BOOST_INCDIR = '/usr/local/Cellar/boost/1.58.0/include'
     BOOST_LIBDIR = '/usr/local/Cellar/boost/1.58.0/lib'
     EXTRA_LIBS = ['gfortran.3', 'Xm.3']
@@ -187,16 +183,27 @@ elif sys.platform == 'darwin':
 else:
     # This LD_FLAGS stuff avoids having to set LD_LIBRARY_PATH to access
     # the other (not pyDAKOTA.so) shared libraries that are part of the egg.
-    BOOST_INCDIR = '/home/ec2-user/include'
-    BOOST_LIBDIR = '/home/ec2-user/boost_1_49_0/stage/lib'
+    #BOOST_INCDIR = '/home/ec2-user/include'
+    #BOOST_LIBDIR = '/home/ec2-user/boost_1_49_0/stage/lib'
+
+    #BOOST_INCDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/include'
+    #BOOST_LIBDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/lib'
+    BOOST_INCDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/include'
+    BOOST_LIBDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/lib'
+
+    #include_dirs.append('/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/include/boost')
+    #library_dirs.append('/nopt/nrel/apps/openmpi/1.7.3-serial-gcc-4.8.2/lib')
+    #include_dirs.append('/nopt/nrel/apps/openmpi/1.7.3-serial-gcc-4.8.2/include')
+
+    LAPACK_LIBDIR="."
     LD_FLAGS = ['-Wl,-z origin',
                 '-Wl,-rpath=${ORIGIN}:${ORIGIN}/../'+egg_dir]
-    EXTRA_LIBS = ['gfortran',
+    EXTRA_LIBS = ['gfortran'
                  ] # 'SM', 'ICE', 'Xext', 'Xm', 'Xt', 'X11', 'Xpm', 'Xmu']
     EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.so'))
     EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.so*')))
-    EGG_LIBS.extend([os.path.join(BOOST_LIBDIR, 'libboost_python.so.1.49.0'),
-                     os.path.join(BOOST_LIBDIR, 'libboost_mpi.so.1.49.0')])
+    #EGG_LIBS.extend([os.path.join(BOOST_LIBDIR, 'libboost_python.so.1.49.0'),
+    #                 os.path.join(BOOST_LIBDIR, 'libboost_mpi.so.1.49.0')])
 
 
 sources = ['dakface.cpp', 'dakota_python_binding.cpp']
@@ -223,11 +230,11 @@ if dakota_libs[0].startswith('-l'):
 # From Makefile.export.Dakota Dakota_TPL_LIBRARIES.
 external_libs = [
     'boost_regex', 'boost_filesystem', 'boost_serialization', 'boost_system',
-    'boost_signals', 'boost_python', 'lapack', 'blas']
+    'boost_signals', 'boost_python']#, 'lapack', 'blas']
 
 if NEED_MPI:
-    os.environ['CC'] = 'mpicxx'  # Force compiler command.
     external_libs.append('boost_mpi')
+    os.environ['CC'] = 'mpicxx'  # Force compiler command.
 
 # Munge boost library names as necessary.
 if BOOST_LIBFMT:

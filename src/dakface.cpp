@@ -23,6 +23,10 @@
 //#include <Python.h>
 // Replaces Python.h according to boost_python docs.
 #include <boost/python/detail/wrap_python.hpp>
+#include <boost/mpi/environment.hpp>
+#include <boost/mpi/communicator.hpp>
+#include <iostream>
+namespace mpi = boost::mpi;
 
 #include "LibraryEnvironment.hpp"
 
@@ -52,7 +56,6 @@ int all_but_actual_main_mpi(int argc, char* argv[], MPI_Comm comm, void *exc)
   return _main(argc, argv, &comm, exc);
 }
 
-
 static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
 {
   static bool initialized = false;
@@ -64,21 +67,27 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
 #endif
 
     // Tie signals to Dakota's abort_handler.
-    Dakota::register_signal_handlers();
+//    Dakota::register_signal_handlers();
 
     // Have abort_handler() throw an exception rather than aborting the process.
-    Dakota::abort_mode = Dakota::ABORT_THROWS;
+//    Dakota::abort_mode = Dakota::ABORT_THROWS;
 
     initialized = true;
   }
+  mpi::environment env_mpi;
+  mpi::communicator world;
 
   // Parse input and construct Dakota LibraryEnvironment, performing
   // input data checks.  Assumes comm rank 0.
-  Dakota::ProgramOptions opts(argc, argv, 0);
+  //Dakota::ProgramOptions opts(argc, argv, 0);
+  //Dakota::ParallelLibrary(argc, argv);
+  Dakota::ProgramOptions opts(argc, argv, world.rank());
+
   Dakota::LibraryEnvironment* env = 0;
   if (pcomm) {
     MPI_Comm comm = *pcomm;
-    env = new Dakota::LibraryEnvironment(comm, opts);
+    //Dakota::ParallelLibrary();
+    env = new Dakota::LibraryEnvironment(comm, opts, true);
   } else {
     env = new Dakota::LibraryEnvironment(opts);
   }
