@@ -8,10 +8,14 @@
 # This was tested using the following C environment:
 #
 #      brew install gcc --without-multilib
-#      export HOMEBREW_CC=gcc-5
+#      export HOMEBREW_CC=gcc-5             (DAKOTA is not clang compatable)
 #      export HOMEBREW_CXX=g++-5
-#      brew install boost --c++11 --with-mpi --withput-single (layout=system)
+#      brew install boost --c++11 --with-mpi --withput-single (`brew edit boost` -> layout=system)
 #      brew install boost-python --c++11
+#      brew install lapack                                                                         |
+#      brew install openmotif (if this formula is still not available you can use the one I found \|/)
+#                              brew install https://gist.githubusercontent.com/steakknife/60a39a32ae84e12238a2/raw/openmotif.rb
+#      brew install boost155 --with-mpi --with-python --without-single    (this is so you can import boost mpi in python)
 #
 #   INSTRUCTIONS
 #   ------------
@@ -22,8 +26,8 @@
 #      mkdir build 
 #      cd build
 #      cmake -C ../BuildDarwinPG.cmake -C ../FindNumpy.cmake ../. -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING 
-#      cd src
 #      make  
+#      make install
 ##############################################################################
 
 set( CTEST_BUILD_NAME "dakota_mac" )
