@@ -186,7 +186,8 @@ def run_dakota(infile, mpi_comm=None, use_mpi=True, stdout=None, stderr=None):
 
     if mpi_comm is None:
         if _HAVE_MPI and use_mpi:
-            from boost.mpi import world
+            try: from boost.mpi import world
+            except ImportError: from mpi import world
             err = pyDAKOTA.run_dakota_mpi(infile, world, stdout, stderr, exc)
         else:
             err = pyDAKOTA.run_dakota(infile, stdout, stderr, exc)

@@ -14,8 +14,10 @@
 #      brew install boost-python --c++11
 #      brew install lapack                                                                         |
 #      brew install openmotif (if this formula is still not available you can use the one I found \|/)
+
 #                              brew install https://gist.githubusercontent.com/steakknife/60a39a32ae84e12238a2/raw/openmotif.rb
 #      brew install boost155 --with-mpi --with-python --without-single    (this is so you can import boost mpi in python)
+#      now append this to ~/.bash_profile: export PYTHONPATH="$PYTHONPATH:/usr/local/Cellar/boost155/1.55.0_1/lib"
 #
 #   INSTRUCTIONS
 #   ------------
