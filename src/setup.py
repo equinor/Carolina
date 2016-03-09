@@ -172,11 +172,10 @@ elif sys.platform == 'darwin':
     # The symbol exists in the OpenMPI libraries in DYLD_LIBRARY_PATH.
     # Possibly something related to i386/x86_64 architecture builds.
     # (DAKOTA libraries are only i386)
-    include_dirs.append('/usr/local/Cellar/boost-python/1.60.0/lib')
-    library_dirs.append('/usr/local/Cellar/boost-python/1.60.0/lib')
-    BOOST_INCDIR = '/usr/local/Cellar/boost/1.60.0_1/include'
-    BOOST_LIBDIR = '/usr/local/Cellar/boost/1.60.0_1/lib'
-    EXTRA_LIBS = ['gfortran.3', 'Xm.4']
+    include_dirs.append('/usr/local/Cellar/boost-python/1.58.0/lib')
+    BOOST_INCDIR = '/usr/local/Cellar/boost/1.58.0/include'
+    BOOST_LIBDIR = '/usr/local/Cellar/boost/1.58.0/lib'
+    EXTRA_LIBS = ['gfortran.3', 'Xm.3']
     #EXTRA_LIBS = ['gfortran.3', 'Xm.3']
     EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.dylib'))
     EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.dylib')))
