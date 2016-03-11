@@ -7,7 +7,7 @@ Allows for users to construct DAKOTA input, feed the input to DAKOTA, and for DA
 
 This allows for a light-weight custom python interace to DAKOTA.
 
-Author: [RRD](mailto:nrel.wisdem@gmail.com)
+Author: [NREL WISDEM](mailto:nrel.wisdem@gmail.com)
 
 ## Prerequisites
 
