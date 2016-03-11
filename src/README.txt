@@ -1,3 +1,58 @@
+pyDAKOTA
+========
+
+pyDAKOTA is an interface to Sania's Design Analysis Kit for Optimization and Terascale Applications (DAKOTA) analysis suite. 
+
+Allows for users to construct DAKOTA input, feed the input to DAKOTA, and for DAKOTA to call a python object with a "dakota_callback" function for function evaluations.
+
+This allows for a light-weight custom python interace to DAKOTA.
+
+Author: [RRD](mailto:nrel.wisdem@gmail.com)
+
+## Prerequisites
+
+General: NumPy, OpenMDAO, DAKOTA
+
+## Dependencies:
+
+Supporting python packages: mpi4py
+
+## Installation
+
+### Install DAKOTA
+First, [download DAKOTA](https://github.com/WISDEM/JacketSE) and [install from source](LINK). Some CMAKE files are provided in the resources/ directory.
+
+Find a cmake file which works for your system, then install DAKOTA with the following commands (this assumes an osx environment):
+
+    $ wget https://dakota.sandia.gov/sites/default/files/distributions/public/dakota-6.2-public.src.tar.gz
+    $ tar -zxvf dakota-6.2-public.src.tar.gz
+    $ cd dakota-6.2.0.src/
+    $ wget https://raw.githubusercontent.com/WISDEM/pyDAKOTA/master/resources/BuildDarwinPG.cmake # for osx
+    $ <Add linux option>
+    $ mkdir build
+    $ cd build
+    $ cmake -C ../BuildDarwinPG.cmake ../.
+    $ make -j 4
+    $ make install
+    $ export DAK_INSTALL=/usr/local/dakota
+    $ export PATH=$PATH:$DAK_INSTALL/bin:$DAK_INSTALL/test:$DAK_INSTALL/lib
+    $ export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$DAK_INSTALL/bin:$DAK_INSTALL/lib
+
+### Install pyDAKOTA
+
+    $ cd pyDAKOTA/src
+    $ python setup.py install
+
+## Run Unit Tests
+
+To check if installation was successful try to run the pyDAKOTA test script
+
+    $ python test_dakface.py
+
+For software issues please use <https://github.com/WISDEM/pyDAKOTA/issues> or email nrel.wisdem@gmail.com. 
+
++++++++ Previous README +++++++
+
 pyDAKOTA: a Python wrapper for DAKOTA
 -------------------------------------
 
@@ -67,4 +122,3 @@ evaluations.
 
 dakota_python_binding.cpp:  This is the boost wrapper that exposes the
 functions in dakface.cpp to python.
-
