@@ -1,7 +1,7 @@
 pyDAKOTA
 ========
 
-pyDAKOTA is an interface to Sania's Design Analysis Kit for Optimization and Terascale Applications (DAKOTA) analysis suite. 
+pyDAKOTA is an interface to Sandia Laboratory's Design Analysis Kit for Optimization and Terascale Applications (DAKOTA) analysis suite. 
 
 Allows for users to construct DAKOTA input, feed the input to DAKOTA, and for DAKOTA to call a python object with a "dakota_callback" function for function evaluations.
 
@@ -20,7 +20,7 @@ Supporting python packages: mpi4py
 ## Installation
 
 ### Install DAKOTA
-First, [download DAKOTA](https://github.com/WISDEM/JacketSE) and [install from source](LINK). Some CMAKE files are provided in the resources/ directory.
+First, [download DAKOTA](https://github.com/WISDEM/JacketSE) and [install from source](https://dakota.sandia.gov/content/using-builddakotatemplatecmake-script). Some CMAKE files are provided in the resources/ directory.
 
 Find a cmake file which works for your system, then install DAKOTA with the following commands (this assumes an osx environment):
 
