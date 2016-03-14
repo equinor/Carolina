@@ -47,7 +47,7 @@ Find a cmake file which works for your system, then install DAKOTA with the foll
 
 To check if installation was successful try to run the pyDAKOTA test script
 
-    $ python test_dakface.py
+    $ python tests/test_dakface.py
 
 For software issues please use <https://github.com/WISDEM/pyDAKOTA/issues> or email nrel.wisdem@gmail.com. 
 
