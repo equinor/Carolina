@@ -38,10 +38,9 @@
 #      now install dakota_driver and you're done
 ##############################################################################
 
-set( CTEST_BUILD_NAME "dakota_mac" )
+set( CTEST_BUILD_NAME "dakota_ubu" )
 
-set( DAKOTA_CMAKE_PLATFORM "Darwin.cmake")
-set( DAKOTA_CMAKE_BUILD_TYPE "DakotaDistro.cmake")
+#set( DAKOTA_CMAKE_BUILD_TYPE "DakotaDistro.cmake")
 
 #********* MUST SET CORRECTLY!!! *********** #
 # TODO: comment or test and error
@@ -59,12 +58,6 @@ set( DAKOTA_DEBUG ON )
 
 # turn python on!
 set (DAKOTA_PYTHON ON CACHE BOOL "python interface on" FORCE)
-set(PYTHON_INCLUDE_DIRS "/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/include/python2.7" CACHE FILEPATH  "py inc" FORCE)
-set(PYTHON_INCLUDE_PATH "/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/include/python2.7" CACHE FILEPATH  "py inc" FORCE)
-#set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib")
-set(PYTHON_LIBRARIES "/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib" CACHE FILEPATH "py libs" FORCE)
-set(PYTHON_LIBRARY "/usr/local/Cellar/python/2.7.10_2/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib" CACHE FILEPATH "py libs" FORCE)
-
 ### no mpi:
 #set( DAKOTA_HAVE_MPI OFF
 #     CACHE BOOL "Always build with MPI enabled" FORCE)
@@ -151,4 +144,3 @@ set ( Boost_COMPILER "mpic++" )
 #include( ${CTEST_SCRIPT_DIRECTORY}/utilities/DakotaSetupBuildEnv.cmake )
 #include( common_build )
 ##########################################################################
-
