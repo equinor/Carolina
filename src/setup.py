@@ -240,7 +240,7 @@ external_libs = [
     'boost_signals', 'boost_python']#, 'lapack', 'blas']
 
 if NEED_MPI:
-    external_libs.append('boost_mpi-mt')
+    external_libs.append('boost_mpi')
     os.environ['CC'] = 'mpicxx'  # Force compiler command.
 
 # Munge boost library names as necessary.
