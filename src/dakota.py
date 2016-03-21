@@ -259,15 +259,10 @@ def dakota_callback(**kwargs):
     try:
         driver = fetch_data(ident, _USER_DATA)
     except KeyError:
-        import time
-        time.sleep(2)
-        try:
-            driver = fetch_data(ident, _USER_DATA)
-        except KeyError:
-            msg = 'dakota_callback (%s): ident %s not found in user data' \
+        msg = 'dakota_callback (%s): ident %s not found in user data' \
                   % (os.getpid(), ident)
-            logging.error(msg)
-            raise RuntimeError(msg)
+        logging.error(msg)
+        raise RuntimeError(msg)
 
     return driver.dakota_callback(**kwargs)
 

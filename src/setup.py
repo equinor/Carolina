@@ -235,10 +235,10 @@ if dakota_libs[0].startswith('-l'):
 # From Makefile.export.Dakota Dakota_TPL_LIBRARIES.
 external_libs = [
     'boost_regex', 'boost_filesystem', 'boost_serialization', 'boost_system',
-    'boost_signals', 'boost_python-mt']#, 'lapack', 'blas']
+    'boost_signals', 'boost_python']#, 'lapack', 'blas']
 
 if NEED_MPI:
-    external_libs.append('boost_mpi-mt')
+    external_libs.append('boost_mpi')
     os.environ['CC'] = 'mpicxx'  # Force compiler command.
 
 # Munge boost library names as necessary.
