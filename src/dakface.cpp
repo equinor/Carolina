@@ -74,14 +74,15 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
 
     initialized = true;
   }
-  mpi::environment env_mpi;
-  mpi::communicator world;
 
   // Parse input and construct Dakota LibraryEnvironment, performing
   // input data checks.  Assumes comm rank 0.
   //Dakota::ProgramOptions opts(argc, argv, 0);
   //Dakota::ParallelLibrary(argc, argv);
-  Dakota::ProgramOptions opts(argc, argv, world.rank());
+  int rank;
+  int ok;
+  ok = MPI_Comm_rank( *pcomm, &rank ) ;
+  Dakota::ProgramOptions opts(argc, argv, rank);
 
   Dakota::LibraryEnvironment* env = 0;
   if (pcomm) {
