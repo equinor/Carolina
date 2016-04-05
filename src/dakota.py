@@ -110,6 +110,7 @@ class DakotaInput(object):
         ]
         self.interface = [
         #    "python asynchronous evaluation_concurrency = %i" % comm.Get_size(),
+            "deactivate evaluation_cache",
             "python",
             "  numpy",
             "  analysis_drivers = 'dakota:dakota_callback'",
