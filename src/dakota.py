@@ -54,8 +54,7 @@ else:
     _HAVE_MPI = True
 
 # Dictionary to map from str(id(data)) to data object.
-_IDS = [-1] * (comm.Get_size() + 1)
-_USER_DATA = [weakref.WeakValueDictionary()] * (comm.Get_size() + 1)
+_USER_DATA = weakref.WeakValueDictionary()
 
 
 class DakotaBase(object):
@@ -71,8 +70,9 @@ class DakotaBase(object):
         Then run DAKOTA with that input, MPI specification, and files.
         DAKOTA will then call our :meth:`dakota_callback` during the run.
         """
-        if comm.Get_rank() == 0: self.input.write_input(infile, data=self)
-        run_dakota(infile, mpi_comm, use_mpi, stdout, stderr)
+        if comm.Get_rank() == 0: 
+            self.input.write_input(infile, data=self)
+            run_dakota(infile, mpi_comm, use_mpi, stdout, stderr)
 
     def dakota_callback(self, **kwargs):
         """ Invoked from global :meth:`dakota_callback`, must be overridden. """
@@ -142,18 +142,14 @@ class DakotaInput(object):
                         if 'analysis_components' in line:
                             raise RuntimeError('Cannot specify both'
                                                ' analysis_components and data')
-                    _IDS[comm.Get_rank()] = str(id(data))
-                    ident =  _IDS[comm.Get_rank()]
-                    #ident = str(id(data))
-                    #_USER_DATA[comm.Get_rank()][ident] = data
-                    _USER_DATA[comm.Get_rank()][ident] = data
+                    ident = str(id(data))
+                    _USER_DATA[ident] = data
                     out.write("\t  analysis_components = '%s'\n" % ident)
 
 
-def fetch_data(ident,dat):
+def fetch_data(ident):
     """ Return user data object recorded by :meth:`DakotaInput.write`. """
-    return dat[comm.Get_rank()][ident]
-    #return _USER_DATA[comm.Get_rank()][ident]
+    return _USER_DATA[ident]
 
 
 class _ExcInfo(object):
@@ -255,10 +251,9 @@ def dakota_callback(**kwargs):
         logging.error(msg)
         raise RuntimeError(msg)
 
-    # ident = acs[0]
-    ident = _IDS[comm.Get_rank()]
+    ident = acs[0]
     try:
-        driver = fetch_data(ident, _USER_DATA)
+        driver = fetch_data(ident)
     except KeyError:
         msg = 'dakota_callback (%s): ident %s not found in user data' \
                   % (os.getpid(), ident)
