@@ -28,6 +28,20 @@
 #include <iostream>
 namespace mpi = boost::mpi;
 
+
+#include "dakota_windows.h"
+#include "dakota_system_defs.hpp"
+#include "ProgramOptions.hpp"
+#include "LibraryEnvironment.hpp"
+#include "ProblemDescDB.hpp"
+#include "PRPMultiIndex.hpp"
+#include "DakotaModel.hpp"
+#include "DakotaInterface.hpp"
+#include "PluginSerialDirectApplicInterface.hpp"
+#include "dakota_global_defs.hpp"
+#include "dakota_dll_api.h"
+
+
 #include "LibraryEnvironment.hpp"
 
 #include "dakface.hpp"
@@ -36,6 +50,10 @@ namespace mpi = boost::mpi;
 namespace bp = boost::python;
 
 #include <boost/system/system_error.hpp>
+namespace Dakota {
+  extern PRPCache data_pairs;
+}
+using namespace Dakota;
 
 #ifdef HAVE_AMPL
 /** Floating-point initialization from AMPL: switch to 53-bit rounding
@@ -85,10 +103,11 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
   Dakota::ProgramOptions opts(argc, argv, rank);
 
   Dakota::LibraryEnvironment* env = 0;
+  Dakota::data_pairs.clear();
   if (pcomm) {
     MPI_Comm comm = *pcomm;
     //Dakota::ParallelLibrary();
-    env = new Dakota::LibraryEnvironment(comm, opts, true);
+    env = new Dakota::LibraryEnvironment(comm, opts);
   } else {
     env = new Dakota::LibraryEnvironment(opts);
   }
