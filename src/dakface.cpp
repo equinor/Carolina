@@ -106,6 +106,7 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
   Dakota::data_pairs.clear();
   if (pcomm) {
     MPI_Comm comm = *pcomm;
+    MPI_Barrier(comm);
     //Dakota::ParallelLibrary();
     env = new Dakota::LibraryEnvironment(comm, opts);
   } else {
@@ -115,7 +116,9 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
   // Execute the environment.
   int retval = 0;
   try {
+  Dakota::data_pairs.clear();
     env->execute();
+  Dakota::data_pairs.clear();
   }
   catch (boost::system::system_error& se) {
     retval = se.code().value();
