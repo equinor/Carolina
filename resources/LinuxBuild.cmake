@@ -31,7 +31,7 @@ set( CMAKE_INSTALL_PREFIX
      "/home/jquick/dakota"
      CACHE PATH "Path to Dakota installation" )
 
-SET ( CMAKE_CXX_FLAGS "-arch x86_64 -libstdc=libc++ -stdlib=libc++ -D MPI_DEBUG=0" )
+SET ( CMAKE_CXX_FLAGS "-D MPI_DEBUG=0" CACHE STRING "compile flags" FORCE)
 set(LIBCXX -stdlib=libc++)
 set (LIBSTDCXX -stdlib=libstdc++)
 set ( Boost_COMPILER "mpic++" )
