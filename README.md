@@ -7,6 +7,11 @@ Allows for users to construct DAKOTA input, feed the input to DAKOTA, and for DA
 
 This allows for a light-weight custom python interace to DAKOTA.
 
+This is intended to be used with the OpenMDAO [dakota driver][1]
+
+
+  [1]: https://github.com/WISDEM/dakota_driver
+
 Author: [NREL WISDEM](mailto:nrel.wisdem@gmail.com)
 
 ## Prerequisites
@@ -30,7 +35,8 @@ Find a cmake file which works for your system, then install DAKOTA with the foll
     $ wget https://raw.githubusercontent.com/WISDEM/pyDAKOTA/master/resources/LinuxBuild.cmake # assuming linux
     $ mkdir build
     $ cd build
-    $ cmake -C ../LinuxBuild.cmake ../.
+    $ cmake -C ../LinuxBuild.cmake ../. # change the username from jquick
+                                        # :%s/jquick/<USERNAME>
     $ make -j 4
     $ make install
 
