@@ -27,16 +27,17 @@ Find a cmake file which works for your system, then install DAKOTA with the foll
     $ wget https://dakota.sandia.gov/sites/default/files/distributions/public/dakota-6.2-public.src.tar.gz
     $ tar -zxvf dakota-6.2-public.src.tar.gz
     $ cd dakota-6.2.0.src/
-    $ wget https://raw.githubusercontent.com/WISDEM/pyDAKOTA/master/resources/BuildDarwinPG.cmake # for osx
-    $ <Add linux option>
+    $ wget https://raw.githubusercontent.com/WISDEM/pyDAKOTA/master/resources/LinuxBuild.cmake # assuming linux
     $ mkdir build
     $ cd build
-    $ cmake -C ../BuildDarwinPG.cmake ../.
+    $ cmake -C ../LinuxBuild.cmake ../.
     $ make -j 4
     $ make install
-    $ export DAK_INSTALL=/usr/local/dakota
-    $ export PATH=$PATH:$DAK_INSTALL/bin:$DAK_INSTALL/test:$DAK_INSTALL/lib
-    $ export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$DAK_INSTALL/bin:$DAK_INSTALL/lib
+
+    # paste this into ~/.bash_profile
+    $ DAK_INSTALL=/home/jquick/dakota
+    $ PATH=$DAK_INSTALL/bin:$DAK_INSTALL/test:$PATH
+    $ LD_LIBRARY_PATH=$DAK_INSTALL/lib:$DAK_INSTALL/bin:$LD_LIBRARY_PATH
 
 ### Install pyDAKOTA
 
