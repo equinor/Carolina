@@ -67,9 +67,14 @@ namespace bpn = boost::python::numeric;
     argv[argc++] = errfile; \
   }
 
-int run_dakota(char *infile, char *outfile, char *errfile, bp::object exc)
+int run_dakota(char *infile, char *outfile, char *errfile, bp::object exc, int restart)
 {
+ 
   MAKE_ARGV
+  if (restart==1){
+    argv[argc++] = const_cast<char*>("-r"); \
+    argv[argc++] = const_cast<char*>("dakota.rst"); 
+  }
 
   void *tmp_exc = NULL;
   if (exc)
@@ -83,9 +88,13 @@ int run_dakota_mpi(char *infile, boost::mpi::communicator &_mpi,
 #else
 int run_dakota_mpi(char *infile, int &_mpi,
 #endif
-                   char *outfile, char *errfile, bp::object exc)
+                   char *outfile, char *errfile, bp::object exc, int restart)
 {
   MAKE_ARGV
+  if (restart==1){
+    argv[argc++] = const_cast<char*>("-r"); \
+    argv[argc++] = const_cast<char*>("dakota.rst"); 
+  }
   MPI_Comm comm = MPI_COMM_WORLD;
   if (_mpi) 
     comm = _mpi;

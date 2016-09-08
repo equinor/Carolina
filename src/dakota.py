@@ -65,14 +65,14 @@ class DakotaBase(object):
         self.input = DakotaInput()
 
     def run_dakota(self, infile='dakota.in', mpi_comm=None, use_mpi=True,
-                   stdout=None, stderr=None):
+                   stdout=None, stderr=None, restart=0):
         """
         Write `self.input` to `infile`, providing `self` as `data`.
         Then run DAKOTA with that input, MPI specification, and files.
         DAKOTA will then call our :meth:`dakota_callback` during the run.
         """
         if comm.Get_rank() == 0: self.input.write_input(infile, data=self)
-        run_dakota(infile, mpi_comm, use_mpi, stdout, stderr)
+        run_dakota(infile, mpi_comm, use_mpi, stdout, stderr, restart=restart)
 
     def dakota_callback(self, **kwargs):
         """ Invoked from global :meth:`dakota_callback`, must be overridden. """
@@ -110,7 +110,8 @@ class DakotaInput(object):
         ]
         self.interface = [
         #    "python asynchronous evaluation_concurrency = %i" % comm.Get_size(),
-            "deactivate evaluation_cache",
+            #"deactivate evaluation_cache",
+            "id_interface 'pydak'",
             "python",
             "  numpy",
             "  analysis_drivers = 'dakota:dakota_callback'",
@@ -165,7 +166,7 @@ class _ExcInfo(object):
         self.traceback = None
 
 
-def run_dakota(infile, mpi_comm=None, use_mpi=True, stdout=None, stderr=None):
+def run_dakota(infile, mpi_comm=None, use_mpi=True, stdout=None, stderr=None, restart=0):
 #def run_dakota(infile, mpi_comm=None, use_mpi=False, stdout=None, stderr=None):
     """
     Run DAKOTA with `infile`.
@@ -189,12 +190,12 @@ def run_dakota(infile, mpi_comm=None, use_mpi=True, stdout=None, stderr=None):
         if _HAVE_MPI and use_mpi:
             try: 
                 from boost.mpi import world
-                err = pyDAKOTA.run_dakota_mpi(infile, world, stdout, stderr, exc)
-            except ImportError: err = pyDAKOTA.run_dakota(infile, stdout, stderr, exc)
+                err = pyDAKOTA.run_dakota_mpi(infile, world, stdout, stderr, exc, restart)
+            except ImportError: err = pyDAKOTA.run_dakota(infile, stdout, stderr, exc, restart)
         else:
-            err = pyDAKOTA.run_dakota(infile, stdout, stderr, exc)
+            err = pyDAKOTA.run_dakota(infile, stdout, stderr, exc, restart)
     else:
-        err = pyDAKOTA.run_dakota_mpi(infile, mpi_comm, stdout, stderr, exc)
+        err = pyDAKOTA.run_dakota_mpi(infile, mpi_comm, stdout, stderr, exc, restart)
 
     # Check for errors. We'll get here if Dakota::abort_mode has been set to
     # throw an exception rather than shut down the process.
