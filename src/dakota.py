@@ -71,7 +71,8 @@ class DakotaBase(object):
         Then run DAKOTA with that input, MPI specification, and files.
         DAKOTA will then call our :meth:`dakota_callback` during the run.
         """
-        if comm.Get_rank() == 0: self.input.write_input(infile, data=self)
+        self.input.write_input(infile, data=self)
+        #if comm.Get_rank() == 0: self.input.write_input(infile, data=self)
         run_dakota(infile, mpi_comm, use_mpi, stdout, stderr, restart=restart)
 
     def dakota_callback(self, **kwargs):
