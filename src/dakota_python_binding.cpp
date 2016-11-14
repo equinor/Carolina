@@ -1,54 +1,31 @@
-// Copyright 2013 National Renewable Energy Laboratory (NREL)
-// 
-//    Licensed under the Apache License, Version 2.0 (the "License");
-//    you may not use this file except in compliance with the License.
-//    You may obtain a copy of the License at
-// 
-//        http://www.apache.org/licenses/LICENSE-2.0
-// 
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS,
-//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-//    See the License for the specific language governing permissions and
-//    limitations under the License.
-// 
-// ++==++==++==++==++==++==++==++==++==++==
+#include <mpi.h>
+#include <iostream>
 
-/* dakota_python_interface.cpp
+static void sayhello(MPI_Comm comm)
+{
+  if (comm == MPI_COMM_NULL) {
+    std::cout << "You passed MPI_COMM_NULL !!!" << std::endl;
+    return;
+  }
+  int size;
+  MPI_Comm_size(comm, &size);
+  int rank;
+  MPI_Comm_rank(comm, &rank);
+  int plen; char pname[MPI_MAX_PROCESSOR_NAME];
+  MPI_Get_processor_name(pname, &plen);
+  std::cout <<
+    "Hello, World! " <<
+    "I am process "  << rank  <<
+    " of "           << size  <<
+    " on  "          << pname <<
+    "."              << std::endl;
+}
 
-This file implements a simple boost based python binding for the dakota library.
-
-   Goal is to be able to simply say:
-
-   import dakota
-   dakota.run()
-
-   and have dakota do its thing
-
-   In actual fact we implement 3 ways:
-   1) run_dakota(file) -- no args, just run it as if from the comnand line, with input file "file"
-   2) run_dakota_data(file, data) -- "data" is any python object, it is passed back to your interface function
-   3) run_dakota_mpi_data(file, comm, data) -- "comm" is an mpi_communicator over which the work is divided
-   
-*/
-
-#include "string.h"
 
 #include "dakface.hpp"
-
-#include <boost/python/module.hpp>
-#include <boost/python/def.hpp>
-#include <boost/python/numeric.hpp>
-#ifdef DAKOTA_HAVE_MPI
-#include <boost/mpi.hpp>
-#endif
-
-#ifdef WINDOWS
-#include <windows.h>
-#endif
-
-#include <numpy/arrayobject.h>
-
+#include <boost/python.hpp>
+#include <mpi4py/mpi4py.h>
+//using namespace boost::python;
 namespace bp = boost::python;
 namespace bpn = boost::python::numeric;
 
@@ -69,11 +46,11 @@ namespace bpn = boost::python::numeric;
 
 int run_dakota(char *infile, char *outfile, char *errfile, bp::object exc, int restart)
 {
- 
+
   MAKE_ARGV
   if (restart==1){
     argv[argc++] = const_cast<char*>("-r"); \
-    argv[argc++] = const_cast<char*>("dakota.rst"); 
+    argv[argc++] = const_cast<char*>("dakota.rst");
   }
 
   void *tmp_exc = NULL;
@@ -83,21 +60,24 @@ int run_dakota(char *infile, char *outfile, char *errfile, bp::object exc, int r
   return all_but_actual_main(argc, argv, tmp_exc);
 }
 
-#ifdef DAKOTA_HAVE_MPI
-int run_dakota_mpi(char *infile, boost::mpi::communicator &_mpi,
-#else
-int run_dakota_mpi(char *infile, int &_mpi,
-#endif
-                   char *outfile, char *errfile, bp::object exc, int restart)
+
+
+int run_dakota_mpi(char *infile, bp::object py_comm, char *outfile, char *errfile, bp::object exc, int restart)
 {
+  MPI_Comm comm = MPI_COMM_WORLD;
+  if (py_comm) {
+  PyObject* py_obj = py_comm.ptr();
+  MPI_Comm *comm_p = PyMPIComm_Get(py_obj);
+  if (comm_p == NULL) bp::throw_error_already_set();
+  //sayhello(*comm_p);
+  MPI_Comm comm = * comm_p ; 
+  }
+
   MAKE_ARGV
   if (restart==1){
     argv[argc++] = const_cast<char*>("-r"); \
-    argv[argc++] = const_cast<char*>("dakota.rst"); 
+    argv[argc++] = const_cast<char*>("dakota.rst");
   }
-  MPI_Comm comm = MPI_COMM_WORLD;
-  if (_mpi) 
-    comm = _mpi;
 
   void *tmp_exc = NULL;
   if (exc)
@@ -106,28 +86,35 @@ int run_dakota_mpi(char *infile, int &_mpi,
   return all_but_actual_main_mpi(argc, argv, comm, tmp_exc);
 }
 
-// When DAKOTA fails it throws an int (if the process isn't aborted).
-// Normally Python model errors will have already recorded an exception.
-// If not, we record one here.
 void translator(const int& exc)
 {
   if (!PyErr_Occurred()) {
     // No exception recorded yet.
-    PyErr_SetString(PyExc_RuntimeError, "DAKOTA run failed");
+    //     PyErr_SetString(PyExc_RuntimeError, "DAKOTA run failed");
   }
 }
+    
 
 #include <boost/python.hpp>
+#include <numpy/arrayobject.h>
 using namespace boost::python;
 BOOST_PYTHON_MODULE(pyDAKOTA)
 {
   using namespace bpn;
+  if (import_mpi4py() < 0) return; /* Python 2.X */
+
   import_array();
   array::set_module_and_type("numpy", "ndarray");
 
   register_exception_translator<int>(&translator);
 
   def("run_dakota", run_dakota, "run dakota");
-  def("run_dakota_mpi", run_dakota_mpi, "run dakota mpi");
+  def("run_dakota_mpi", run_dakota_mpi);
 }
 
+
+/*
+ * Local Variables:
+ * mode: C++
+ * End:
+ */

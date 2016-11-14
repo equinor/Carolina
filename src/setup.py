@@ -131,7 +131,8 @@ EGG_LIBS = []
 # Set True to include MPI support.
 NEED_MPI = '-DDAKOTA_HAVE_MPI' in dakota_macros['Dakota_DEFINES']
 
-include_dirs = [dakota_include, numpy_include]
+include_dirs = ['/nopt/nrel/apps/mpi4py/1.3.1/openmpi-gcc-1.7.3-4.8.2-python-2.7.6-gcc-4.8.2_140404/lib/python2.7/site-packages/mpi4py/include', dakota_include, numpy_include]
+    #include_dirs.append('/nopt/nrel/apps/mpi4py/1.3.1/openmpi-gcc-1.7.3-4.8.2-python-2.7.6-gcc-4.8.2_140404/lib/python2.7/site-packages/mpi4py/include')
 library_dirs = [dakota_lib, dakota_bin]
 
 if sys.platform == 'cygwin':  # Only tested with DAKOTA 5.3.
@@ -211,6 +212,7 @@ else:
     #                 os.path.join(BOOST_LIBDIR, 'libboost_mpi.so.1.49.0')])
 
 
+#sources = ['dakota_python_binding.cpp'] 
 sources = ['dakface.cpp', 'dakota_python_binding.cpp']
 
 if BOOST_INCDIR:
