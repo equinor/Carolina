@@ -106,7 +106,7 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
   Dakota::data_pairs.clear();
   if (pcomm) {
     MPI_Comm comm = *pcomm;
-    MPI_Barrier(comm);
+    //MPI_Barrier(comm);
     //Dakota::ParallelLibrary();
     env = new Dakota::LibraryEnvironment(comm, opts);
   } else {
