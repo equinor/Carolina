@@ -72,9 +72,12 @@ class DakotaBase(object):
         DAKOTA will then call our :meth:`dakota_callback` during the run.
         """
         if mpi_comm: comm = mpi_comm
+        else: comm = None
         #if comm.Get_rank() == 0:
         #self.input.write_input(infile, data=self)
-        if comm.Get_rank() == 0: self.input.write_input(infile, data=self)
+        if comm:
+            if comm.Get_rank() == 0: self.input.write_input(infile, data=self)
+        else: self.input.write_input(infile, data=self)
         run_dakota(infile, mpi_comm, use_mpi, stdout, stderr, restart=restart)
 
     def dakota_callback(self, **kwargs):

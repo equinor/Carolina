@@ -43,7 +43,7 @@ import sys
 
 from distutils.spawn import find_executable
 from pkg_resources import get_build_platform
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.extension import Extension
 
 # Locate numpy include directory.
@@ -212,8 +212,7 @@ else:
     #                 os.path.join(BOOST_LIBDIR, 'libboost_mpi.so.1.49.0')])
 
 
-#sources = ['dakota_python_binding.cpp'] 
-sources = ['dakface.cpp', 'dakota_python_binding.cpp']
+sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp']
 
 if BOOST_INCDIR:
     include_dirs.append(BOOST_INCDIR)
@@ -257,7 +256,7 @@ libraries = dakota_libs + external_libs + EXTRA_LIBS
 # List extra files to be included in the egg.
 data_files = []
 if EGG_LIBS:
-    with open('MANIFEST.in', 'w') as manifest:
+    with open('src/MANIFEST.in', 'w') as manifest:
         for lib in EGG_LIBS:
             manifest.write('include %s\n' % os.path.basename(lib))
     data_files = [('', EGG_LIBS)]
@@ -277,6 +276,8 @@ setup(name='pyDAKOTA',
       description='A Python wrapper for DAKOTA',
       py_modules=['dakota', 'test_dakota'],
       ext_modules=[pyDAKOTA],
+      packages=find_packages('src'),
+      package_dir={'':'src'},
       zip_safe=False,
       data_files=data_files)
 
