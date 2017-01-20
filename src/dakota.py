@@ -54,8 +54,8 @@ else:
     _HAVE_MPI = True
 
 # Dictionary to map from str(id(data)) to data object.
-_IDS = [-1] * (comm.Get_size() + 1)
-_USER_DATA = [weakref.WeakValueDictionary()] * (comm.Get_size() + 1)
+_IDS = [-1] * (comm.Get_size() + 1) * 2
+_USER_DATA = [weakref.WeakValueDictionary()] * (comm.Get_size() + 1) * 2
 
 
 class DakotaBase(object):
@@ -65,7 +65,7 @@ class DakotaBase(object):
         self.input = DakotaInput()
 
     def run_dakota(self, infile='dakota.in', mpi_comm=None, use_mpi=True,
-                   stdout=None, stderr=None, restart=0):
+                   stdout=None, stderr=None, restart=0, other_model=None):
         """
         Write `self.input` to `infile`, providing `self` as `data`.
         Then run DAKOTA with that input, MPI specification, and files.
@@ -76,8 +76,8 @@ class DakotaBase(object):
         #if comm.Get_rank() == 0:
         #self.input.write_input(infile, data=self)
         if comm:
-            if comm.Get_rank() == 0: self.input.write_input(infile, data=self)
-        else: self.input.write_input(infile, data=self)
+            if comm.Get_rank() == 0: self.input.write_input(infile, data=self, other_data=None)
+        else: self.input.write_input(infile, data=self, other_data=None)
         run_dakota(infile, mpi_comm, use_mpi, stdout, stderr, restart=restart)
 
     def dakota_callback(self, **kwargs):
@@ -131,13 +131,14 @@ class DakotaInput(object):
         for key in kwargs:
             setattr(self, key, kwargs[key])
 
-    def write_input(self, infile, data=None):
+    def write_input(self, infile, data=None, other_data=None):
         """
         Write input file sections in standard order.
         If data is not None, its id is written to ``analysis_components``.
         The invoked Python method should then recover the original object
         using :meth:`fetch_data`.
         """
+        print 'RUNNING'
         with open(infile, 'w') as out:
             for section in ('environment', 'method', 'model', 'variables',
                             'interface', 'responses'):
@@ -155,6 +156,17 @@ class DakotaInput(object):
                     #_USER_DATA[comm.Get_rank()][ident] = data
                     _USER_DATA[comm.Get_rank()][ident] = data
                     out.write("\t  analysis_components = '%s'\n" % ident)
+                    if other_data:
+                        _IDS[comm.Get_rank()] = str(id(other_data))
+                        ident =  _IDS[comm.Get_rank()]
+                        #ident = str(id(other_data))
+                        #_USER_DATA[comm.Get_rank()][ident] = other_data
+                        _USER_DATA[comm.Get_rank()][ident] = other_data
+                        out.write("\t  interface\n")
+                        out.write("\t  id_interface 'pydak_other'\n")
+                        out.write("\t  python\n\t\tnumpy\n\t\tanalysis_drivers = 'dakota:dakota_callback'\n")
+                        out.write("\t  analysis_components = '%s'\n" % ident)
+
 
 
 def fetch_data(ident,dat):
