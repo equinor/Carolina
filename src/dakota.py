@@ -277,8 +277,8 @@ def dakota_callback(**kwargs):
         logging.error(msg)
         raise RuntimeError(msg)
 
-    # ident = acs[0]
-    ident = _IDS[comm.Get_rank()]
+    ident = acs[0]
+    #ident = _IDS[comm.Get_rank()]
     try:
         driver = fetch_data(ident, _USER_DATA)
     except KeyError:
