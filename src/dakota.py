@@ -116,7 +116,7 @@ class DakotaInput(object):
         ]
         self.interface = [
         #    "python asynchronous evaluation_concurrency = %i" % comm.Get_size(),
-            #"deactivate evaluation_cache",
+            "deactivate evaluation_cache",
             "id_interface 'pydak'",
             "python",
             "  numpy",
