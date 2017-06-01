@@ -46,16 +46,12 @@ from pkg_resources import get_build_platform
 from setuptools import setup, find_packages
 from setuptools.extension import Extension
 
-# Locate numpy include directory.
-import numpy
-numpy_include = os.path.dirname(numpy.__file__)+'/core/include'
-
-
 # Execute DAKOTA to get version.
 try:
     proc = subprocess.Popen(['dakota', '-v'], universal_newlines=True,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
+
 except Exception, exc:
     print "Couldn't execute 'dakota -v':", exc
     sys.exit(1)
@@ -131,8 +127,16 @@ EGG_LIBS = []
 # Set True to include MPI support.
 NEED_MPI = '-DDAKOTA_HAVE_MPI' in dakota_macros['Dakota_DEFINES']
 
-include_dirs = ['/nopt/nrel/apps/mpi4py/1.3.1/openmpi-gcc-1.7.3-4.8.2-python-2.7.6-gcc-4.8.2_140404/lib/python2.7/site-packages/mpi4py/include', dakota_include, numpy_include]
-    #include_dirs.append('/nopt/nrel/apps/mpi4py/1.3.1/openmpi-gcc-1.7.3-4.8.2-python-2.7.6-gcc-4.8.2_140404/lib/python2.7/site-packages/mpi4py/include')
+# Locate numpy include directory.
+import numpy
+numpy_include = os.path.join(os.path.dirname(numpy.__file__), os.path.join('core', 'include'))
+
+mpi4py_include = ''
+if NEED_MPI:
+   import mpi4py 
+   mpi4py_include = os.path.join(os.path.dirname(mpi4py.__file__), 'include')
+
+include_dirs = [dakota_include, numpy_include, mpi4py_include]
 library_dirs = [dakota_lib, dakota_bin]
 
 if sys.platform == 'cygwin':  # Only tested with DAKOTA 5.3.
@@ -194,8 +198,8 @@ else:
 
     #BOOST_INCDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/include'
     #BOOST_LIBDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/lib'
-    BOOST_INCDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/include'
-    BOOST_LIBDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/lib'
+    #BOOST_INCDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/include'
+    #BOOST_LIBDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/lib'
 
     #include_dirs.append('/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/include/boost')
     #library_dirs.append('/nopt/nrel/apps/openmpi/1.7.3-serial-gcc-4.8.2/lib')
@@ -277,7 +281,7 @@ setup(name='pyDAKOTA',
       py_modules=['dakota', 'test_dakota'],
       ext_modules=[pyDAKOTA],
       packages=find_packages('src'),
-      package_dir={'':'src', '':'tests'},
+      package_dir={'':'src'},
       zip_safe=False,
       data_files=data_files)
 
