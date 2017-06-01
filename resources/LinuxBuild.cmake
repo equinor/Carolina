@@ -22,6 +22,15 @@ set( CMAKE_CXX_COMPILER "mpic++"
 set( CMAKE_Fortran_COMPILER "mpif90" 
      CACHE FILEPATH "MPI Fortran compiler wrapper" FORCE)
 
+### Force static
+set( BUILD_STATIC_LIBS ON 
+     CACHE BOOL "Set to ON to build static libraries" FORCE)
+
+set( BUILD_SHARED_LIBS OFF 
+     CACHE BOOL "Set to ON to build DSO libraries" FORCE)
+
+option(DAKOTA_DLL_API "Enable DAKOTA DLL API." OFF)
+
 
 # Disable optional X graphics
 set(HAVE_X_GRAPHICS OFF CACHE BOOL "Disable dependency on X libraries" FORCE)
