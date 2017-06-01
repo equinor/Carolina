@@ -70,9 +70,7 @@ egg_dir = 'pyDAKOTA-%s_%s-py%s-%s.egg' % (dakota_version, wrapper_version,
                                           sys.version[0:3], get_build_platform())
 
 # Assuming standard prefix-based install.
-dakota_install = os.path.dirname(
-                     os.path.dirname(
-                         find_executable('dakota')))
+dakota_install = os.path.dirname( os.path.dirname(find_executable('dakota')))
 dakota_bin     = os.path.join(dakota_install, 'bin')
 dakota_include = os.path.join(dakota_install, 'include')
 dakota_lib     = os.path.join(dakota_install, 'lib')
@@ -95,7 +93,7 @@ with open(os.path.join(dakota_install, 'include',
 
 
 # Set to a list of any special compiler flags required.
-CXX_FLAGS = ["-w"]
+CXX_FLAGS = []
 
 # Set to a list of any special linker flags required.
 LD_FLAGS = []
@@ -207,16 +205,17 @@ else:
 
     LAPACK_LIBDIR="."
     LD_FLAGS = ['-Wl,-z origin',
-                '-Wl,-rpath=${ORIGIN}:${ORIGIN}/../'+egg_dir]
+                '-Wl,-rpath=${ORIGIN}:${ORIGIN}/../' + egg_dir]
     EXTRA_LIBS = ['gfortran'
                  ] # 'SM', 'ICE', 'Xext', 'Xm', 'Xt', 'X11', 'Xpm', 'Xmu']
+    
     EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.so'))
     EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.so*')))
     #EGG_LIBS.extend([os.path.join(BOOST_LIBDIR, 'libboost_python.so.1.49.0'),
     #                 os.path.join(BOOST_LIBDIR, 'libboost_mpi.so.1.49.0')])
 
 
-sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp']
+sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp', 'src/python_interface.cpp']
 
 if BOOST_INCDIR:
     include_dirs.append(BOOST_INCDIR)
