@@ -91,6 +91,7 @@ with open(os.path.join(dakota_install, 'include',
         name, _, value = line.partition('=')
         dakota_macros[name.strip()] = value.strip().split()
 
+print dakota_macros
 
 # Set to a list of any special compiler flags required.
 CXX_FLAGS = ['-fPIC']
@@ -211,9 +212,8 @@ else:
     
     EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.so'))
     EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.so*')))
-    #EGG_LIBS.extend([os.path.join(BOOST_LIBDIR, 'libboost_python.so.1.49.0'),
-    #                 os.path.join(BOOST_LIBDIR, 'libboost_mpi.so.1.49.0')])
-
+    
+    print (EGG_LIBS)
 
 sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp']
 
