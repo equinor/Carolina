@@ -36,7 +36,7 @@ option(DAKOTA_DLL_API "Enable DAKOTA DLL API." OFF)
 set(HAVE_X_GRAPHICS OFF CACHE BOOL "Disable dependency on X libraries" FORCE)
 
 ##############################################################################
-SET ( CMAKE_CXX_FLAGS "-D MPI_DEBUG=0" CACHE STRING "compile flags" FORCE)
+SET ( CMAKE_CXX_FLAGS "-D MPI_DEBUG=0 -fPIC" CACHE STRING "compile flags" FORCE)
 set(LIBCXX -stdlib=libc++)
 set (LIBSTDCXX -stdlib=libstdc++)
 set ( Boost_COMPILER "mpic++" )
