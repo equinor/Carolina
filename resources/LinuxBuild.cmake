@@ -27,10 +27,6 @@ set( CMAKE_Fortran_COMPILER "mpif90"
 set(HAVE_X_GRAPHICS OFF CACHE BOOL "Disable dependency on X libraries" FORCE)
 
 ##############################################################################
-set( CMAKE_INSTALL_PREFIX
-     "/home/jquick/dakota"
-     CACHE PATH "Path to Dakota installation" )
-
 SET ( CMAKE_CXX_FLAGS "-D MPI_DEBUG=0" CACHE STRING "compile flags" FORCE)
 set(LIBCXX -stdlib=libc++)
 set (LIBSTDCXX -stdlib=libstdc++)
