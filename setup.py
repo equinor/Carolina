@@ -93,7 +93,7 @@ with open(os.path.join(dakota_install, 'include',
 
 
 # Set to a list of any special compiler flags required.
-CXX_FLAGS = []
+CXX_FLAGS = ['-fPIC']
 
 # Set to a list of any special linker flags required.
 LD_FLAGS = []
