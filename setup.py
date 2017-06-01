@@ -206,8 +206,8 @@ else:
     LAPACK_LIBDIR="."
     LD_FLAGS = ['-Wl,-z origin',
                 '-Wl,-rpath=${ORIGIN}:${ORIGIN}/../' + egg_dir]
-    EXTRA_LIBS = ['gfortran'
-                 ] # 'SM', 'ICE', 'Xext', 'Xm', 'Xt', 'X11', 'Xpm', 'Xmu']
+    # EXTRA_LIBS = ['gfortran'
+    #             ] # 'SM', 'ICE', 'Xext', 'Xm', 'Xt', 'X11', 'Xpm', 'Xmu']
     
     EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.so'))
     EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.so*')))
@@ -215,7 +215,7 @@ else:
     #                 os.path.join(BOOST_LIBDIR, 'libboost_mpi.so.1.49.0')])
 
 
-sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp', 'src/python_interface.cpp']
+sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp']
 
 if BOOST_INCDIR:
     include_dirs.append(BOOST_INCDIR)
