@@ -94,7 +94,7 @@ with open(os.path.join(dakota_install, 'include',
 print dakota_macros
 
 # Set to a list of any special compiler flags required.
-CXX_FLAGS = ['-fPIC']
+CXX_FLAGS = []
 
 # Set to a list of any special linker flags required.
 LD_FLAGS = []
@@ -138,82 +138,74 @@ if NEED_MPI:
 include_dirs = [dakota_include, numpy_include, mpi4py_include]
 library_dirs = [dakota_lib, dakota_bin]
 
-if sys.platform == 'cygwin':  # Only tested with DAKOTA 5.3.
-    BOOST_LIBFMT = '%s-mt'
-    EXTRA_LIBS = ['gfortran',
-                  'SM', 'ICE', 'Xext', 'Xm', 'Xt', 'X11', 'Xpm', 'Xmu']
-    EGG_LIBS = ['C:/cygwin/bin/cygboost_python-mt-1_50.dll',
-                'C:/cygwin/bin/libpython2.7.dll']
-    EGG_LIBS.extend(glob.glob(os.path.join(dakota_lib, '*.dll')))
-    EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.dll')))
-    # Needed to avoid a problem with 'locale::facet::_S_create_c_locale'
-    os.environ['LC_ALL'] = 'C'
+#if sys.platform == 'cygwin':  # Only tested with DAKOTA 5.3.
+#    BOOST_LIBFMT = '%s-mt'
+#    EXTRA_LIBS = ['gfortran',
+#                  'SM', 'ICE', 'Xext', 'Xm', 'Xt', 'X11', 'Xpm', 'Xmu']
+#   EGG_LIBS = ['C:/cygwin/bin/cygboost_python-mt-1_50.dll',
+#               'C:/cygwin/bin/libpython2.7.dll']
+#   EGG_LIBS.extend(glob.glob(os.path.join(dakota_lib, '*.dll')))
+#   EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.dll')))
+#   # Needed to avoid a problem with 'locale::facet::_S_create_c_locale'
+#   os.environ['LC_ALL'] = 'C'
+#
+#elif sys.platform == 'win32':
+#   CXX_FLAGS = ['/EHsc']
+#   BOOST_INCDIR = r'C:\Users\setowns1\Downloads\boost_1_54_0'
+#   BOOST_LIBDIR = r'C:\Users\setowns1\Downloads\boost_1_54_0\stage\lib'
+#   # The normal DAKOTA build links Boost libraries statically. But attempting a
+#   # static link of boost_python here doesn't work. So with the BOOST_LIBFMT
+#   # and BOOST_PYFMT definitions below we get statically-linked Boost, except
+#   # for boost_python which refers to a .dll that we must then deliver.
+#   # We probably could just use a dynamic Boost for everything, but then we
+#   # have to deliver more files for no apparent gain.
+#   BOOST_LIBFMT = 'lib%s-vc90-mt-1_54'  # Default Boost static build name.
+#   BOOST_PYFMT = '%s-vc90-mt-1_54'      # Name from Boost dynamic build.
+#   LAPACK_LIBDIR = r'C:\Users\setowns1\Downloads\lapack-3.4.1\install\lib'
+#   FORTRAN_LIBDIR = r'C:\Program Files\Intel\Composer XE 2013\compiler\lib\ia32'
+#   EXTRA_LIBS = ['Dbghelp', 'winmm']
+#   EGG_LIBS = glob.glob(os.path.join(dakota_bin, '*.dll'))
+#   EGG_LIBS.extend([os.path.join(dakota_bin, 'Microsoft.VC90.CRT.manifest'),
+#                    os.path.join(BOOST_LIBDIR, 'boost_python-vc90-mt-1_54.dll')])
+#
+#elif sys.platform == 'darwin':
+#   # This builds an egg, but it doesn't load:
+#   #   ImportError: dlopen(/Users/setowns1/OpenMDAO-Framework/devenv/lib/python2.7/site-packages/pyDAKOTA-5.3.1_1-py2.7-macosx-10.6-intel.egg/pyDAKOTA.so, 2): Symbol not found: __ZN3MPI3Win4FreeEv
+#   #   Referenced from: /Users/setowns1/OpenMDAO-Framework/devenv/lib/python2.7/site-packages/pyDAKOTA-5.3.1_1-py2.7-macosx-10.6-intel.egg/pyDAKOTA.so
+#   #   Expected in: flat namespace
+#   # The symbol exists in the OpenMPI libraries in DYLD_LIBRARY_PATH.
+#   # Possibly something related to i386/x86_64 architecture builds.
+#   # (DAKOTA libraries are only i386)
+#   include_dirs.append('/usr/local/opt/boost155/include')
+#   library_dirs.append('/usr/local/opt/boost155/lib')
+#   library_dirs.append('/usr/local/opt/openmotif/lib')
+#   library_dirs.append('/usr/local/opt/lapack/lib')
+#   BOOST_INCDIR = '/usr/local/opt/boost/include'
+#   BOOST_LIBDIR = '/usr/local/opt/boost/lib'
+#   EXTRA_LIBS = ['gfortran.3', 'Xm.4']
+#   include_dirs.append('/usr/local/opt/boost-python/include')
+#   library_dirs.append('/usr/local/opt/boost-python/lib')
+#   #EXTRA_LIBS = ['gfortran.3', 'Xm.3']
+#   EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.dylib'))
+#   EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.dylib')))
+#
+#else:
+# This LD_FLAGS stuff avoids having to set LD_LIBRARY_PATH to access
+# the other (not pyDAKOTA.so) shared libraries that are part of the egg.
+#BOOST_INCDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/include'
+#BOOST_LIBDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/lib'
 
-elif sys.platform == 'win32':
-    CXX_FLAGS = ['/EHsc']
-    BOOST_INCDIR = r'C:\Users\setowns1\Downloads\boost_1_54_0'
-    BOOST_LIBDIR = r'C:\Users\setowns1\Downloads\boost_1_54_0\stage\lib'
-    # The normal DAKOTA build links Boost libraries statically. But attempting a
-    # static link of boost_python here doesn't work. So with the BOOST_LIBFMT
-    # and BOOST_PYFMT definitions below we get statically-linked Boost, except
-    # for boost_python which refers to a .dll that we must then deliver.
-    # We probably could just use a dynamic Boost for everything, but then we
-    # have to deliver more files for no apparent gain.
-    BOOST_LIBFMT = 'lib%s-vc90-mt-1_54'  # Default Boost static build name.
-    BOOST_PYFMT = '%s-vc90-mt-1_54'      # Name from Boost dynamic build.
-    LAPACK_LIBDIR = r'C:\Users\setowns1\Downloads\lapack-3.4.1\install\lib'
-    FORTRAN_LIBDIR = r'C:\Program Files\Intel\Composer XE 2013\compiler\lib\ia32'
-    EXTRA_LIBS = ['Dbghelp', 'winmm']
-    EGG_LIBS = glob.glob(os.path.join(dakota_bin, '*.dll'))
-    EGG_LIBS.extend([os.path.join(dakota_bin, 'Microsoft.VC90.CRT.manifest'),
-                     os.path.join(BOOST_LIBDIR, 'boost_python-vc90-mt-1_54.dll')])
+LAPACK_LIBDIR="."
+LD_FLAGS = ['-Wl,-z origin',
+            '-Wl,-rpath=${ORIGIN}:${ORIGIN}/../' + egg_dir]
+# EXTRA_LIBS = ['gfortran'
+#             ] # 'SM', 'ICE', 'Xext', 'Xm', 'Xt', 'X11', 'Xpm', 'Xmu']
 
-elif sys.platform == 'darwin':
-    # This builds an egg, but it doesn't load:
-    #   ImportError: dlopen(/Users/setowns1/OpenMDAO-Framework/devenv/lib/python2.7/site-packages/pyDAKOTA-5.3.1_1-py2.7-macosx-10.6-intel.egg/pyDAKOTA.so, 2): Symbol not found: __ZN3MPI3Win4FreeEv
-    #   Referenced from: /Users/setowns1/OpenMDAO-Framework/devenv/lib/python2.7/site-packages/pyDAKOTA-5.3.1_1-py2.7-macosx-10.6-intel.egg/pyDAKOTA.so
-    #   Expected in: flat namespace
-    # The symbol exists in the OpenMPI libraries in DYLD_LIBRARY_PATH.
-    # Possibly something related to i386/x86_64 architecture builds.
-    # (DAKOTA libraries are only i386)
-    include_dirs.append('/usr/local/opt/boost155/include')
-    library_dirs.append('/usr/local/opt/boost155/lib')
-    library_dirs.append('/usr/local/opt/openmotif/lib')
-    library_dirs.append('/usr/local/opt/lapack/lib')
-    BOOST_INCDIR = '/usr/local/opt/boost/include'
-    BOOST_LIBDIR = '/usr/local/opt/boost/lib'
-    EXTRA_LIBS = ['gfortran.3', 'Xm.4']
-    include_dirs.append('/usr/local/opt/boost-python/include')
-    library_dirs.append('/usr/local/opt/boost-python/lib')
-    #EXTRA_LIBS = ['gfortran.3', 'Xm.3']
-    EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.dylib'))
-    EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.dylib')))
+EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.so'))
+EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.so*')))
 
-else:
-    # This LD_FLAGS stuff avoids having to set LD_LIBRARY_PATH to access
-    # the other (not pyDAKOTA.so) shared libraries that are part of the egg.
-    #BOOST_INCDIR = '/home/ec2-user/include'
-    #BOOST_LIBDIR = '/home/ec2-user/boost_1_49_0/stage/lib'
-
-    #BOOST_INCDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/include'
-    #BOOST_LIBDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/lib'
-    #BOOST_INCDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/include'
-    #BOOST_LIBDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/lib'
-
-    #include_dirs.append('/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/include/boost')
-    #library_dirs.append('/nopt/nrel/apps/openmpi/1.7.3-serial-gcc-4.8.2/lib')
-    #include_dirs.append('/nopt/nrel/apps/openmpi/1.7.3-serial-gcc-4.8.2/include')
-
-    LAPACK_LIBDIR="."
-    LD_FLAGS = ['-Wl,-z origin',
-                '-Wl,-rpath=${ORIGIN}:${ORIGIN}/../' + egg_dir]
-    # EXTRA_LIBS = ['gfortran'
-    #             ] # 'SM', 'ICE', 'Xext', 'Xm', 'Xt', 'X11', 'Xpm', 'Xmu']
-    
-    EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.so'))
-    EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.so*')))
-    
-    print (EGG_LIBS)
+print (EGG_LIBS)
+# end else branch
 
 sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp']
 
@@ -283,4 +275,3 @@ setup(name='pyDAKOTA',
       package_dir={'':'src'},
       zip_safe=False,
       data_files=data_files)
-
