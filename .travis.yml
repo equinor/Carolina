@@ -1,13 +1,23 @@
+dist: trusty
 language: python
 
 addons:
   apt:
-    sources:
-    - ubuntu-toolchain-r-test
     packages:
-    - gcc-4.8
-    - g++-4.8
-    - cmake
+      - gfortran
+      - liblapack-dev
+      - libboost-all-dev
+
+install:
+  - export ROOT_DIR=$PWD
+  - wget https://dakota.sandia.gov/sites/default/files/distributions/public/dakota-6.6-public.src.tar.gz
+  - tar zxf dakota-6.6-public.src.tar.gz
+  - cd dakota-6.6.0.src/
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
 
 script:
-  - python -m unittest discover tests
+  - cd $ROOT_DIR
+  - # python -m unittest discover tests
