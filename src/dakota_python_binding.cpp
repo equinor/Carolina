@@ -1,5 +1,5 @@
+#ifdef DAKOTA_HAVE_MPI
 #include <mpi.h>
-#include <iostream>
 
 static void sayhello(MPI_Comm comm)
 {
@@ -21,11 +21,13 @@ static void sayhello(MPI_Comm comm)
     "."              << std::endl;
 }
 
+#include <mpi4py/mpi4py.h>
 
+#endif
+
+#include <iostream>
 #include "dakface.hpp"
 #include <boost/python.hpp>
-#include <mpi4py/mpi4py.h>
-//using namespace boost::python;
 namespace bp = boost::python;
 namespace bpn = boost::python::numeric;
 
@@ -60,8 +62,7 @@ int run_dakota(char *infile, char *outfile, char *errfile, bp::object exc, int r
   return all_but_actual_main(argc, argv, tmp_exc);
 }
 
-
-
+#ifdef DAKOTA_HAVE_MPI
 int run_dakota_mpi(char *infile, bp::object py_comm, char *outfile, char *errfile, bp::object exc, int restart)
 {
   MPI_Comm comm = MPI_COMM_WORLD;
@@ -85,6 +86,7 @@ int run_dakota_mpi(char *infile, bp::object py_comm, char *outfile, char *errfil
 
   return all_but_actual_main_mpi(argc, argv, comm, tmp_exc);
 }
+#endif
 
 void translator(const int& exc)
 {
@@ -101,7 +103,9 @@ using namespace boost::python;
 BOOST_PYTHON_MODULE(pyDAKOTA)
 {
   using namespace bpn;
-  if (import_mpi4py() < 0) return; /* Python 2.X */
+#ifdef DAKOTA_HAVE_MPI
+  if (import_mpi4py() < 0) return;
+#endif
 
   import_array();
   array::set_module_and_type("numpy", "ndarray");
@@ -109,7 +113,10 @@ BOOST_PYTHON_MODULE(pyDAKOTA)
   register_exception_translator<int>(&translator);
 
   def("run_dakota", run_dakota, "run dakota");
-  def("run_dakota_mpi", run_dakota_mpi);
+
+#ifdef DAKOTA_HAVE_MPI
+    def("run_dakota_mpi", run_dakota_mpi);
+#endif
 }
 
 

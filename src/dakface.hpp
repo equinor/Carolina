@@ -22,7 +22,11 @@ using namespace Dakota;
 
 extern int all_but_actual_main(int argc, char* argv[], void *exc);
 
+#ifdef DAKOTA_HAVE_MPI
 extern int all_but_actual_main_mpi(int argc, char* argv[],
                                    MPI_Comm comm, void *exc);
+#else
+typedef int MPI_Comm;
+#endif // DAKOTA_HAVE_MPI
 
-#endif
+#endif _DAKFACE_H_
