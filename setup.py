@@ -271,7 +271,6 @@ setup(name='pyDAKOTA',
       description='A Python wrapper for DAKOTA',
       py_modules=['dakota', 'test_dakota'],
       ext_modules=[pyDAKOTA],
-      packages=['dakota', 'test_pydakota']
       package_dir={'dakota':'src', 'test_pydakota':'tests'},
       zip_safe=False,
       data_files=data_files)
