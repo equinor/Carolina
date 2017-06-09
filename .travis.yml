@@ -15,7 +15,7 @@ install:
   - cd dakota-6.6.0.src/
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake -DDAKOTA_HAVE_MPI=FALSE ..
   - make -j 3
 
 script:
