@@ -124,7 +124,7 @@ EXTRA_LIBS = []
 EGG_LIBS = []
 
 # Set True to include MPI support.
-NEED_MPI = False # '-DDAKOTA_HAVE_MPI' in dakota_macros['Dakota_DEFINES']
+NEED_MPI = '-DDAKOTA_HAVE_MPI' in dakota_macros['Dakota_DEFINES']
 
 # Locate numpy include directory.
 import numpy
@@ -271,7 +271,6 @@ setup(name='pyDAKOTA',
       description='A Python wrapper for DAKOTA',
       py_modules=['dakota', 'test_dakota'],
       ext_modules=[pyDAKOTA],
-      packages=find_packages('src'),
-      package_dir={'':'src'},
+      package_dir={'dakota':'src', 'test_pydakota':'tests'},
       zip_safe=False,
       data_files=data_files)

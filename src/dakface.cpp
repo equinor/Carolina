@@ -23,11 +23,14 @@
 //#include <Python.h>
 // Replaces Python.h according to boost_python docs.
 #include <boost/python/detail/wrap_python.hpp>
+
+#ifdef DAKOTA_HAVE_MPI
 #include <boost/mpi/environment.hpp>
 #include <boost/mpi/communicator.hpp>
-#include <iostream>
 namespace mpi = boost::mpi;
+#endif
 
+#include <iostream>
 
 #include "dakota_windows.h"
 #include "dakota_system_defs.hpp"
@@ -40,8 +43,6 @@ namespace mpi = boost::mpi;
 #include "PluginSerialDirectApplicInterface.hpp"
 #include "dakota_global_defs.hpp"
 #include "dakota_dll_api.h"
-
-
 #include "LibraryEnvironment.hpp"
 
 #include "dakface.hpp"
@@ -61,7 +62,6 @@ using namespace Dakota;
   extern "C" void fpinit_ASL();
 #endif
 
-
 static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc);
 
 int all_but_actual_main(int argc, char* argv[], void *exc)
@@ -69,15 +69,19 @@ int all_but_actual_main(int argc, char* argv[], void *exc)
   return _main(argc, argv, NULL, exc);
 }
 
+#ifdef DAKOTA_HAVE_MPI
 int all_but_actual_main_mpi(int argc, char* argv[], MPI_Comm comm, void *exc)
 {
   return _main(argc, argv, &comm, exc);
 }
+#endif
 
 static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
 {
   static bool initialized = false;
-  if (!initialized) {
+  if (!initialized) 
+ {
+
 #ifdef HAVE_AMPL
     // Switch to 53-bit rounding if appropriate, to eliminate some
     // cross-platform differences.
@@ -85,10 +89,10 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
 #endif
 
     // Tie signals to Dakota's abort_handler.
-//    Dakota::register_signal_handlers();
+    // Dakota::register_signal_handlers();
 
     // Have abort_handler() throw an exception rather than aborting the process.
-//    Dakota::abort_mode = Dakota::ABORT_THROWS;
+    // Dakota::abort_mode = Dakota::ABORT_THROWS;
 
     initialized = true;
   }
@@ -104,23 +108,28 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
 
   Dakota::LibraryEnvironment* env = 0;
   Dakota::data_pairs.clear();
-  if (pcomm) {
+  if (pcomm) 
+ {
     MPI_Comm comm = *pcomm;
     //MPI_Barrier(comm);
     //Dakota::ParallelLibrary();
     env = new Dakota::LibraryEnvironment(comm, opts);
-  } else {
+  } 
+  else 
+ {
     env = new Dakota::LibraryEnvironment(opts);
   }
 
   // Execute the environment.
   int retval = 0;
-  try {
-  Dakota::data_pairs.clear();
+  try 
+  {
+    Dakota::data_pairs.clear();
     env->execute();
-  Dakota::data_pairs.clear();
+    Dakota::data_pairs.clear();
   }
-  catch (boost::system::system_error& se) {
+  catch (boost::system::system_error& se) 
+  {
     retval = se.code().value();
     if (PyErr_Occurred()) {
       PyObject *type = NULL, *value = NULL, *traceback = NULL;
