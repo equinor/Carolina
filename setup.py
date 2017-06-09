@@ -124,7 +124,7 @@ EXTRA_LIBS = []
 EGG_LIBS = []
 
 # Set True to include MPI support.
-NEED_MPI = '-DDAKOTA_HAVE_MPI' in dakota_macros['Dakota_DEFINES']
+NEED_MPI = False # '-DDAKOTA_HAVE_MPI' in dakota_macros['Dakota_DEFINES']
 
 # Locate numpy include directory.
 import numpy
