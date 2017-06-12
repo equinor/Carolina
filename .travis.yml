@@ -15,9 +15,13 @@ install:
   - cd dakota-6.6.0.src/
   - mkdir build
   - cd build
-  - cmake -DDAKOTA_HAVE_MPI=FALSE ..
-  - make -j 3
+  - export DAKOTA_INSTALL=$PWD/install
+  - cmake -DDAKOTA_HAVE_MPI=OFF -DCMAKE_INSTALL_PREFIX=$DAKOTA_INSTALL -C $ROOT_DIR/resources/LinuxBuild.cmake ..
+  - make -j 3 install
 
 script:
   - cd $ROOT_DIR
-  - # python -m unittest discover tests
+  - export PATH=$PATH:$DAKOTA_INSTALL
+  - export PATH=$PATH:$DAKOTA_INSTALL/bin
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$DAKOTA_INSTALL/lib
+  - python setup.py build

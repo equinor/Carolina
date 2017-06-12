@@ -11,15 +11,15 @@ set (DAKOTA_PYTHON ON CACHE BOOL "python interface on" FORCE)
 # Stop being in debug mode please - does nothing
 set (MPI_DEBUG OFF CACHE BOOL "mpi debug off" FORCE)
 
-### yes mpi
-set( CMAKE_C_COMPILER "mpicc"
+### no mpi
+set( CMAKE_C_COMPILER "gcc"
      CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
-set( DAKOTA_HAVE_MPI ON
+set( DAKOTA_HAVE_MPI OFF
      CACHE BOOL "Always build with MPI enabled" FORCE)
-set( CMAKE_CXX_COMPILER "mpic++"
+set( CMAKE_CXX_COMPILER "g++"
      CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
 
-set( CMAKE_Fortran_COMPILER "mpif90" 
+set( CMAKE_Fortran_COMPILER "gfortran"
      CACHE FILEPATH "MPI Fortran compiler wrapper" FORCE)
 
 ### Force static
@@ -41,7 +41,7 @@ set ( CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fPIC" CACHE STRING "compile C flags" FO
 set ( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fPIC" CACHE STRING "compile fortran flags" FORCE)
 set ( LIBCXX -stdlib=libc++)
 set ( LIBSTDCXX -stdlib=libstdc++)
-set ( Boost_COMPILER "mpic++" )
+set ( Boost_COMPILER "g++" )
 
 ##########################################################################
 # Set up Internal CMake paths first. Then call automated build file.

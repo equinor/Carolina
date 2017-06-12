@@ -160,8 +160,7 @@ if FORTRAN_LIBDIR:
 
 # Drop '-l' from Dakota_LIBRARIES if necessary.
 dakota_libs = dakota_macros['Dakota_LIBRARIES']
-if dakota_libs[0].startswith('-l'):
-    dakota_libs = [name[2:] for name in dakota_libs]
+dakota_libs = [name[2:] if name.startswith('-l') else name for name in dakota_libs]
 
 # From Makefile.export.Dakota Dakota_TPL_LIBRARIES.
 external_libs = [
@@ -187,6 +186,7 @@ if EGG_LIBS:
         for lib in EGG_LIBS:
             manifest.write('include %s\n' % os.path.basename(lib))
     data_files = [('', EGG_LIBS)]
+
 
 pyDAKOTA = Extension(name='pyDAKOTA',
                      sources=sources,
