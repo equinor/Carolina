@@ -123,77 +123,12 @@ EXTRA_LIBS = []
 # Set this to a list of libraries to be included in the egg.
 EGG_LIBS = []
 
-# Set True to include MPI support.
-NEED_MPI = '-DDAKOTA_HAVE_MPI' in dakota_macros['Dakota_DEFINES']
-
 # Locate numpy include directory.
 import numpy
 numpy_include = os.path.join(os.path.dirname(numpy.__file__), os.path.join('core', 'include'))
 
-mpi4py_include = ''
-if NEED_MPI:
-   import mpi4py 
-   mpi4py_include = os.path.join(os.path.dirname(mpi4py.__file__), 'include')
-
-include_dirs = [dakota_include, numpy_include, mpi4py_include]
+include_dirs = [dakota_include, numpy_include]
 library_dirs = [dakota_lib, dakota_bin]
-
-#if sys.platform == 'cygwin':  # Only tested with DAKOTA 5.3.
-#    BOOST_LIBFMT = '%s-mt'
-#    EXTRA_LIBS = ['gfortran',
-#                  'SM', 'ICE', 'Xext', 'Xm', 'Xt', 'X11', 'Xpm', 'Xmu']
-#   EGG_LIBS = ['C:/cygwin/bin/cygboost_python-mt-1_50.dll',
-#               'C:/cygwin/bin/libpython2.7.dll']
-#   EGG_LIBS.extend(glob.glob(os.path.join(dakota_lib, '*.dll')))
-#   EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.dll')))
-#   # Needed to avoid a problem with 'locale::facet::_S_create_c_locale'
-#   os.environ['LC_ALL'] = 'C'
-#
-#elif sys.platform == 'win32':
-#   CXX_FLAGS = ['/EHsc']
-#   BOOST_INCDIR = r'C:\Users\setowns1\Downloads\boost_1_54_0'
-#   BOOST_LIBDIR = r'C:\Users\setowns1\Downloads\boost_1_54_0\stage\lib'
-#   # The normal DAKOTA build links Boost libraries statically. But attempting a
-#   # static link of boost_python here doesn't work. So with the BOOST_LIBFMT
-#   # and BOOST_PYFMT definitions below we get statically-linked Boost, except
-#   # for boost_python which refers to a .dll that we must then deliver.
-#   # We probably could just use a dynamic Boost for everything, but then we
-#   # have to deliver more files for no apparent gain.
-#   BOOST_LIBFMT = 'lib%s-vc90-mt-1_54'  # Default Boost static build name.
-#   BOOST_PYFMT = '%s-vc90-mt-1_54'      # Name from Boost dynamic build.
-#   LAPACK_LIBDIR = r'C:\Users\setowns1\Downloads\lapack-3.4.1\install\lib'
-#   FORTRAN_LIBDIR = r'C:\Program Files\Intel\Composer XE 2013\compiler\lib\ia32'
-#   EXTRA_LIBS = ['Dbghelp', 'winmm']
-#   EGG_LIBS = glob.glob(os.path.join(dakota_bin, '*.dll'))
-#   EGG_LIBS.extend([os.path.join(dakota_bin, 'Microsoft.VC90.CRT.manifest'),
-#                    os.path.join(BOOST_LIBDIR, 'boost_python-vc90-mt-1_54.dll')])
-#
-#elif sys.platform == 'darwin':
-#   # This builds an egg, but it doesn't load:
-#   #   ImportError: dlopen(/Users/setowns1/OpenMDAO-Framework/devenv/lib/python2.7/site-packages/pyDAKOTA-5.3.1_1-py2.7-macosx-10.6-intel.egg/pyDAKOTA.so, 2): Symbol not found: __ZN3MPI3Win4FreeEv
-#   #   Referenced from: /Users/setowns1/OpenMDAO-Framework/devenv/lib/python2.7/site-packages/pyDAKOTA-5.3.1_1-py2.7-macosx-10.6-intel.egg/pyDAKOTA.so
-#   #   Expected in: flat namespace
-#   # The symbol exists in the OpenMPI libraries in DYLD_LIBRARY_PATH.
-#   # Possibly something related to i386/x86_64 architecture builds.
-#   # (DAKOTA libraries are only i386)
-#   include_dirs.append('/usr/local/opt/boost155/include')
-#   library_dirs.append('/usr/local/opt/boost155/lib')
-#   library_dirs.append('/usr/local/opt/openmotif/lib')
-#   library_dirs.append('/usr/local/opt/lapack/lib')
-#   BOOST_INCDIR = '/usr/local/opt/boost/include'
-#   BOOST_LIBDIR = '/usr/local/opt/boost/lib'
-#   EXTRA_LIBS = ['gfortran.3', 'Xm.4']
-#   include_dirs.append('/usr/local/opt/boost-python/include')
-#   library_dirs.append('/usr/local/opt/boost-python/lib')
-#   #EXTRA_LIBS = ['gfortran.3', 'Xm.3']
-#   EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.dylib'))
-#   EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.dylib')))
-#
-#else:
-# This LD_FLAGS stuff avoids having to set LD_LIBRARY_PATH to access
-# the other (not pyDAKOTA.so) shared libraries that are part of the egg.
-#BOOST_INCDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/include'
-#BOOST_LIBDIR = '/nopt/nrel/apps/boost/1.55.0-openmpi-gcc_140415/lib'
 
 LAPACK_LIBDIR="."
 LD_FLAGS = ['-Wl,-z origin',
@@ -233,9 +168,6 @@ external_libs = [
     'boost_regex', 'boost_filesystem', 'boost_serialization', 'boost_system',
     'boost_signals', 'boost_python']#, 'lapack', 'blas']
 
-if NEED_MPI:
-    external_libs.append('boost_mpi')
-    os.environ['CC'] = 'mpicxx'  # Force compiler command.
 
 # Munge boost library names as necessary.
 if BOOST_LIBFMT:
