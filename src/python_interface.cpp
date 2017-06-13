@@ -90,7 +90,7 @@ int NRELPythonInterface::derived_map_ac(const String& ac_name)
 #ifdef MPI_DEBUG
     Cout << "analysis server " << analysisServerId << " invoking " << ac_name
          << " within PythonInterface." << std::endl;
-#endif // MPI_DEBUG
+#endif
 
   int fail_code = python_run(ac_name);
 

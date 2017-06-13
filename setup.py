@@ -91,6 +91,7 @@ with open(os.path.join(dakota_install, 'include',
         name, _, value = line.partition('=')
         dakota_macros[name.strip()] = value.strip().split()
 
+print "Dakota macros: \n"
 print dakota_macros
 
 # Set to a list of any special compiler flags required.
@@ -130,6 +131,9 @@ numpy_include = os.path.join(os.path.dirname(numpy.__file__), os.path.join('core
 include_dirs = [dakota_include, numpy_include]
 library_dirs = [dakota_lib, dakota_bin]
 
+BOOST_INCDIR = '/boost_install/include'
+BOOST_LIBDIR = '/boost_install/lib'
+
 LAPACK_LIBDIR="."
 LD_FLAGS = ['-Wl,-z origin',
             '-Wl,-rpath=${ORIGIN}:${ORIGIN}/../' + egg_dir]
@@ -138,9 +142,8 @@ LD_FLAGS = ['-Wl,-z origin',
 
 EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.so'))
 EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.so*')))
-
+print "egg libraries: \n"
 print (EGG_LIBS)
-# end else branch
 
 sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp']
 
@@ -166,7 +169,6 @@ dakota_libs = [name[2:] if name.startswith('-l') else name for name in dakota_li
 external_libs = [
     'boost_regex', 'boost_filesystem', 'boost_serialization', 'boost_system',
     'boost_signals', 'boost_python']#, 'lapack', 'blas']
-
 
 # Munge boost library names as necessary.
 if BOOST_LIBFMT:
@@ -201,8 +203,10 @@ pyDAKOTA = Extension(name='pyDAKOTA',
 setup(name='pyDAKOTA',
       version='%s-%s' % (dakota_version, wrapper_version),
       description='A Python wrapper for DAKOTA',
-      py_modules=['dakota', 'test_dakota'],
+      py_modules=['test_dakota'],
       ext_modules=[pyDAKOTA],
-      package_dir={'dakota':'src', 'test_pydakota':'tests'},
+      packages=['dakota'],
+      package_dir={'dakota':'src', 'test_dakota':'tests'},
       zip_safe=False,
       data_files=data_files)
+

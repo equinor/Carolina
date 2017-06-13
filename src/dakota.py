@@ -43,20 +43,6 @@ if sys.platform in ('cygwin', 'win32'):
     os.environ['LC_ALL'] = 'C'
 
 import pyDAKOTA
-import pyDAKOTA
-from mpi4py import MPI
-comm = MPI.COMM_WORLD
-
-# Hard-coded assumption regarding availability of MPI.
-if sys.platform in ('cygwin', 'win32'):
-    _HAVE_MPI = False
-else:
-    _HAVE_MPI = True
-
-# Dictionary to map from str(id(data)) to data object.
-_IDS = [-1] * (comm.Get_size() + 1) * 2
-_USER_DATA = [weakref.WeakValueDictionary()] * (comm.Get_size() + 1) * 2
-
 
 class DakotaBase(object):
     """ Base class for a DAKOTA 'driver'. """
@@ -64,21 +50,15 @@ class DakotaBase(object):
     def __init__(self):
         self.input = DakotaInput()
 
-    def run_dakota(self, infile='dakota.in', mpi_comm=None, use_mpi=True,
+    def run_dakota(self, infile='dakota.in',
                    stdout=None, stderr=None, restart=0, other_model=None):
         """
         Write `self.input` to `infile`, providing `self` as `data`.
         Then run DAKOTA with that input, MPI specification, and files.
         DAKOTA will then call our :meth:`dakota_callback` during the run.
         """
-        if mpi_comm: comm = mpi_comm
-        else: comm = None
-        #if comm.Get_rank() == 0:
-        #self.input.write_input(infile, data=self)
-        if comm:
-            if comm.Get_rank() == 0: self.input.write_input(infile, data=self, other_data=None)
-        else: self.input.write_input(infile, data=self, other_data=None)
-        run_dakota(infile, mpi_comm, use_mpi, stdout, stderr, restart=restart)
+	self.input.write_input(infile, data=self, other_data=None)
+        run_dakota(infile, stdout, stderr, restart=restart)
 
     def dakota_callback(self, **kwargs):
         """ Invoked from global :meth:`dakota_callback`, must be overridden. """
@@ -145,34 +125,27 @@ class DakotaInput(object):
                 out.write('%s\n' % section)
                 for line in getattr(self, section):
                     out.write("\t%s\n" % line)
+
                 if section == 'interface' and data is not None:
                     for line in getattr(self, section):
                         if 'analysis_components' in line:
                             raise RuntimeError('Cannot specify both'
                                                ' analysis_components and data')
-                    _IDS[comm.Get_rank()] = str(id(data))
-                    ident =  _IDS[comm.Get_rank()]
-                    #ident = str(id(data))
-                    #_USER_DATA[comm.Get_rank()][ident] = data
-                    _USER_DATA[comm.Get_rank()][ident] = data
+
+                    ident = str(id(data))
                     out.write("\t  analysis_components = '%s'\n" % ident)
+
                     if other_data:
-                        _IDS[comm.Get_rank()] = str(id(other_data))
-                        ident =  _IDS[comm.Get_rank()]
-                        #ident = str(id(other_data))
-                        #_USER_DATA[comm.Get_rank()][ident] = other_data
-                        _USER_DATA[comm.Get_rank()][ident] = other_data
+                        ident = str(id(other_data))
                         out.write("\t  interface\n")
                         out.write("\t  id_interface 'pydak_other'\n")
                         out.write("\t  python\n\t\tnumpy\n\t\tanalysis_drivers = 'dakota:dakota_callback'\n")
                         out.write("\t  analysis_components = '%s'\n" % ident)
 
 
-
 def fetch_data(ident,dat):
     """ Return user data object recorded by :meth:`DakotaInput.write`. """
-    return dat[comm.Get_rank()][ident]
-    #return _USER_DATA[comm.Get_rank()][ident]
+    return dat[0][ident]
 
 
 class _ExcInfo(object):
@@ -184,8 +157,7 @@ class _ExcInfo(object):
         self.traceback = None
 
 
-def run_dakota(infile, mpi_comm=None, use_mpi=True, stdout=None, stderr=None, restart=0):
-#def run_dakota(infile, mpi_comm=None, use_mpi=False, stdout=None, stderr=None):
+def run_dakota(infile, stdout=None, stderr=None, restart=0):
     """
     Run DAKOTA with `infile`.
 
@@ -203,20 +175,7 @@ def run_dakota(infile, mpi_comm=None, use_mpi=True, stdout=None, stderr=None, re
     # it with the exception information so we can re-raise it.
     err = 0
     exc = _ExcInfo()
-
-    if mpi_comm is None:
-        if _HAVE_MPI and use_mpi:
-            try: 
-                # from boost.mpi import world
-                from mpi4py import MPI
-                world = MPI.COMM_WORLD
-                # err = pyDAKOTA.run_dakota_mpi(infile, None, stdout, stderr, exc, restart)
-                err = pyDAKOTA.run_dakota_mpi(infile, world, stdout, stderr, exc, restart)
-            except ImportError: err = pyDAKOTA.run_dakota(infile, stdout, stderr, exc, restart)
-        else:
-            err = pyDAKOTA.run_dakota(infile, stdout, stderr, exc, restart)
-    else:
-        err = pyDAKOTA.run_dakota_mpi(infile, mpi_comm, stdout, stderr, exc, restart)
+    err = pyDAKOTA.run_dakota(infile, stdout, stderr, exc, restart)
 
     # Check for errors. We'll get here if Dakota::abort_mode has been set to
     # throw an exception rather than shut down the process.
@@ -277,10 +236,11 @@ def dakota_callback(**kwargs):
         logging.error(msg)
         raise RuntimeError(msg)
 
-    #ident = acs[0]
-    ident = _IDS[comm.Get_rank()]
+    ident = acs[0]
+
     try:
         driver = fetch_data(ident, _USER_DATA)
+
     except KeyError:
         msg = 'dakota_callback (%s): ident %s not found in user data' \
                   % (os.getpid(), ident)
