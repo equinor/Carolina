@@ -102,8 +102,8 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
   //Dakota::ProgramOptions opts(argc, argv, 0);
   //Dakota::ParallelLibrary(argc, argv);
   int rank;
-  int ok;
-  ok = MPI_Comm_rank( *pcomm, &rank ) ;
+  // int ok;
+  // ok = MPI_Comm_rank( *pcomm, &rank ) ;
   Dakota::ProgramOptions opts(argc, argv, rank);
 
   Dakota::LibraryEnvironment* env = 0;
