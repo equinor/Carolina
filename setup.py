@@ -91,9 +91,6 @@ with open(os.path.join(dakota_install, 'include',
         name, _, value = line.partition('=')
         dakota_macros[name.strip()] = value.strip().split()
 
-print "Dakota macros: \n"
-print dakota_macros
-
 # Set to a list of any special compiler flags required.
 CXX_FLAGS = []
 
@@ -142,8 +139,6 @@ LD_FLAGS = ['-Wl,-z origin',
 
 EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.so'))
 EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.so*')))
-print "egg libraries: \n"
-print (EGG_LIBS)
 
 sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp']
 
@@ -203,10 +198,9 @@ pyDAKOTA = Extension(name='pyDAKOTA',
 setup(name='pyDAKOTA',
       version='%s-%s' % (dakota_version, wrapper_version),
       description='A Python wrapper for DAKOTA',
-      py_modules=['test_dakota'],
+      py_modules=['dakota'],
       ext_modules=[pyDAKOTA],
-      packages=['dakota'],
-      package_dir={'dakota':'src', 'test_dakota':'tests'},
+      package_dir={'':'src'},
       zip_safe=False,
       data_files=data_files)
 
