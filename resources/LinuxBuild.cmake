@@ -9,7 +9,7 @@ set( DAKOTA_DEBUG OFF CACHE BOOL "debug OFF" FORCE)
 set (DAKOTA_PYTHON ON CACHE BOOL "python interface on" FORCE)
 
 # Stop being in debug mode please - does nothing
-set (MPI_DEBUG OFF CACHE BOOL "mpi debug off" FORCE)
+# DO NOT ENABLE!!! set (MPI_DEBUG OFF CACHE BOOL "mpi debug off" FORCE)
 
 ### no mpi
 set( CMAKE_C_COMPILER "gcc"
@@ -36,7 +36,8 @@ option(DAKOTA_DLL_API "Enable DAKOTA DLL API." OFF)
 set(HAVE_X_GRAPHICS OFF CACHE BOOL "Disable dependency on X libraries" FORCE)
 
 ##############################################################################
-set ( CMAKE_CXX_FLAGS "-D MPI_DEBUG=0 -fPIC" CACHE STRING "compile CXX flags" FORCE)
+# set ( CMAKE_CXX_FLAGS "-D MPI_DEBUG=0 -fPIC" CACHE STRING "compile CXX flags" FORCE)
+set ( CMAKE_CXX_FLAGS "-fPIC" CACHE STRING "compile CXX flags" FORCE)
 set ( CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fPIC" CACHE STRING "compile C flags" FORCE)
 set ( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fPIC" CACHE STRING "compile fortran flags" FORCE)
 set ( LIBCXX -stdlib=libc++)

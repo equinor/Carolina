@@ -16,7 +16,7 @@ install:
   - mkdir build
   - cd build
   - export DAKOTA_INSTALL=$PWD/install
-  - cmake -DDAKOTA_HAVE_MPI=OFF -DCMAKE_INSTALL_PREFIX=$DAKOTA_INSTALL -C $ROOT_DIR/resources/LinuxBuild.cmake ..
+  - cmake -DCMAKE_INSTALL_PREFIX=$DAKOTA_INSTALL -C $ROOT_DIR/resources/LinuxBuild.cmake ..
   - make -j 3 install
 
 script:
