@@ -274,3 +274,4 @@ setup(name='pyDAKOTA',
       package_dir={'dakota':'src', 'test_pydakota':'tests'},
       zip_safe=False,
       data_files=data_files)
+
