@@ -12,21 +12,20 @@ set (DAKOTA_PYTHON ON CACHE BOOL "python interface on" FORCE)
 # DO NOT ENABLE!!! set (MPI_DEBUG OFF CACHE BOOL "mpi debug off" FORCE)
 
 ### no mpi
+set( DAKOTA_HAVE_MPI FALSE
+     CACHE BOOL "Build WITHOUT MPI enabled" FORCE)
 set( CMAKE_C_COMPILER "gcc"
-     CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
-set( DAKOTA_HAVE_MPI OFF
-     CACHE BOOL "Always build with MPI enabled" FORCE)
+     CACHE FILEPATH "Do NOT USE MPI compiler wrapper" FORCE)
 set( CMAKE_CXX_COMPILER "g++"
-     CACHE FILEPATH "Use MPI compiler wrapper" FORCE)
-
+     CACHE FILEPATH "Do NOT USE MPI compiler wrapper" FORCE)
 set( CMAKE_Fortran_COMPILER "gfortran"
-     CACHE FILEPATH "MPI Fortran compiler wrapper" FORCE)
+     CACHE FILEPATH "Do NOT USE MPI Fortran compiler wrapper" FORCE)
 
 ### Force static
-set( BUILD_STATIC_LIBS ON 
-     CACHE BOOL "Set to ON to build static libraries" FORCE)
+set( BUILD_STATIC_LIBS OFF 
+     CACHE BOOL "Set to OFF to build static libraries" FORCE)
 
-set( BUILD_SHARED_LIBS OFF 
+set( BUILD_SHARED_LIBS ON 
      CACHE BOOL "Set to ON to build DSO libraries" FORCE)
 
 option(DAKOTA_DLL_API "Enable DAKOTA DLL API." OFF)
@@ -36,7 +35,6 @@ option(DAKOTA_DLL_API "Enable DAKOTA DLL API." OFF)
 set(HAVE_X_GRAPHICS OFF CACHE BOOL "Disable dependency on X libraries" FORCE)
 
 ##############################################################################
-# set ( CMAKE_CXX_FLAGS "-D MPI_DEBUG=0 -fPIC" CACHE STRING "compile CXX flags" FORCE)
 set ( CMAKE_CXX_FLAGS "-fPIC" CACHE STRING "compile CXX flags" FORCE)
 set ( CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} -fPIC" CACHE STRING "compile C flags" FORCE)
 set ( CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fPIC" CACHE STRING "compile fortran flags" FORCE)

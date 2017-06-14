@@ -9,6 +9,7 @@ addons:
       - libboost-all-dev
 
 install:
+  - export BOOST_ROOT=/usr/
   - export ROOT_DIR=$PWD
   - wget https://dakota.sandia.gov/sites/default/files/distributions/public/dakota-6.6-public.src.tar.gz
   - tar zxf dakota-6.6-public.src.tar.gz
