@@ -38,6 +38,7 @@ This has been tested on a 'vanilla' (no DAKOTA pre-installed) Windows machine.
 
 import glob
 import os.path
+import os
 import subprocess
 import sys
 
@@ -97,11 +98,14 @@ CXX_FLAGS = []
 # Set to a list of any special linker flags required.
 LD_FLAGS = []
 
-# Set to directory with 'boost' subdirectory (or None if found by default).
+# BOOST_ROOT is expected to be set if a certain boost build is required
+BOOST_ROOT = os.getenv('BOOST_ROOT', None)
+# Set boost include and lib directories (or None if found by default).
 BOOST_INCDIR = None
-
-# Set to directory with Boost libraries (or None if found by default).
 BOOST_LIBDIR = None
+if BOOST_ROOT:
+    BOOST_INCDIR = os.path.join(BOOST_ROOT, 'include')
+    BOOST_LIBDIR = os.path.join(BOOST_ROOT, 'lib')
 
 # Set this for formatting library names like 'boost_regex' to library names for
 # the linker.
@@ -128,9 +132,6 @@ numpy_include = os.path.join(os.path.dirname(numpy.__file__), os.path.join('core
 include_dirs = [dakota_include, numpy_include]
 library_dirs = [dakota_lib, dakota_bin]
 
-BOOST_INCDIR = '/boost_install/include'
-BOOST_LIBDIR = '/boost_install/lib'
-
 LAPACK_LIBDIR="."
 LD_FLAGS = ['-Wl,-z origin',
             '-Wl,-rpath=${ORIGIN}:${ORIGIN}/../' + egg_dir]
@@ -139,6 +140,10 @@ LD_FLAGS = ['-Wl,-z origin',
 
 EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.so'))
 EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.so*')))
+
+# Add the boost python library to the egg
+if BOOST_LIBDIR:
+    EGG_LIBS.extend(glob.glob(os.path.join(BOOST_LIBDIR, '*boost_python.so*')))
 
 sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp']
 
@@ -151,8 +156,10 @@ define_macros = [(name[2:], None) for name in dakota_macros['Dakota_DEFINES']]
 # Some DAKOTA distributions (i.e. cygwin) put libraries in 'bin'.
 if BOOST_LIBDIR:
     library_dirs.append(BOOST_LIBDIR)
+
 if LAPACK_LIBDIR:
     library_dirs.append(LAPACK_LIBDIR)
+
 if FORTRAN_LIBDIR:
     library_dirs.append(FORTRAN_LIBDIR)
 
@@ -183,7 +190,6 @@ if EGG_LIBS:
         for lib in EGG_LIBS:
             manifest.write('include %s\n' % os.path.basename(lib))
     data_files = [('', EGG_LIBS)]
-
 
 pyDAKOTA = Extension(name='pyDAKOTA',
                      sources=sources,
