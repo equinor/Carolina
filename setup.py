@@ -37,21 +37,20 @@ This has been tested on a 'vanilla' (no DAKOTA pre-installed) Windows machine.
 """
 
 import glob
-import os.path
 import os
 import subprocess
 import sys
 
 from distutils.spawn import find_executable
 from pkg_resources import get_build_platform
-from setuptools import setup, find_packages
+from setuptools import setup
 from setuptools.extension import Extension
 
 # Execute DAKOTA to get version.
 try:
-    proc = subprocess.Popen(['dakota', '-v'], universal_newlines=True,
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = proc.communicate()
+    dakota_process = subprocess.Popen(['dakota', '-v'], universal_newlines=True,
+                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = dakota_process.communicate()
 
 except Exception, exc:
     print "Couldn't execute 'dakota -v':", exc
@@ -71,10 +70,10 @@ egg_dir = 'pyDAKOTA-%s_%s-py%s-%s.egg' % (dakota_version, wrapper_version,
                                           sys.version[0:3], get_build_platform())
 
 # Assuming standard prefix-based install.
-dakota_install = os.path.dirname( os.path.dirname(find_executable('dakota')))
-dakota_bin     = os.path.join(dakota_install, 'bin')
+dakota_install = os.path.dirname(os.path.dirname(find_executable('dakota')))
+dakota_bin = os.path.join(dakota_install, 'bin')
 dakota_include = os.path.join(dakota_install, 'include')
-dakota_lib     = os.path.join(dakota_install, 'lib')
+dakota_lib = os.path.join(dakota_install, 'lib')
 if not os.path.exists(dakota_bin) or \
    not os.path.exists(dakota_include) or \
    not os.path.exists(dakota_lib):
@@ -101,23 +100,23 @@ LD_FLAGS = []
 # BOOST_ROOT is expected to be set if a certain boost build is required
 BOOST_ROOT = os.getenv('BOOST_ROOT', None)
 # Set boost include and lib directories (or None if found by default).
-BOOST_INCDIR = None
-BOOST_LIBDIR = None
+BOOST_INC_DIR = None
+BOOST_LIB_DIR = None
 if BOOST_ROOT:
-    BOOST_INCDIR = os.path.join(BOOST_ROOT, 'include')
-    BOOST_LIBDIR = os.path.join(BOOST_ROOT, 'lib')
+    BOOST_INC_DIR = os.path.join(BOOST_ROOT, 'include')
+    BOOST_LIB_DIR = os.path.join(BOOST_ROOT, 'lib')
 
 # Set this for formatting library names like 'boost_regex' to library names for
 # the linker.
 BOOST_LIBFMT = '%s'
 BOOST_PYFMT = None  # Used to handle case when only boost_python was built
-                    # as shared library on Windows (temporary hack).
+# as shared library on Windows (temporary hack).
 
 # Set to directory with LAPACK and BLAS libraries (or None if found by default).
-LAPACK_LIBDIR = None
+LAPACK_LIB_DIR = None
 
 # Set to directory with Fortran libraries (or None if found by default).
-FORTRAN_LIBDIR = None
+FORTRAN_LIB_DIR = None
 
 # Set this to a list of extra libraries required beyond DAKOTA and BOOST.
 EXTRA_LIBS = []
@@ -132,7 +131,7 @@ numpy_include = os.path.join(os.path.dirname(numpy.__file__), os.path.join('core
 include_dirs = [dakota_include, numpy_include]
 library_dirs = [dakota_lib, dakota_bin]
 
-LAPACK_LIBDIR="."
+LAPACK_LIB_DIR = "."
 LD_FLAGS = ['-Wl,-z origin',
             '-Wl,-rpath=${ORIGIN}:${ORIGIN}/../' + egg_dir]
 # EXTRA_LIBS = ['gfortran'
@@ -142,26 +141,26 @@ EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.so'))
 EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.so*')))
 
 # Add the boost python library to the egg
-if BOOST_LIBDIR:
-    EGG_LIBS.extend(glob.glob(os.path.join(BOOST_LIBDIR, '*boost_python.so*')))
+if BOOST_LIB_DIR:
+    EGG_LIBS.extend(glob.glob(os.path.join(BOOST_LIB_DIR, '*boost_python.so*')))
 
 sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp']
 
-if BOOST_INCDIR:
-    include_dirs.append(BOOST_INCDIR)
+if BOOST_INC_DIR:
+    include_dirs.append(BOOST_INC_DIR)
 
 # Drop '-D' from Dakota_DEFINES.
 define_macros = [(name[2:], None) for name in dakota_macros['Dakota_DEFINES']]
 
 # Some DAKOTA distributions (i.e. cygwin) put libraries in 'bin'.
-if BOOST_LIBDIR:
-    library_dirs.append(BOOST_LIBDIR)
+if BOOST_LIB_DIR:
+    library_dirs.append(BOOST_LIB_DIR)
 
-if LAPACK_LIBDIR:
-    library_dirs.append(LAPACK_LIBDIR)
+if LAPACK_LIB_DIR:
+    library_dirs.append(LAPACK_LIB_DIR)
 
-if FORTRAN_LIBDIR:
-    library_dirs.append(FORTRAN_LIBDIR)
+if FORTRAN_LIB_DIR:
+    library_dirs.append(FORTRAN_LIB_DIR)
 
 # Drop '-l' from Dakota_LIBRARIES if necessary.
 dakota_libs = dakota_macros['Dakota_LIBRARIES']
@@ -170,7 +169,7 @@ dakota_libs = [name[2:] if name.startswith('-l') else name for name in dakota_li
 # From Makefile.export.Dakota Dakota_TPL_LIBRARIES.
 external_libs = [
     'boost_regex', 'boost_filesystem', 'boost_serialization', 'boost_system',
-    'boost_signals', 'boost_python']#, 'lapack', 'blas']
+    'boost_signals', 'boost_python']  # , 'lapack', 'blas']
 
 # Munge boost library names as necessary.
 if BOOST_LIBFMT:
@@ -206,7 +205,6 @@ setup(name='pyDAKOTA',
       description='A Python wrapper for DAKOTA',
       py_modules=['dakota'],
       ext_modules=[pyDAKOTA],
-      package_dir={'':'src'},
+      package_dir={'': 'src'},
       zip_safe=False,
       data_files=data_files)
-

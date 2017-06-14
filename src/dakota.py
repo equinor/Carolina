@@ -35,13 +35,6 @@ from __future__ import with_statement
 
 import logging
 import os
-import sys
-import weakref
-
-# Needed to avoid a problem with 'locale::facet::_S_create_c_locale'
-if sys.platform in ('cygwin', 'win32'):
-    os.environ['LC_ALL'] = 'C'
-
 import pyDAKOTA
 
 class DakotaBase(object):
@@ -57,7 +50,7 @@ class DakotaBase(object):
         Then run DAKOTA with that input, MPI specification, and files.
         DAKOTA will then call our :meth:`dakota_callback` during the run.
         """
-	self.input.write_input(infile, data=self, other_data=None)
+        self.input.write_input(infile, data=self, other_data=None)
         run_dakota(infile, stdout, stderr, restart=restart)
 
     def dakota_callback(self, **kwargs):
@@ -95,7 +88,7 @@ class DakotaInput(object):
             "  descriptors   'x1' 'x2'",
         ]
         self.interface = [
-        #    "python asynchronous evaluation_concurrency = %i" % comm.Get_size(),
+            # "python asynchronous evaluation_concurrency = %i" % comm.Get_size(),
             "deactivate evaluation_cache",
             "id_interface 'pydak'",
             "python",
@@ -239,7 +232,7 @@ def dakota_callback(**kwargs):
     ident = acs[0]
 
     try:
-        driver = fetch_data(ident, _USER_DATA)
+        driver = fetch_data(ident, acs)
 
     except KeyError:
         msg = 'dakota_callback (%s): ident %s not found in user data' \
