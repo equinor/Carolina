@@ -103,6 +103,7 @@ using namespace boost::python;
 BOOST_PYTHON_MODULE(pyDAKOTA)
 {
   using namespace bpn;
+
 #ifdef DAKOTA_HAVE_MPI
   if (import_mpi4py() < 0) return;
 #endif

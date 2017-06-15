@@ -101,22 +101,26 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
   // input data checks.  Assumes comm rank 0.
   //Dakota::ProgramOptions opts(argc, argv, 0);
   //Dakota::ParallelLibrary(argc, argv);
+#ifdef DAKOTA_HAVE_MPI
   int rank;
   // int ok;
   // ok = MPI_Comm_rank( *pcomm, &rank ) ;
   Dakota::ProgramOptions opts(argc, argv, rank);
+#else
+  Dakota::ProgramOptions opts(argc, argv, 0);
+#endif
 
   Dakota::LibraryEnvironment* env = 0;
   Dakota::data_pairs.clear();
   if (pcomm) 
- {
+  {
     MPI_Comm comm = *pcomm;
     //MPI_Barrier(comm);
     //Dakota::ParallelLibrary();
     env = new Dakota::LibraryEnvironment(comm, opts);
   } 
   else 
- {
+  {
     env = new Dakota::LibraryEnvironment(opts);
   }
 
