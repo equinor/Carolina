@@ -3,26 +3,13 @@ language: python
 
 addons:
   apt:
+    sources:
+      - sourceline: 'ppa:jokva/carolina'
     packages:
-      - gfortran
-      - liblapack-dev
+      - dakota1
+      - libdakota-dev
+      - libboost-python-dev
       - libboost-all-dev
 
-install:
-  - export BOOST_ROOT=/usr/
-  - export ROOT_DIR=$PWD
-  - wget https://dakota.sandia.gov/sites/default/files/distributions/public/dakota-6.6-public.src.tar.gz
-  - tar zxf dakota-6.6-public.src.tar.gz
-  - cd dakota-6.6.0.src/
-  - mkdir build
-  - cd build
-  - export DAKOTA_INSTALL=$PWD/install
-  - cmake -DCMAKE_INSTALL_PREFIX=$DAKOTA_INSTALL -C $ROOT_DIR/resources/LinuxBuild.cmake ..
-  - make -j 3 install
-
 script:
-  - cd $ROOT_DIR
-  - export PATH=$PATH:$DAKOTA_INSTALL
-  - export PATH=$PATH:$DAKOTA_INSTALL/bin
-  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$DAKOTA_INSTALL/lib
   - python setup.py build
