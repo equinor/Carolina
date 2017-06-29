@@ -47,8 +47,11 @@ _USER_DATA = weakref.WeakValueDictionary()
 class DakotaBase(object):
     """ Base class for a DAKOTA 'driver'. """
 
-    def __init__(self):
-        self.input = DakotaInput()
+    def __init__(self, dakota_input):
+        if dakota_input is None:
+            raise RuntimeError("The problem definition is required - None value received")
+
+        self.input = dakota_input
 
     def run_dakota(self, infile='dakota.in', stdout=None, stderr=None, restart=0,
                    self_driver=True, other_model_instance=None):
@@ -94,36 +97,6 @@ class DakotaInput(object):
 
     """
     def __init__(self, **kwargs):
-        self.environment = [
-            "tabular_graphics_data",
-        ]
-        self.method = [
-            "multidim_parameter_study",
-            "  partitions = 4 4",
-        ]
-        self.model = [
-            "single",
-        ]
-        self.variables = [
-            "continuous_design = 2",
-            "  lower_bounds    3    5",
-            "  upper_bounds    4    6",
-            "  descriptors   'x1' 'x2'",
-        ]
-        self.interface = [
-            # "python asynchronous evaluation_concurrency = %i" % comm.Get_size(),
-            "deactivate evaluation_cache",
-            "id_interface 'pydak'",
-            "python",
-            "  numpy",
-            "  analysis_drivers = 'dakota:dakota_callback'",
-        ]
-        self.responses = [
-            "num_objective_functions = 1",
-            "no_gradients",
-            "no_hessians",
-        ]
-
         for key in kwargs:
             setattr(self, key, kwargs[key])
 
@@ -258,4 +231,3 @@ def dakota_callback(**kwargs):
         raise RuntimeError(msg)
 
     return driver.dakota_callback(**kwargs)
-
