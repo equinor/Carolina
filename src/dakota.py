@@ -19,7 +19,7 @@ This uses the standard version of DAKOTA as a library (libdakota_src.so).
 
 :class:`DakotaInput` holds DAKOTA input strings and can write them to a file.
 
-:meth:`run_dakota` optionally accepts a boost.mpi MPI communicator to use.
+:meth:`run_dakota` runs dakota.
 
 :meth:`dakota_callback` can be invoked by DAKOTA's Python interface to
 evaluate the model.
@@ -48,33 +48,40 @@ class DakotaBase(object):
     """ Base class for a DAKOTA 'driver'. """
 
     def __init__(self, dakota_input):
+        """
+        The main constructor of the Base dakota driver. It sets the problem definition.
+        :param dakota_input: The object that contains the problem definition and is the source of information
+        for writing the configuration file for dakota
+        :type dakota_input: DakotaInput
+        """
         if dakota_input is None:
             raise RuntimeError("The problem definition is required - None value received")
 
         self.input = dakota_input
 
-    def run_dakota(self, infile='dakota.in', stdout=None, stderr=None, restart=0,
-                   self_driver=True, other_model_instance=None):
+    def run_dakota(self, infile='dakota.in', stdout=None, stderr=None, restart=0):
         """
-        Write `self.input` to `infile`, providing `self` as `driver_instance` if requested.
-        If additional model instance is provided pass that as 'driver_instance'
-        If both are specified issue an warning but continue with self
-        Then run DAKOTA with that input, MPI specification, and files.
-        DAKOTA will then call our :meth:`dakota_callback` during the run.
+        This will create the configuration file for dakota,
+        will set the driver instance that should handle dakota's requests and start dakota.
+
+        This code expects that the DakotaInput instance stored as 'self.input' is properly initialized
+        such that the callback Python based interface is used. If this is the case then dakota will call the
+        'dakota.dakota_callback' function defined in this module.
+
+        :param infile: The name used for the configuration file
+        :type infile: str
+        :param stdout: The stream to be used for redirecting the standard output
+        :param stderr: The stream to be used for redirecting the standard error
+        :param restart: A flag that instructs dakota whether to restart an experiment.
+        This should be set to 1 if a restart is required.
+        Set to 0 (the default value) means do not restart.
+        If a restart is required dakota expects a restart file to be present
+        in the working directory with the name 'dakota.rst'
+        :type restart: int
         """
-        if self_driver and other_model_instance is not None:
-            print("Warning: Both dakota driver and other model instance are provided. "
-                  "Dakota will continue with self as driver")
 
-        # If user specified another driver instance than use that as driver
-        if self_driver:
-            self.input.write_input(infile, driver_instance=self)
-
-        elif other_model_instance is not None:
-            self.input.write_input(infile, driver_instance=other_model_instance)
-
-        else:
-            self.input.write_input(infile)
+        # Write dakota config file and set the driver_instance to self
+        self.input.write_input(infile, driver_instance=self)
 
         # Run dakota
         run_dakota(infile, stdout, stderr, restart=restart)
@@ -88,25 +95,56 @@ class DakotaInput(object):
     """
     Simple mechanism where we store the strings that will go in each section
     of the DAKOTA input file.  The ``interface`` section defaults to a
-    configuration that will use :meth:`dakota_callback`, assuming a driver
-    object is passed as `data` to :meth:`write`.
+    configuration that will use Python and set :meth:`dakota_callback` as driver.
 
-        # Provide your own input with key word arguments,
+    The :meth:'write' is expected to receive a reference
+    to the actual driver instance that should handle the requests from dakota.
+
+        # The problem definition is expected to be provided in the constructor as in the example:
         # e.g.: DakotaInput(method=["multidim_parameter_study",
         #                           "partitions = %d %d" % (nx, nx)])
 
     """
+
     def __init__(self, **kwargs):
+        # Hard code the only acceptable interface
+        self.interface = [
+            "id_interface 'carolina'",
+            "python",
+            "  numpy",
+            "  analysis_drivers = 'dakota:dakota_callback'",
+            ]
+
+        # Set all other sections
         for key in kwargs:
+            if key == "interface":
+                raise RuntimeError("It is not allowed to change the interface. "
+                                   "This has been preset to the Python interface with dakota:dakota_callback as driver.")
             setattr(self, key, kwargs[key])
 
     def write_input(self, infile, driver_instance=None):
         """
         Write input file sections in standard order.
-        If data is not None, its id is written to ``analysis_components``.
-        The invoked Python method should then recover the original object
-        using :meth:`fetch_data`.
+
+        Save the driver_instance for later use and write its id as ``analysis_components``.
+        The invoked Python method should recover the original object using :meth:`fetch_data`.
+
+        If the driver_instance is None raise exception.
+
+        :param infile: The name of the file where to write the configuration for dakota
+        :type infile: str
+        :param driver_instance: The reference to the driver instance that will handle the requests from dakota
+        :type driver_instance: DakotaBase
+
         """
+        if driver_instance is None:
+            raise RuntimeError("The driver instance is not set")
+
+        # Store the reference to the driver instance
+        ident = str(id(driver_instance))
+        _USER_DATA[ident] = driver_instance
+
+        # Write the configuration file
         with open(infile, 'w') as out:
             for section in ('environment', 'method', 'model', 'variables', 'interface', 'responses'):
                 # Write the section and all its sub keywords
@@ -115,21 +153,26 @@ class DakotaInput(object):
                     out.write("\t%s\n" % line)
 
                 # Write the driver instance id as analysis_components
-                # if driver instance is specified and store the reverence to this instance for later use
-                if section == 'interface' and driver_instance is not None:
+                if section == 'interface':
                     # Check if there was already some other analysis component set
                     for line in getattr(self, section):
                         if 'analysis_components' in line:
-                            raise RuntimeError('Cannot specify both analysis_components and driver_instance')
+                            raise RuntimeError('The analysis_components is only allowed to contain '
+                                               'the id of the driver instance. Any additional data should be stored '
+                                               'in the driver object.')
 
-                    # Store the reference to the data and write its id to dakota input file as analysis_component
-                    ident = str(id(driver_instance))
-                    _USER_DATA[ident] = driver_instance
+                    # Write the id of the driver instance to the interface section
                     out.write("\t  analysis_components = '%s'\n" % ident)
 
 
 def fetch_data(ident, dat):
-    """ Return user data object recorded by :meth:`DakotaInput.write`. """
+    """
+    Return the user object recorded by :meth:`DakotaInput.write` as the driver.
+
+    :param ident: The identifier of the object
+    :type ident: str
+    :rtype: DakotaBase
+    """
     return dat[ident]
 
 
@@ -144,14 +187,21 @@ class _ExcInfo(object):
 
 def run_dakota(infile, stdout=None, stderr=None, restart=0):
     """
-    Run DAKOTA with `infile`.
-
-    If `mpi_comm` is not None, that is used as an MPI communicator.
-    Otherwise, the ``world`` communicator from :class:`boost.mpi` is used
-    if MPI is supported and `use_mpi` is True.
+    Run DAKOTA with the configuration file as provided as first argument 'infile'.
 
     `stdout` and `stderr` can be used to direct their respective DAKOTA
     stream to a filename.
+
+    Set dakota in restart mode if restart is equal to 1
+
+    :param infile: The name of the configuration file
+    :type infile: str
+    :param stdout: The stream where to redirect standard output
+    :param stderr: The stream where to redirect standard error
+    :param restart: The flag that tells dakota whether to restart or not.
+    If set to 1 than dakota will be started in restart mode. Dakota will
+    expect in this case the restart file dakota.rst to be present in the working directory
+    :type restart: int
     """
 
     # Checking for a Python exception via sys.exc_info() doesn't work, for
@@ -174,7 +224,7 @@ def run_dakota(infile, stdout=None, stderr=None, restart=0):
 def dakota_callback(**kwargs):
     """
     Generic callback from DAKOTA, forwards parameters to driver provided as
-    the ``data`` argument to :meth:`DakotaInput.write`.
+    the ``driver_instance`` argument to :meth:`DakotaInput.write`.
 
     The driver should return a responses dictionary based on the parameters.
 
@@ -209,9 +259,9 @@ def dakota_callback(**kwargs):
     ------------------- ----------------------------------------------
     currEvalId          current evaluation ID number
     ------------------- ----------------------------------------------
-    analysis_components list of strings from input file, the first is
-                        assumed to be an identifier for a driver
-                        object with a dakota_callback method
+    analysis_components one string that is assumed to be an identifier
+                        for a driver object with
+                        a dakota_callback method
     =================== ==============================================
 
     """
