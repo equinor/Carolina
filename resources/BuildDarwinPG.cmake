@@ -25,16 +25,16 @@
 #   INSTRUCTIONS
 #   ------------
 # Use this file to build DAKOTA from source: https://dakota.sandia.gov/download.html
-# Download and decompress the source file, cd into that directory, 
+# Download and decompress the source file, cd into that directory,
 # then cp <this file> into this directory. Copy and paste the following commands to build DAKOTA.
-#    
-#      mkdir build 
+#
+#      mkdir build
 #      cd build
-#      cmake -C ../BuildDarwinPG.cmake -C ../FindNumpy.cmake ../. -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING 
-#      make  
+#      cmake -C ../BuildDarwinPG.cmake -C ../FindNumpy.cmake ../. -DCMAKE_CXX_FLAGS=-DBOOST_SIGNALS_NO_DEPRECATION_WARNING
+#      make
 #      make install
 #
-#      now install pyDAKOTA, changing the mpicxx compiler in /usr/local/Cellar/open-mpi/1.10.2/share/openmpi/mpicxx-wrapper-data.txt to clang++
+#      now install carolina, changing the mpicxx compiler in /usr/local/Cellar/open-mpi/1.10.2/share/openmpi/mpicxx-wrapper-data.txt to clang++
 #      now install dakota_driver and you're done
 ##############################################################################
 
@@ -45,7 +45,7 @@ set( DAKOTA_CMAKE_BUILD_TYPE "DakotaDistro.cmake")
 
 #********* MUST SET CORRECTLY!!! *********** #
 # TODO: comment or test and error
-#set( CTEST_DASHBOARD_ROOT 
+#set( CTEST_DASHBOARD_ROOT
 #     "$ENV{HOME}/dakota-devel" )
 #set( CTEST_SOURCE_DIRECTORY
 #     "${CTEST_DASHBOARD_ROOT}/dakota")
@@ -96,7 +96,7 @@ set( CMAKE_CXX_COMPILER "mpic++"
 
 #message("got here 2")
 
-set( CMAKE_Fortran_COMPILER "mpif90" 
+set( CMAKE_Fortran_COMPILER "mpif90"
      CACHE FILEPATH "MPI Fortran compiler wrapper" FORCE)
 set( MPI_LIBRARY
      #"/Users/pgraf/root/mpich/lib/libmpich.a"
@@ -151,4 +151,3 @@ set ( Boost_COMPILER "mpic++" )
 #include( ${CTEST_SCRIPT_DIRECTORY}/utilities/DakotaSetupBuildEnv.cmake )
 #include( common_build )
 ##########################################################################
-
