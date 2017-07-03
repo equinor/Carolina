@@ -2,7 +2,7 @@
 # CTest Automated Build Variables for Darwin
 #
 ##############################################################################
-# 
+#
 # This is intended for building the DAKOTA library on the OSX system
 # This was tested using the following C environment:
 #
