@@ -95,12 +95,12 @@ void translator(const int& exc)
     //     PyErr_SetString(PyExc_RuntimeError, "DAKOTA run failed");
   }
 }
-    
+
 
 #include <boost/python.hpp>
 #include <numpy/arrayobject.h>
 using namespace boost::python;
-BOOST_PYTHON_MODULE(pyDAKOTA)
+BOOST_PYTHON_MODULE(carolina)
 {
   using namespace bpn;
 

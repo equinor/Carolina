@@ -14,7 +14,7 @@
 #
 # ++==++==++==++==++==++==++==++==++==++==
 """
-Build pyDAKOTA Python 'egg' for cygwin, darwin, linux, or win32 platforms.
+Build carolina Python 'egg' for cygwin, darwin, linux, or win32 platforms.
 Assumes DAKOTA has been installed.  The egg will include all libraries
 included in the DAKOTA installation.
 
@@ -66,7 +66,7 @@ else:
     sys.exit(1)
 
 wrapper_version = '1'
-egg_dir = 'pyDAKOTA-%s_%s-py%s-%s.egg' % (dakota_version, wrapper_version,
+egg_dir = 'carolina-%s_%s-py%s-%s.egg' % (dakota_version, wrapper_version,
                                           sys.version[0:3], get_build_platform())
 
 # Assuming standard prefix-based install.
@@ -190,7 +190,7 @@ if EGG_LIBS:
             manifest.write('include %s\n' % os.path.basename(lib))
     data_files = [('', EGG_LIBS)]
 
-pyDAKOTA = Extension(name='pyDAKOTA',
+carolina = Extension(name='carolina',
                      sources=sources,
                      include_dirs=include_dirs,
                      define_macros=define_macros,
@@ -200,11 +200,11 @@ pyDAKOTA = Extension(name='pyDAKOTA',
                      libraries=libraries,
                      language='c++')
 
-setup(name='pyDAKOTA',
+setup(name='carolina',
       version='%s-%s' % (dakota_version, wrapper_version),
       description='A Python wrapper for DAKOTA',
       py_modules=['dakota'],
-      ext_modules=[pyDAKOTA],
+      ext_modules=[carolina],
       package_dir={'': 'src'},
       zip_safe=False,
       data_files=data_files)
