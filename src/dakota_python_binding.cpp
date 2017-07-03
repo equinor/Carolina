@@ -71,7 +71,7 @@ int run_dakota_mpi(char *infile, bp::object py_comm, char *outfile, char *errfil
   MPI_Comm *comm_p = PyMPIComm_Get(py_obj);
   if (comm_p == NULL) bp::throw_error_already_set();
   //sayhello(*comm_p);
-  MPI_Comm comm = * comm_p ; 
+  MPI_Comm comm = * comm_p ;
   }
 
   MAKE_ARGV

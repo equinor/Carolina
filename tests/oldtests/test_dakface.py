@@ -29,7 +29,7 @@ def callback(**kwargs):
     from numpy import array
 
     num_fns = kwargs['functions']
-        
+
     x = kwargs['cv']
     ASV = kwargs['asv']
 
@@ -48,7 +48,7 @@ def callback(**kwargs):
 
     if (ASV[0] & 4): # **** d^2f/dx^2:
         fx = x[1]-3*x[0]*x[0]
-        
+
         h = array([ [ [-400*fx + 2, -400*x[0]],
               [-400*x[0],    200     ] ] ]    )
         retval['fnHessians'] = h
@@ -64,9 +64,8 @@ def test_rundak():
         from boost.mpi import world
         pyDAKOTA.run_dakota_mpi("test_dakface.in", world, AnObj())
     print "made it back from dakota call"
-    
+
 if __name__=="__main__":
     """ super simple test of connectivity. solves Rosenbrock, no openMDAO.
     requires test_dakface.in to be present """
     test_rundak()
-

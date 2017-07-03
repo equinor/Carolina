@@ -84,7 +84,7 @@ class TestDriver(DakotaBase):
         ------------------- ----------------------------------------------
         analysis_components str(id(self))
         =================== ==============================================
-        
+
         """
         print 'dakota_callback:'
         cv = kwargs['cv']
@@ -170,4 +170,3 @@ class TestCase(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
