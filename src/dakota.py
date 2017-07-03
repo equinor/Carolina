@@ -36,7 +36,7 @@ from __future__ import print_function
 
 import logging
 import os
-import pyDAKOTA
+import carolina
 import weakref
 
 # This will hold a reference to the DakotaDriver instance or
@@ -210,7 +210,7 @@ def run_dakota(infile, stdout=None, stderr=None, restart=0):
     # it with the exception information so we can re-raise it.
     err = 0
     exc = _ExcInfo()
-    err = pyDAKOTA.run_dakota(infile, stdout, stderr, exc, restart)
+    err = carolina.run_dakota(infile, stdout, stderr, exc, restart)
 
     # Check for errors. We'll get here if Dakota::abort_mode has been set to
     # throw an exception rather than shut down the process.

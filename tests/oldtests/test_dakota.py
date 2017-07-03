@@ -14,7 +14,7 @@
 #
 # ++==++==++==++==++==++==++==++==++==++==
 """
-Trivial pyDAKOTA test which runs an optimization on a 'model' which is the
+Trivial carolina test which runs an optimization on a 'model' which is the
 Rosenbrock function.
 """
 
