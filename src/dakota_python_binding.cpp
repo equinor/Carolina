@@ -71,7 +71,7 @@ int run_dakota_mpi(char *infile, bp::object py_comm, char *outfile, char *errfil
   MPI_Comm *comm_p = PyMPIComm_Get(py_obj);
   if (comm_p == NULL) bp::throw_error_already_set();
   //sayhello(*comm_p);
-  MPI_Comm comm = * comm_p ; 
+  MPI_Comm comm = * comm_p ;
   }
 
   MAKE_ARGV
@@ -95,12 +95,12 @@ void translator(const int& exc)
     //     PyErr_SetString(PyExc_RuntimeError, "DAKOTA run failed");
   }
 }
-    
+
 
 #include <boost/python.hpp>
 #include <numpy/arrayobject.h>
 using namespace boost::python;
-BOOST_PYTHON_MODULE(pyDAKOTA)
+BOOST_PYTHON_MODULE(carolina)
 {
   using namespace bpn;
 

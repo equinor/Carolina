@@ -1,4 +1,4 @@
-pyDAKOTA: a Python wrapper for DAKOTA
+carolina: a Python wrapper for DAKOTA
 -------------------------------------
 
 This is a generic Python wrapper for DAKOTA originally written by
@@ -34,7 +34,8 @@ you can use this to build the egg:
 
 To install the egg (easy_install is from setuptools):
 
-    easy_install pyDAKOTA-6.0_1-py2.7-linux-x86_64.egg
+    easy_install carolina-6.6_1-py2.7-linux-x86_64.egg
+
 
 To run a trivial test:
 

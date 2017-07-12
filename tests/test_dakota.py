@@ -14,7 +14,7 @@
 #
 # ++==++==++==++==++==++==++==++==++==++==
 """
-Trivial pyDAKOTA test which runs an optimization on a 'model' which is the
+Trivial carolina test which runs an optimization on a 'model' which is the
 Rosenbrock function.
 """
 
@@ -22,13 +22,28 @@ from numpy import array
 from traceback import print_exc
 import unittest
 
-from dakota import DakotaBase
+from dakota import DakotaBase, DakotaInput
 
 
 class TestDriver(DakotaBase):
 
     def __init__(self):
-        super(TestDriver, self).__init__()
+        # Create a dakota input template - this is not complete since it does not contain yet
+        # the optimization problem specific information such as variables, constraints, etc.
+        dakota_input = DakotaInput(
+            environment=[
+                "tabular_graphics_data",
+                "output_precision = 8", ],
+            method=[],
+            model=[
+                "single", ],
+            variables=[],
+            responses=[
+                "num_objective_functions = 1",
+                "analytic_gradients",
+                "no_hessians", ]
+        )
+        super(TestDriver, self).__init__(dakota_input)
         self.force_exception = False
 
         self.input.method = [
@@ -84,7 +99,7 @@ class TestDriver(DakotaBase):
         ------------------- ----------------------------------------------
         analysis_components str(id(self))
         =================== ==============================================
-        
+
         """
         print 'dakota_callback:'
         cv = kwargs['cv']
@@ -135,4 +150,3 @@ class TestCase(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

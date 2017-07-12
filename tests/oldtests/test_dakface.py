@@ -1,19 +1,19 @@
 # Copyright 2013 National Renewable Energy Laboratory (NREL)
-# 
+#
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
 #    You may obtain a copy of the License at
-# 
+#
 #        http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 #    Unless required by applicable law or agreed to in writing, software
 #    distributed under the License is distributed on an "AS IS" BASIS,
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-# 
+#
 # ++==++==++==++==++==++==++==++==++==++==
-import pyDAKOTA
+import carolina
 
 class AnObj(object):
     """ test object to show we can pass an object through our DAKOTA interface """
@@ -29,7 +29,7 @@ def callback(**kwargs):
     from numpy import array
 
     num_fns = kwargs['functions']
-        
+
     x = kwargs['cv']
     ASV = kwargs['asv']
 
@@ -48,7 +48,7 @@ def callback(**kwargs):
 
     if (ASV[0] & 4): # **** d^2f/dx^2:
         fx = x[1]-3*x[0]*x[0]
-        
+
         h = array([ [ [-400*fx + 2, -400*x[0]],
               [-400*x[0],    200     ] ] ]    )
         retval['fnHessians'] = h
@@ -59,14 +59,13 @@ def test_rundak():
     """ run dakota to solve rosenbrock all driven from python """
     __have_mpi__ = False
     if (not __have_mpi__):
-        pyDAKOTA.run_dakota("test_dakface.in", 'daktest.out','dakerrors.log',AnObj())
+        carolina.run_dakota("test_dakface.in", 'daktest.out','dakerrors.log',AnObj())
     else:
         from boost.mpi import world
-        pyDAKOTA.run_dakota_mpi("test_dakface.in", world, AnObj())
+        carolina.run_dakota_mpi("test_dakface.in", world, AnObj())
     print "made it back from dakota call"
-    
+
 if __name__=="__main__":
     """ super simple test of connectivity. solves Rosenbrock, no openMDAO.
     requires test_dakface.in to be present """
     test_rundak()
-
