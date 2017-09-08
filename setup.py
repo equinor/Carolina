@@ -1,5 +1,6 @@
+#!/usr/bin/env python
 # Copyright 2013 National Renewable Energy Laboratory (NREL)
-#
+#           2017 Statoil ASA
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
 #    You may obtain a copy of the License at
@@ -40,6 +41,7 @@ import glob
 import os
 import subprocess
 import sys
+import unittest
 
 from distutils.spawn import find_executable
 from pkg_resources import get_build_platform
@@ -132,8 +134,8 @@ include_dirs = [dakota_include, numpy_include]
 library_dirs = [dakota_lib, dakota_bin]
 
 LAPACK_LIB_DIR = "."
-LD_FLAGS = ['-Wl,-z origin',
-            '-Wl,-rpath=${ORIGIN}:${ORIGIN}/../' + egg_dir]
+LD_FLAGS = ['-Wl,-z origin']
+
 # EXTRA_LIBS = ['gfortran'
 #             ] # 'SM', 'ICE', 'Xext', 'Xm', 'Xt', 'X11', 'Xpm', 'Xmu']
 
@@ -143,6 +145,7 @@ EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.so*')))
 # Add the boost python library to the egg
 if BOOST_LIB_DIR:
     EGG_LIBS.extend(glob.glob(os.path.join(BOOST_LIB_DIR, '*boost_python.so*')))
+    EGG_LIBS.extend(glob.glob(os.path.join(BOOST_LIB_DIR+'64', '*boost_python.so*')))
 
 sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp']
 
@@ -155,6 +158,7 @@ define_macros = [(name[2:], None) for name in dakota_macros['Dakota_DEFINES']]
 # Some DAKOTA distributions (i.e. cygwin) put libraries in 'bin'.
 if BOOST_LIB_DIR:
     library_dirs.append(BOOST_LIB_DIR)
+    library_dirs.append(BOOST_LIB_DIR+'64')
 
 if LAPACK_LIB_DIR:
     library_dirs.append(LAPACK_LIB_DIR)
@@ -200,6 +204,13 @@ carolina = Extension(name='carolina',
                      libraries=libraries,
                      language='c++')
 
+
+def carolina_test_suite():
+    test_loader = unittest.TestLoader()
+    test_suite = test_loader.discover(os.path.abspath('tests'),
+                                      pattern='test_*.py')
+    return test_suite
+
 setup(name='carolina',
       version='%s-%s' % (dakota_version, wrapper_version),
       description='A Python wrapper for DAKOTA',
@@ -207,4 +218,5 @@ setup(name='carolina',
       ext_modules=[carolina],
       package_dir={'': 'src'},
       zip_safe=False,
-      data_files=data_files)
+      data_files=data_files,
+      test_suite='setup.carolina_test_suite')
