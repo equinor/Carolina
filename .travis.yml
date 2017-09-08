@@ -12,6 +12,6 @@ addons:
       - libboost-all-dev
 
 script:
-  - python setup.py build
+  - ./setup.py build
   - export PYTHONPATH=$PYTHONPATH:$PWD/build/lib.linux-x86_64-2.7
-  - python -m unittest discover tests
+  - ./setup.py test
