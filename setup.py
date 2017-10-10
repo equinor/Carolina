@@ -37,50 +37,28 @@ The win32 platform is built using VisualStudio C++ and Intel Fortran.
 This has been tested on a 'vanilla' (no DAKOTA pre-installed) Windows machine.
 """
 
-import glob
 import os
 import subprocess
 import sys
 import unittest
 
+import numpy
+
 from distutils.spawn import find_executable
-from pkg_resources import get_build_platform
 from setuptools import setup
 from setuptools.extension import Extension
 
-# Execute DAKOTA to get version.
-try:
-    dakota_process = subprocess.Popen(['dakota', '-v'], universal_newlines=True,
-                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = dakota_process.communicate()
 
-except Exception, exc:
-    print "Couldn't execute 'dakota -v':", exc
-    sys.exit(1)
-
-fields = stdout.split()
-if len(fields) >= 3 and \
-   fields[0].upper() == 'DAKOTA' and fields[1] == 'version':
-    dakota_version = fields[2]
-else:
-    print "Can't parse version from DAKOTA output %r" % stdout
-    print "    stderr output:", stderr
-    sys.exit(1)
-
-wrapper_version = '1'
-egg_dir = 'carolina-%s_%s-py%s-%s.egg' % (dakota_version, wrapper_version,
-                                          sys.version[0:3], get_build_platform())
+CAROLINA_VERSION = '1.0'
 
 # Assuming standard prefix-based install.
 dakota_install = os.path.dirname(os.path.dirname(find_executable('dakota')))
 dakota_bin = os.path.join(dakota_install, 'bin')
 dakota_include = os.path.join(dakota_install, 'include')
 dakota_lib = os.path.join(dakota_install, 'lib')
-if not os.path.exists(dakota_bin) or \
-   not os.path.exists(dakota_include) or \
-   not os.path.exists(dakota_lib):
-    print "Can't find", dakota_bin, 'or', dakota_include, 'or', dakota_lib, ', bummer'
-    sys.exit(1)
+req = (dakota_bin, dakota_include, dakota_lib)
+if not all(map(os.path.exists, req)):
+    exit("Can't find %s or %s or %s, bummer" % req)
 
 # Read make macros from `install_dir`/include/Makefile.export.Dakota.
 dakota_macros = {}
@@ -92,12 +70,6 @@ with open(os.path.join(dakota_install, 'include',
             continue
         name, _, value = line.partition('=')
         dakota_macros[name.strip()] = value.strip().split()
-
-# Set to a list of any special compiler flags required.
-CXX_FLAGS = []
-
-# Set to a list of any special linker flags required.
-LD_FLAGS = []
 
 # BOOST_ROOT is expected to be set if a certain boost build is required
 BOOST_ROOT = os.getenv('BOOST_ROOT', None)
@@ -114,38 +86,11 @@ BOOST_LIBFMT = '%s'
 BOOST_PYFMT = None  # Used to handle case when only boost_python was built
 # as shared library on Windows (temporary hack).
 
-# Set to directory with LAPACK and BLAS libraries (or None if found by default).
-LAPACK_LIB_DIR = None
-
-# Set to directory with Fortran libraries (or None if found by default).
-FORTRAN_LIB_DIR = None
-
-# Set this to a list of extra libraries required beyond DAKOTA and BOOST.
-EXTRA_LIBS = []
-
-# Set this to a list of libraries to be included in the egg.
-EGG_LIBS = []
-
-# Locate numpy include directory.
-import numpy
-numpy_include = os.path.join(os.path.dirname(numpy.__file__), os.path.join('core', 'include'))
+numpy_include = os.path.join(os.path.dirname(numpy.__file__),
+                             os.path.join('core', 'include'))
 
 include_dirs = [dakota_include, numpy_include]
 library_dirs = [dakota_lib, dakota_bin]
-
-LAPACK_LIB_DIR = "."
-LD_FLAGS = ['-Wl,-z origin']
-
-# EXTRA_LIBS = ['gfortran'
-#             ] # 'SM', 'ICE', 'Xext', 'Xm', 'Xt', 'X11', 'Xpm', 'Xmu']
-
-EGG_LIBS = glob.glob(os.path.join(dakota_lib, '*.so'))
-EGG_LIBS.extend(glob.glob(os.path.join(dakota_bin, '*.so*')))
-
-# Add the boost python library to the egg
-if BOOST_LIB_DIR:
-    EGG_LIBS.extend(glob.glob(os.path.join(BOOST_LIB_DIR, '*boost_python.so*')))
-    EGG_LIBS.extend(glob.glob(os.path.join(BOOST_LIB_DIR+'64', '*boost_python.so*')))
 
 sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp']
 
@@ -160,11 +105,6 @@ if BOOST_LIB_DIR:
     library_dirs.append(BOOST_LIB_DIR)
     library_dirs.append(BOOST_LIB_DIR+'64')
 
-if LAPACK_LIB_DIR:
-    library_dirs.append(LAPACK_LIB_DIR)
-
-if FORTRAN_LIB_DIR:
-    library_dirs.append(FORTRAN_LIB_DIR)
 
 # Drop '-l' from Dakota_LIBRARIES if necessary.
 dakota_libs = dakota_macros['Dakota_LIBRARIES']
@@ -184,22 +124,13 @@ if BOOST_LIBFMT:
             else:
                 external_libs[i] = BOOST_LIBFMT % name
 
-libraries = dakota_libs + external_libs + EXTRA_LIBS
-
-# List extra files to be included in the egg.
-data_files = []
-if EGG_LIBS:
-    with open('src/MANIFEST.in', 'w') as manifest:
-        for lib in EGG_LIBS:
-            manifest.write('include %s\n' % os.path.basename(lib))
-    data_files = [('', EGG_LIBS)]
+libraries = dakota_libs + external_libs
 
 carolina = Extension(name='carolina',
                      sources=sources,
                      include_dirs=include_dirs,
                      define_macros=define_macros,
-                     extra_compile_args=CXX_FLAGS,
-                     extra_link_args=LD_FLAGS,
+                     extra_link_args=['-Wl,-z origin'],
                      library_dirs=library_dirs,
                      libraries=libraries,
                      language='c++')
@@ -212,11 +143,10 @@ def carolina_test_suite():
     return test_suite
 
 setup(name='carolina',
-      version='%s-%s' % (dakota_version, wrapper_version),
+      version='%s' % CAROLINA_VERSION,
       description='A Python wrapper for DAKOTA',
       py_modules=['dakota'],
       ext_modules=[carolina],
       package_dir={'': 'src'},
       zip_safe=False,
-      data_files=data_files,
       test_suite='setup.carolina_test_suite')
