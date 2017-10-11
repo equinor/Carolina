@@ -14,139 +14,155 @@
 #    limitations under the License.
 #
 # ++==++==++==++==++==++==++==++==++==++==
-"""
-Build carolina Python 'egg' for cygwin, darwin, linux, or win32 platforms.
-Assumes DAKOTA has been installed.  The egg will include all libraries
-included in the DAKOTA installation.
+"""Build carolina Python 'egg' for linux, assuming DAKOTA has been installed.
 
-The cygwin platform is built using gcc.  It requires a cygwin Python.
-This has only been tested on the build machine.
+The linux platform is built using mpicxx.
 
-The darwin platform is built using mpicxx.  This currently has problems when
-trying to load the egg.  It's probably related to DAKOTA delivering i386 only
-and the machine attempting to run is x86_64 => Python executable attempting
-to load is likely running as x86_64.
-
-The linux platform is built using mpicxx.  Some linker magic is used to avoid
-having to set LD_LIBRARY_PATH on the system the egg is installed on.
 DAKOTA graphics has been disabled to reduce the number of library dependencies.
 This is built on RHEL 6.4 to mimic the DAKOTA release, and has been tested on
 RHEL 6.4 and Ubuntu 'pangolin'.
 
-The win32 platform is built using VisualStudio C++ and Intel Fortran.
-This has been tested on a 'vanilla' (no DAKOTA pre-installed) Windows machine.
 """
 
 import os
 import subprocess
 import sys
 import unittest
+from distutils.spawn import find_executable
 
 import numpy
 
-from distutils.spawn import find_executable
 from setuptools import setup
 from setuptools.extension import Extension
 
 
 CAROLINA_VERSION = '1.0'
-
-# Assuming standard prefix-based install.
-dakota_install = os.path.dirname(os.path.dirname(find_executable('dakota')))
-dakota_bin = os.path.join(dakota_install, 'bin')
-dakota_include = os.path.join(dakota_install, 'include')
-dakota_lib = os.path.join(dakota_install, 'lib')
-req = (dakota_bin, dakota_include, dakota_lib)
-if not all(map(os.path.exists, req)):
-    exit("Can't find %s or %s or %s, bummer" % req)
-
-# Read make macros from `install_dir`/include/Makefile.export.Dakota.
-dakota_macros = {}
-with open(os.path.join(dakota_install, 'include',
-                       'Makefile.export.Dakota'), 'rU') as inp:
-    for line in inp:
-        line = line.strip()
-        if not line or line.startswith('#'):
-            continue
-        name, _, value = line.partition('=')
-        dakota_macros[name.strip()] = value.strip().split()
-
-# BOOST_ROOT is expected to be set if a certain boost build is required
-BOOST_ROOT = os.getenv('BOOST_ROOT', None)
-# Set boost include and lib directories (or None if found by default).
-BOOST_INC_DIR = None
-BOOST_LIB_DIR = None
-if BOOST_ROOT:
-    BOOST_INC_DIR = os.path.join(BOOST_ROOT, 'include')
-    BOOST_LIB_DIR = os.path.join(BOOST_ROOT, 'lib')
-
-# Set this for formatting library names like 'boost_regex' to library names for
-# the linker.
-BOOST_LIBFMT = '%s'
-BOOST_PYFMT = None  # Used to handle case when only boost_python was built
-# as shared library on Windows (temporary hack).
-
-numpy_include = os.path.join(os.path.dirname(numpy.__file__),
-                             os.path.join('core', 'include'))
-
-include_dirs = [dakota_include, numpy_include]
-library_dirs = [dakota_lib, dakota_bin]
-
-sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp']
-
-if BOOST_INC_DIR:
-    include_dirs.append(BOOST_INC_DIR)
-
-# Drop '-D' from Dakota_DEFINES.
-define_macros = [(name[2:], None) for name in dakota_macros['Dakota_DEFINES']]
-
-# Some DAKOTA distributions (i.e. cygwin) put libraries in 'bin'.
-if BOOST_LIB_DIR:
-    library_dirs.append(BOOST_LIB_DIR)
-    library_dirs.append(BOOST_LIB_DIR+'64')
+DAKOTA_EXEC = find_executable('dakota')
+if not DAKOTA_EXEC:
+    exit('Unable to find dakota executable.')
 
 
-# Drop '-l' from Dakota_LIBRARIES if necessary.
-dakota_libs = dakota_macros['Dakota_LIBRARIES']
-dakota_libs = [name[2:] if name.startswith('-l') else name for name in dakota_libs]
+def get_numpy_include():
+    """Return path to numpy/core/include."""
+    return os.path.join(os.path.dirname(numpy.__file__),
+                        os.path.join('core', 'include'))
 
-# From Makefile.export.Dakota Dakota_TPL_LIBRARIES.
-external_libs = [
-    'boost_regex', 'boost_filesystem', 'boost_serialization', 'boost_system',
-    'boost_signals', 'boost_python']  # , 'lapack', 'blas']
 
-# Munge boost library names as necessary.
-if BOOST_LIBFMT:
-    for i, name in enumerate(external_libs):
-        if name.startswith('boost_'):
-            if name == 'boost_python' and BOOST_PYFMT:
-                external_libs[i] = BOOST_PYFMT % name
-            else:
-                external_libs[i] = BOOST_LIBFMT % name
+def find_dakota_paths():
+    """Assuming standard prefix-based install."""
+    dakota_install = os.path.dirname(os.path.dirname(DAKOTA_EXEC))
+    dakota_bin = os.path.join(dakota_install, 'bin')
+    dakota_include = os.path.join(dakota_install, 'include')
+    dakota_lib = os.path.join(dakota_install, 'lib')
+    req = (dakota_bin, dakota_include, dakota_lib)
+    if not all(map(os.path.exists, req)):
+        exit("Can't find %s or %s or %s, bummer" % req)
+    return dakota_install, dakota_bin, dakota_include, dakota_lib
 
-libraries = dakota_libs + external_libs
 
-carolina = Extension(name='carolina',
-                     sources=sources,
-                     include_dirs=include_dirs,
-                     define_macros=define_macros,
-                     extra_link_args=['-Wl,-z origin'],
-                     library_dirs=library_dirs,
-                     libraries=libraries,
-                     language='c++')
+def read_dakota_macros(install_path):
+    """Read make macros from `install_path`/include/Makefile.export.Dakota."""
+    dakota_macros = {}
+    with open(os.path.join(install_path, 'include',
+                           'Makefile.export.Dakota'), 'rU') as inp:
+        for line in inp:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            name, _, value = line.partition('=')
+            dakota_macros[name.strip()] = value.strip().split()
+    return dakota_macros
+
+
+def get_dakota_libs(macros):
+    """Drop '-l' from Dakota_LIBRARIES if necessary."""
+    libs = macros['Dakota_LIBRARIES']
+    libs = [name[2:] if name.startswith('-l') else name for name in libs]
+    return libs
+
+
+def get_define_macros(macros):
+    """Drop '-D' from Dakota_DEFINES."""
+    define_macros = [(name[2:], None) for name in macros['Dakota_DEFINES']]
+    return define_macros
+
+def get_boost_inc_lib():
+    """BOOST_ROOT is expected to be set if a certain boost build is required.
+
+    Set boost include and lib directories (or None if found by default).
+
+    """
+
+    boost_root = os.getenv('BOOST_ROOT', None)
+
+    boost_inc_dir = None
+    boost_lib_dir = None
+    if boost_root:
+        boost_inc_dir = os.path.join(boost_root, 'include')
+        boost_lib_dir = os.path.join(boost_root, 'lib')
+
+    if not boost_lib_dir:
+        return boost_inc_dir, None, None
+    return boost_inc_dir, boost_lib_dir, boost_lib_dir+'64'
+
+
+def get_macros_include_library():
+    """Get the dakota macros, include and library dirs."""
+    dakota_install, dakota_bin, dakota_include, dakota_lib = find_dakota_paths()
+    dakota_macros = read_dakota_macros(dakota_install)
+
+    inc = [dakota_include, get_numpy_include()]
+    lib = [dakota_lib, dakota_bin]
+    return dakota_macros, inc, lib
+
+def get_carolina_extension():
+    """Setup everything and make an Extension for Carolina!"""
+    dakota_macros, include_dirs, library_dirs = get_macros_include_library()
+
+    boost_inc, boost_lib, boost_lib64 = get_boost_inc_lib()
+    if boost_inc:
+        include_dirs.append(boost_inc)
+    if boost_lib:
+        library_dirs.append(boost_lib)
+        library_dirs.append(boost_lib64)
+
+
+    sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp']
+
+    external_libs = ['boost_regex', 'boost_filesystem', 'boost_serialization',
+                     'boost_system', 'boost_signals', 'boost_python']
+
+    dakota_libs = get_dakota_libs(dakota_macros)
+    libraries = dakota_libs + external_libs
+
+    define_macros = get_define_macros(dakota_macros)
+
+    carolina = Extension(name='carolina',
+                         sources=sources,
+                         include_dirs=include_dirs,
+                         define_macros=define_macros,
+                         extra_link_args=['-Wl,-z origin'],
+                         library_dirs=library_dirs,
+                         libraries=libraries,
+                         language='c++')
+    return carolina
 
 
 def carolina_test_suite():
+    """Discover and return test files as test_suite."""
     test_loader = unittest.TestLoader()
     test_suite = test_loader.discover(os.path.abspath('tests'),
                                       pattern='test_*.py')
     return test_suite
 
+
+CAROLINA = get_carolina_extension()
+
 setup(name='carolina',
       version='%s' % CAROLINA_VERSION,
       description='A Python wrapper for DAKOTA',
       py_modules=['dakota'],
-      ext_modules=[carolina],
+      ext_modules=[CAROLINA],
       package_dir={'': 'src'},
       zip_safe=False,
       test_suite='setup.carolina_test_suite')
