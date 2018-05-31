@@ -96,11 +96,22 @@ void translator(const int& exc)
   }
 }
 
-
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <boost/python.hpp>
 #include <numpy/arrayobject.h>
 using namespace boost::python;
+
+#if PY_MAJOR_VERSION >= 3
+int
+#else
+void
+#endif
+init_numpy()
+{
+  import_array();
+}
+
+
 BOOST_PYTHON_MODULE(carolina)
 {
   using namespace bpn;
@@ -109,7 +120,7 @@ BOOST_PYTHON_MODULE(carolina)
   if (import_mpi4py() < 0) return;
 #endif
 
-  import_array();
+  init_numpy();
   array::set_module_and_type("numpy", "ndarray");
 
   register_exception_translator<int>(&translator);
