@@ -1,5 +1,7 @@
 dist: trusty
 language: python
+python:
+  - "3.6"
 
 addons:
   apt:
@@ -13,5 +15,5 @@ addons:
 
 script:
   - ./setup.py build
-  - export PYTHONPATH=$PYTHONPATH:$PWD/build/lib.linux-x86_64-2.7
+  - export PYTHONPATH=$PYTHONPATH:$PWD/build/lib.linux-x86_64-3.6
   - ./setup.py test
