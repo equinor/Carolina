@@ -111,7 +111,6 @@ init_numpy()
   import_array();
 }
 
-
 BOOST_PYTHON_MODULE(carolina)
 {
   using namespace bpn;

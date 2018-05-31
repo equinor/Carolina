@@ -101,11 +101,11 @@ class TestDriver(DakotaBase):
         =================== ==============================================
 
         """
-        print 'dakota_callback:'
+        print('dakota_callback:')
         cv = kwargs['cv']
         asv = kwargs['asv']
-        print '    cv', cv
-        print '    asv', asv
+        print('    cv', cv)
+        print('    asv', asv)
 
         # Rosenbrock function.
         x = cv
@@ -131,11 +131,11 @@ class TestDriver(DakotaBase):
             if self.force_exception:
                 raise RuntimeError('Forced exception')
 
-        except Exception, exc:
-            print '    caught', exc
+        except Exception as exc:
+            print('    caught', exc)
             raise
 
-        print '    returning', retval
+        print('    returning', retval)
         return retval
 
 
@@ -145,7 +145,7 @@ class TestCase(unittest.TestCase):
         # To exercise recovery from exceptions, all tests are run within this.
         driver = TestDriver()
 
-        print '\n### Check normal run.'
+        print('\n### Check normal run.')
         driver.run_dakota()
 
 if __name__ == '__main__':
