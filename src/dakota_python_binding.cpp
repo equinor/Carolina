@@ -97,6 +97,7 @@ void translator(const int& exc)
 }
 
 
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include <boost/python.hpp>
 #include <numpy/arrayobject.h>
 using namespace boost::python;

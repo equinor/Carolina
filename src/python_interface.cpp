@@ -29,7 +29,7 @@
 //#include <Python.h>
 // Replaces Python.h according to boost_python docs.
 #include <boost/python/detail/wrap_python.hpp>
-
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "python_interface.hpp"
 #include "DataMethod.hpp"
 
