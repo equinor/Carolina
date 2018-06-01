@@ -218,7 +218,7 @@ def run_dakota(infile, stdout=None, stderr=None, restart=0):
         if exc.type is None:
             raise RuntimeError('DAKOTA analysis failed')
         else:
-            raise Exception(f"{exc.type}, {exc.value}, {exc.traceback}")
+            raise Exception("{}, {}, {}".format(exc.type, exc.value, exc.traceback))
 
 
 def dakota_callback(**kwargs):
