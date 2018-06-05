@@ -14,7 +14,10 @@ addons:
       - libboost-python-dev
       - libboost-all-dev
 
+defore_install:
+  - alias python3='/usr/bin/env python'
+
 script:
-  - ./setup.py build
+  - python3 setup.py build
   - export PYTHONPATH=$PYTHONPATH:$PWD/build/lib.linux-x86_64-3.4
-  - ./setup.py test
+  - python3 setup.py test

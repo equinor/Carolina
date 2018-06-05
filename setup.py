@@ -130,7 +130,7 @@ def get_carolina_extension():
     sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp']
 
     external_libs = ['boost_regex', 'boost_filesystem', 'boost_serialization',
-                     'boost_system', 'boost_signals', 'boost_python']
+                     'boost_system', 'boost_signals', 'boost_python-py34']
 
     dakota_libs = get_dakota_libs(dakota_macros)
     libraries = dakota_libs + external_libs
