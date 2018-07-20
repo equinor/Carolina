@@ -59,7 +59,7 @@ class DakotaBase(object):
 
         self.input = dakota_input
 
-    def run_dakota(self, infile='dakota.in', stdout=None, stderr=None, restart=0):
+    def run_dakota(self, infile='dakota.in', stdout=None, stderr=None, restart=0, throw_on_error=True):
         """
         This will create the configuration file for dakota,
         will set the driver instance that should handle dakota's requests and start dakota.
@@ -78,13 +78,14 @@ class DakotaBase(object):
         If a restart is required dakota expects a restart file to be present
         in the working directory with the name 'dakota.rst'
         :type restart: int
+        :param throw_on_error: Dakota throws on error instead of aborting
         """
 
         # Write dakota config file and set the driver_instance to self
         self.input.write_input(infile, driver_instance=self)
 
         # Run dakota
-        run_dakota(infile, stdout, stderr, restart=restart)
+        run_dakota(infile, stdout, stderr, restart=restart, throw_on_error=throw_on_error)
 
     def dakota_callback(self, **kwargs):
         """ Invoked from global :meth:`dakota_callback`, must be overridden. """
@@ -185,7 +186,7 @@ class _ExcInfo(object):
         self.traceback = None
 
 
-def run_dakota(infile, stdout=None, stderr=None, restart=0):
+def run_dakota(infile, stdout=None, stderr=None, restart=0, throw_on_error=True):
     """
     Run DAKOTA with the configuration file as provided as first argument 'infile'.
 
@@ -202,6 +203,7 @@ def run_dakota(infile, stdout=None, stderr=None, restart=0):
     If set to 1 than dakota will be started in restart mode. Dakota will
     expect in this case the restart file dakota.rst to be present in the working directory
     :type restart: int
+    :param throw_on_error: Dakota throws on error instead of aborting
     """
 
     # Checking for a Python exception via sys.exc_info() doesn't work, for
@@ -210,7 +212,12 @@ def run_dakota(infile, stdout=None, stderr=None, restart=0):
     # it with the exception information so we can re-raise it.
     err = 0
     exc = _ExcInfo()
-    err = carolina.run_dakota(infile, stdout, stderr, exc, restart)
+    err = carolina.run_dakota(infile,
+                              stdout,
+                              stderr,
+                              exc,
+                              restart,
+                              throw_on_error)
 
     # Check for errors. We'll get here if Dakota::abort_mode has been set to
     # throw an exception rather than shut down the process.

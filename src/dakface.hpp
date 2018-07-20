@@ -20,11 +20,12 @@
 
 using namespace Dakota;
 
-extern int all_but_actual_main(int argc, char* argv[], void *exc);
+extern int all_but_actual_main(int argc, char* argv[], void *exc, bool throw_on_error);
 
 #ifdef DAKOTA_HAVE_MPI
 extern int all_but_actual_main_mpi(int argc, char* argv[],
-                                   MPI_Comm comm, void *exc);
+                                   MPI_Comm comm, void *exc,
+                                   bool throw_on_error);
 #endif // DAKOTA_HAVE_MPI
 
 #endif // _DAKFACE_H_
