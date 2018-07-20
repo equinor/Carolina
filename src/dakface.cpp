@@ -62,21 +62,21 @@ using namespace Dakota;
   extern "C" void fpinit_ASL();
 #endif
 
-static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc);
+static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc, bool throw_on_error=false);
 
-int all_but_actual_main(int argc, char* argv[], void *exc)
+int all_but_actual_main(int argc, char* argv[], void *exc, bool throw_on_error=false)
 {
-  return _main(argc, argv, NULL, exc);
+  return _main(argc, argv, NULL, exc, throw_on_error);
 }
 
 #ifdef DAKOTA_HAVE_MPI
-int all_but_actual_main_mpi(int argc, char* argv[], MPI_Comm comm, void *exc)
+int all_but_actual_main_mpi(int argc, char* argv[], MPI_Comm comm, void *exc, bool throw_on_error=false)
 {
-  return _main(argc, argv, &comm, exc);
+  return _main(argc, argv, &comm, exc, trhow_on_error);
 }
 #endif
 
-static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
+static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc, bool throw_on_error)
 {
   static bool initialized = false;
   if (!initialized) 
@@ -90,9 +90,6 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
 
     // Tie signals to Dakota's abort_handler.
     // Dakota::register_signal_handlers();
-
-    // Have abort_handler() throw an exception rather than aborting the process.
-    // Dakota::abort_mode = Dakota::ABORT_THROWS;
 
     initialized = true;
   }
@@ -109,6 +106,10 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc)
 #else
   Dakota::ProgramOptions opts(argc, argv, 0);
 #endif
+
+  if(throw_on_error)
+     // Have Dakota throw an exception rather than aborting the process when error occurs
+     opts.exit_mode("throw");
 
   Dakota::LibraryEnvironment* env = 0;
   Dakota::data_pairs.clear();
