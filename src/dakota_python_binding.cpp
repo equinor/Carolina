@@ -46,7 +46,7 @@ namespace bpn = boost::python::numeric;
     argv[argc++] = errfile; \
   }
 
-int run_dakota(char *infile, char *outfile, char *errfile, bp::object exc, int restart)
+int run_dakota(char *infile, char *outfile, char *errfile, bp::object exc, int restart, bool throw_on_error)
 {
 
   MAKE_ARGV
@@ -59,11 +59,11 @@ int run_dakota(char *infile, char *outfile, char *errfile, bp::object exc, int r
   if (exc)
     tmp_exc = &exc;
 
-  return all_but_actual_main(argc, argv, tmp_exc);
+  return all_but_actual_main(argc, argv, tmp_exc, throw_on_error);
 }
 
 #ifdef DAKOTA_HAVE_MPI
-int run_dakota_mpi(char *infile, bp::object py_comm, char *outfile, char *errfile, bp::object exc, int restart)
+int run_dakota_mpi(char *infile, bp::object py_comm, char *outfile, char *errfile, bp::object exc, int restart, bool throw_on_error)
 {
   MPI_Comm comm = MPI_COMM_WORLD;
   if (py_comm) {
@@ -84,7 +84,7 @@ int run_dakota_mpi(char *infile, bp::object py_comm, char *outfile, char *errfil
   if (exc)
     tmp_exc = &exc;
 
-  return all_but_actual_main_mpi(argc, argv, comm, tmp_exc);
+  return all_but_actual_main_mpi(argc, argv, comm, tmp_exc, throw_on_error);
 }
 #endif
 
