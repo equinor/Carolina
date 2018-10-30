@@ -140,9 +140,9 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc, bool throw_
       PyObject *type = NULL, *value = NULL, *traceback = NULL;
       PyErr_Fetch(&type, &value, &traceback);
       bp::object *tmp = (bp::object *)exc;
-      PyObject_SetAttrString(tmp->ptr(), "type", type);
-      PyObject_SetAttrString(tmp->ptr(), "value", value);
-      PyObject_SetAttrString(tmp->ptr(), "traceback", traceback);
+      PyObject_SetAttrString(tmp->ptr(), "type", type ? type : Py_None);
+      PyObject_SetAttrString(tmp->ptr(), "value", value ? value : Py_None);
+      PyObject_SetAttrString(tmp->ptr(), "traceback", traceback ? traceback : Py_None);
     }
   }
 
