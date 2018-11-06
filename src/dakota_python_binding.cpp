@@ -1,5 +1,6 @@
 #ifdef DAKOTA_HAVE_MPI
 #include <mpi.h>
+#include <patchlevel.h> 
 
 static void sayhello(MPI_Comm comm)
 {
@@ -108,7 +109,11 @@ BOOST_PYTHON_MODULE(carolina)
   if (import_mpi4py() < 0) return;
 #endif
 
+#if PY_MAJOR_VERSION >= 3
+  import_array1();
+#else
   import_array();
+#endif
   array::set_module_and_type("numpy", "ndarray");
 
   register_exception_translator<int>(&translator);
