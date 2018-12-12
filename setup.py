@@ -25,6 +25,7 @@ RHEL 6.4 and Ubuntu 'pangolin'.
 """
 
 import os
+import glob
 import subprocess
 import sys
 import unittest
@@ -128,9 +129,13 @@ def get_carolina_extension():
 
 
     sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp']
-
+    
+    boost_python = 'boost_python'
+    if boost_lib:
+        boost_python = os.path.basename(glob.glob(os.path.join(boost_lib,"libboost_python*.so"))[0])[3:-3]
+    
     external_libs = ['boost_regex', 'boost_filesystem', 'boost_serialization',
-                     'boost_system', 'boost_signals', 'boost_python']
+                     'boost_system', 'boost_signals', boost_python]
 
     dakota_libs = get_dakota_libs(dakota_macros)
     libraries = dakota_libs + external_libs
