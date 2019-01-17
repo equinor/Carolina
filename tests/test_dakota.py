@@ -21,6 +21,7 @@ Rosenbrock function.
 from __future__ import print_function
 from numpy import array
 from traceback import print_exc
+import sys
 import unittest
 
 from dakota import DakotaBase, DakotaInput
@@ -155,7 +156,12 @@ class TestCase(unittest.TestCase):
         driver = TestDriver(force_exception=True)
 
         print('\n### Check run into exception.')
-        self.assertRaises(RuntimeError, driver.run_dakota)
+        with self.assertRaises(RuntimeError):
+            try:
+                driver.run_dakota()
+            except RuntimeError as ex:
+                print_exc(file=sys.stdout)
+                raise
 
 
 if __name__ == '__main__':
