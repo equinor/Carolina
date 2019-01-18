@@ -21,6 +21,7 @@ Rosenbrock function.
 from __future__ import print_function
 from numpy import array
 from traceback import print_exc
+import sys
 import unittest
 
 from dakota import DakotaBase, DakotaInput
@@ -28,7 +29,7 @@ from dakota import DakotaBase, DakotaInput
 
 class TestDriver(DakotaBase):
 
-    def __init__(self):
+    def __init__(self, force_exception=False):
         # Create a dakota input template - this is not complete since it does not contain yet
         # the optimization problem specific information such as variables, constraints, etc.
         dakota_input = DakotaInput(
@@ -45,7 +46,8 @@ class TestDriver(DakotaBase):
                 "no_hessians", ]
         )
         super(TestDriver, self).__init__(dakota_input)
-        self.force_exception = False
+
+        self.force_exception = force_exception
 
         self.input.method = [
             "conmin_frcg", #"optpp_newton",
@@ -149,5 +151,19 @@ class TestCase(unittest.TestCase):
         print('\n### Check normal run.')
         driver.run_dakota()
 
+    def test_dakota_exception(self):
+        # To exercise recovery from exceptions, all tests are run within this.
+        driver = TestDriver(force_exception=True)
+
+        print('\n### Check run into exception.')
+        with self.assertRaises(RuntimeError):
+            try:
+                driver.run_dakota()
+            except RuntimeError as ex:
+                print_exc(file=sys.stdout)
+                raise
+
+
 if __name__ == '__main__':
     unittest.main()
+
