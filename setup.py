@@ -92,6 +92,8 @@ def get_boost_inc_lib():
 
     Set boost include and lib directories (or None if found by default).
 
+    BOOST_PYTHON is expected to be set if a certain python version of boost_python build is required.
+
     """
 
     boost_root = os.getenv('BOOST_ROOT', None)
@@ -102,9 +104,12 @@ def get_boost_inc_lib():
         boost_inc_dir = os.path.join(boost_root, 'include')
         boost_lib_dir = os.path.join(boost_root, 'lib')
 
+    boost_python = os.getenv('BOOST_PYTHON', 'boost_python')
+
     if not boost_lib_dir:
-        return boost_inc_dir, None, None
-    return boost_inc_dir, boost_lib_dir, boost_lib_dir+'64'
+        return boost_inc_dir, None, None, boost_python
+
+    return boost_inc_dir, boost_lib_dir, boost_lib_dir+'64', boost_python
 
 
 def get_macros_include_library():
@@ -117,10 +122,13 @@ def get_macros_include_library():
     return dakota_macros, inc, lib
 
 def get_carolina_extension():
-    """Setup everything and make an Extension for Carolina!"""
+    """Setup everything and make an Extension for Carolina!
+
+    """
+
     dakota_macros, include_dirs, library_dirs = get_macros_include_library()
 
-    boost_inc, boost_lib, boost_lib64 = get_boost_inc_lib()
+    boost_inc, boost_lib, boost_lib64, boost_python = get_boost_inc_lib()
     if boost_inc:
         include_dirs.append(boost_inc)
     if boost_lib:
@@ -130,12 +138,11 @@ def get_carolina_extension():
 
     sources = ['src/dakface.cpp', 'src/dakota_python_binding.cpp']
     
-    boost_python = 'boost_python'
-    if boost_lib:
-        boost_python = os.path.basename(glob.glob(os.path.join(boost_lib,"libboost_python*.so"))[0])[3:-3]
-    
+     
     external_libs = ['boost_regex', 'boost_filesystem', 'boost_serialization',
                      'boost_system', 'boost_signals', boost_python]
+
+    print(boost_python)
 
     dakota_libs = get_dakota_libs(dakota_macros)
     libraries = dakota_libs + external_libs
