@@ -1,4 +1,4 @@
-dist: trusty
+
 language: python
 sudo: required
 
@@ -10,15 +10,20 @@ addons:
       - libboost-python-dev
       - libboost-all-dev
 
-python:
-  - "2.7"
-  - "3.4"
-
+matrix:
+    include:
+      - dist: trusty
+        python: 2.7
+        env: PY3=no
+      - dist: trusty
+        python: 3.4
+        env: 
+           - BOOST_PYTHON=boost_python-py34
+           - PY3=yes
 script:
   - echo "Running build and tests against $(python --version) ..."
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then export BOOST_PYTHON=boost_python-py34; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then sudo apt-get install python3-dakota1 python3-libdakota-dev; fi
-  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then sudo apt-get install dakota1 libdakota-dev; fi
+  - if [[ ${PY3} == yes ]]; then sudo apt-get install python3-dakota1 python3-libdakota-dev; fi
+  - if [[ ${PY3} == no ]]; then sudo apt-get install dakota1 libdakota-dev; fi
 
   - ./setup.py build
   - ./setup.py test
