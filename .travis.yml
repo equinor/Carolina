@@ -1,17 +1,25 @@
 dist: trusty
 language: python
+sudo: required
 
 addons:
   apt:
     sources:
       - sourceline: 'ppa:jokva/carolina'
     packages:
-      - dakota1
-      - libdakota-dev
       - libboost-python-dev
       - libboost-all-dev
 
+python:
+  - "2.7"
+  - "3.4"
+
 script:
+  - echo "Running build and tests against $(python --version) ..."
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then export BOOST_PYTHON=boost_python-py34; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.4 ]]; then sudo apt-get install python3-dakota1 python3-libdakota-dev; fi
+  - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then sudo apt-get install dakota1 libdakota-dev; fi
+
   - ./setup.py build
-  - export PYTHONPATH=$PYTHONPATH:$PWD/build/lib.linux-x86_64-2.7
   - ./setup.py test
+
