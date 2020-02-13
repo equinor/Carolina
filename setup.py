@@ -43,6 +43,13 @@ if not DAKOTA_EXEC:
     exit('Unable to find dakota executable.')
 
 
+def get_default_boost_python():
+    if sys.version_info < (3,):
+        return "boost_python"
+    else:
+        return "boost_python3"
+
+
 def get_numpy_include():
     """Return path to numpy/core/include."""
     return os.path.join(os.path.dirname(numpy.__file__),
@@ -104,7 +111,7 @@ def get_boost_inc_lib():
         boost_inc_dir = os.path.join(boost_root, 'include')
         boost_lib_dir = os.path.join(boost_root, 'lib')
 
-    boost_python = os.getenv('BOOST_PYTHON', 'boost_python')
+    boost_python = os.getenv('BOOST_PYTHON', get_default_boost_python())
 
     if not boost_lib_dir:
         return boost_inc_dir, None, None, boost_python
