@@ -1,0 +1,42 @@
+name: Python package
+
+on: [pull_request]
+
+jobs:
+  tests:
+    name: "Python ${{ matrix.python-version }} on ${{ matrix.os }}"
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Ubuntu dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo add-apt-repository ppa:jokva/carolina
+        sudo apt-get update
+        sudo apt-get install python3-dakota1 python3-libdakota-dev;
+        sudo apt-get install libboost-python-dev  libboost-all-dev
+
+    - name: Install Dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install pytest
+        pip install .
+
+    - name: Run Tests
+      run: |
+        python -m pytest
