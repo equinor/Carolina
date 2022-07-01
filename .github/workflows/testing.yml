@@ -3,14 +3,44 @@ name: Python package
 on: [pull_request]
 
 jobs:
-  tests:
-    name: "Python ${{ matrix.python-version }} on ${{ matrix.os }}"
+  build-wheels:
+    name: Build wheels
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.6, 3.7, 3.8]
-        os: [ubuntu-18.04]
+        python-version: ['3.8', '3.9', '3.10']
+        os: [ubuntu-latest]
 
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Build Linux Wheel
+      uses: docker://quay.io/pypa/manylinux2014_x86_64
+      with:
+        entrypoint: /github/workspace/ci/build_linux_wheel.sh
+        args: ${{ matrix.python-version }}
+
+    - name: Upload wheel as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.os }} Python ${{ matrix.python-version }} wheel
+        path: dist/*
+
+
+  tests:
+    name: Run pytest
+    needs: [build-wheels]
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.8', '3.9', '3.10']
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -23,19 +53,43 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    - name: Install Ubuntu dependencies
-      run: |
-        sudo add-apt-repository ppa:jokva/carolina
-        sudo apt-get update
-        sudo apt-get install python3-dakota1 python3-libdakota-dev;
-        sudo apt-get install libboost-python-dev  libboost-all-dev
+    - name: Get wheels
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ matrix.os }} Python ${{ matrix.python-version }} wheel
 
-    - name: Install Dependencies
+    - name: Install wheel and test dependencies
       run: |
+        find . -name "*.whl" -exec pip install {} \;
         pip install -r requirements.txt
         pip install pytest
-        pip install .
 
     - name: Run Tests
       run: |
         python -m pytest
+
+
+  publish:
+    name: Publish to PyPI
+    runs-on: ubuntu-latest
+    needs: [tests]
+
+    # If this is a tagged release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+
+    steps:
+      - name: Get wheels
+        uses: actions/download-artifact@v2
+        with:
+          path: artifacts
+
+      - name: Move to dist/
+        run: |
+          mkdir dist
+          find artifacts -name "*.whl" -exec mv '{}' dist/ \;
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.3.1
+        with:
+          user: statoil-travis
+          password: ${{ secrets.pypi_password }}

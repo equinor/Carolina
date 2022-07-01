@@ -1,0 +1,19 @@
+[build-system]
+
+requires = [
+    "setuptools",
+    "wheel",
+    "numpy",
+]
+
+[tool.pytest.ini_options]
+markers = [
+    "requires_ert_storage",
+    "script",
+    "requires_window_manager",
+    "consumer_driven_contract_test",
+    "unstable",
+    "consumer_driven_contract_verification",
+    "integration_test"
+]
+asyncio_mode = "auto"

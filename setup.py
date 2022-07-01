@@ -104,12 +104,18 @@ def get_boost_inc_lib():
     """
 
     boost_root = os.getenv('BOOST_ROOT', None)
+    boost_inc_dir_env = os.getenv('BOOST_INCLUDE_DIRS', None)
+    boost_lib_dir_env = os.getenv('BOOST_LIBRARY_DIRS', None)
 
     boost_inc_dir = None
     boost_lib_dir = None
     if boost_root:
         boost_inc_dir = os.path.join(boost_root, 'include')
         boost_lib_dir = os.path.join(boost_root, 'lib')
+    if boost_inc_dir_env is not None:
+        boost_inc_dir = boost_inc_dir_env
+    if boost_lib_dir_env is not None:
+        boost_lib_dir = boost_lib_dir_env
 
     boost_python = os.getenv('BOOST_PYTHON', get_default_boost_python())
 
