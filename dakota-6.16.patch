@@ -1,0 +1,13 @@
+diff --git a/src/dakota.py b/src/dakota.py
+index 91c1abc..9de0468 100644
+--- a/src/dakota.py
++++ b/src/dakota.py
+@@ -233,7 +233,7 @@ def run_dakota(infile, stdout=None, stderr=None, restart=0, throw_on_error=True)
+                 reraise(exc.type, exc.value, exc.traceback)
+ 
+ 
+-def dakota_callback(**kwargs):
++def dakota_callback(kwargs):
+     """
+     Generic callback from DAKOTA, forwards parameters to driver provided as
+     the ``driver_instance`` argument to :meth:`DakotaInput.write`.
