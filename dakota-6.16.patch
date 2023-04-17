@@ -1,9 +1,9 @@
 diff --git a/src/dakota.py b/src/dakota.py
-index 91c1abc..9de0468 100644
+index d6f89fc..b2e080e 100644
 --- a/src/dakota.py
 +++ b/src/dakota.py
-@@ -233,7 +233,7 @@ def run_dakota(infile, stdout=None, stderr=None, restart=0, throw_on_error=True)
-                 reraise(exc.type, exc.value, exc.traceback)
+@@ -225,7 +225,7 @@ def run_dakota(infile, stdout=None, stderr=None, restart=0, throw_on_error=True)
+             raise exc.type(exc.value).with_traceback(exc.traceback)
  
  
 -def dakota_callback(**kwargs):
