@@ -17,11 +17,13 @@ In addition, [Boost](https://www.boost.org/), including Boost.Python, and [Dakot
 
 The `BOOST_ROOT` environment variable can be set to the location of the boost library, if not in a default location.
 
-The `BOOST_PYTHON` can be set if a given version of `boost_python` is needed. For instance if the default of `boost_python3` is not available, and Python 3.8 is to be used:
+The `BOOST_PYTHON` can be set if a given version of `boost_python` is needed. For instance if Python 3.8 is to be used:
 
 ```bash
     export BOOST_PYTHON=boost_python38
 ```
+
+By default the installation script will try to guess the `boost_python` version from the minor version of Python, i.e. for Python 3.10, it will try `boost_python310`.
 
 Carolina can then be installed with:
 

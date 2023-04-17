@@ -133,9 +133,8 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc, bool throw_
     env->execute();
     Dakota::data_pairs.clear();
   }
-  catch (boost::system::system_error& se) 
+  catch (...) 
   {
-    retval = se.code().value();
     if (PyErr_Occurred()) {
       PyObject *type = NULL, *value = NULL, *traceback = NULL;
       PyErr_Fetch(&type, &value, &traceback);
@@ -143,10 +142,11 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc, bool throw_
       PyObject_SetAttrString(tmp->ptr(), "type", type ? type : Py_None);
       PyObject_SetAttrString(tmp->ptr(), "value", value ? value : Py_None);
       PyObject_SetAttrString(tmp->ptr(), "traceback", traceback ? traceback : Py_None);
+      PyErr_Clear();
     }
+    retval = 1;
   }
 
   delete env;
   return retval;
 }
-
