@@ -25,11 +25,8 @@ RHEL 6.4 and Ubuntu 'pangolin'.
 """
 
 import os
-import glob
-import subprocess
 import sys
-import unittest
-from distutils.spawn import find_executable
+import shutil
 
 import numpy
 
@@ -38,22 +35,18 @@ from setuptools.extension import Extension
 
 
 CAROLINA_VERSION = '1.0'
-DAKOTA_EXEC = find_executable('dakota')
+DAKOTA_EXEC = shutil.which("dakota")
 if not DAKOTA_EXEC:
     exit('Unable to find dakota executable.')
 
 
 def get_default_boost_python():
-    if sys.version_info < (3,):
-        return "boost_python"
-    else:
-        return "boost_python3"
+    return f"boost_python3{sys.version_info.minor}"
 
 
 def get_numpy_include():
     """Return path to numpy/core/include."""
-    return os.path.join(os.path.dirname(numpy.__file__),
-                        os.path.join('core', 'include'))
+    return numpy.get_include()
 
 
 def find_dakota_paths():
@@ -168,21 +161,15 @@ def get_carolina_extension():
     return carolina
 
 
-def carolina_test_suite():
-    """Discover and return test files as test_suite."""
-    test_loader = unittest.TestLoader()
-    test_suite = test_loader.discover(os.path.abspath('tests'),
-                                      pattern='test_*.py')
-    return test_suite
-
-
 CAROLINA = get_carolina_extension()
 
-setup(name='carolina',
-      version='%s' % CAROLINA_VERSION,
-      description='A Python wrapper for DAKOTA',
-      py_modules=['dakota'],
-      ext_modules=[CAROLINA],
-      package_dir={'': 'src'},
-      zip_safe=False,
-      test_suite='setup.carolina_test_suite')
+setup(
+    name="carolina",
+    version="%s" % CAROLINA_VERSION,
+    description="A Python wrapper for DAKOTA",
+    py_modules=["dakota"],
+    ext_modules=[CAROLINA],
+    package_dir={"": "src"},
+    zip_safe=False,
+    install_requires=["numpy"],
+)
