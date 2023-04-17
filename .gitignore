@@ -1,6 +1,4 @@
-# Ignore bak file
 **~
-
-# Ignore idea project metadata
-.idea/
 build
+src/**egg-info/**
+**/__pycache__/**
