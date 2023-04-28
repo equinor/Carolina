@@ -154,7 +154,7 @@ def get_carolina_extension():
                          include_dirs=include_dirs,
                          define_macros=define_macros,
                          extra_link_args=['-Wl,-z origin'],
-                         extra_compile_args=['-std=c++11'],
+                         extra_compile_args=['-std=c++14'],
                          library_dirs=library_dirs,
                          libraries=libraries,
                          language='c++')
