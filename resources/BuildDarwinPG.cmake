@@ -9,7 +9,7 @@
 #      brew install gcc --without-multilib
 #      export HOMEBREW_CC=gcc-5             (DAKOTA is not clang compatable)
 #      export HOMEBREW_CXX=g++-5
-#      brew install boost --c++11 --with-mpi --withput-single (`brew edit boost` -> layout=system)
+#      brew install boost --c++14 --with-mpi --withput-single (`brew edit boost` -> layout=system)
 #      brew install lapack                                                                         |
 #      brew install openmotif (if this formula is still not available you can use the one I found \|/)
 
@@ -19,7 +19,7 @@
 #
 #      unset HOMEBREW_CC
 #      unset HOMEBREW_CXX
-#      brew install boost-python --c++11
+#      brew install boost-python --c++14
 #
 #
 #   INSTRUCTIONS

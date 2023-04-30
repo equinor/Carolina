@@ -9,8 +9,8 @@
 #      brew install gcc --without-multilib
 #      export HOMEBREW_CC=gcc-5
 #      export HOMEBREW_CXX=g++-5
-#      brew install boost --c++11 --without-single (change layout=system)
-#      brew install boost-python --c++11
+#      brew install boost --c++14 --without-single (change layout=system)
+#      brew install boost-python --c++14
 #
 #   INSTRUCTIONS
 #   ------------
