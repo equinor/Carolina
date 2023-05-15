@@ -2,6 +2,7 @@ name: Python package
 
 env:
   DAKOTA_VERSION: 6.17.0
+  INSTALL_DIR: local
 
 on:
   pull_request:
@@ -67,7 +68,7 @@ jobs:
   tests:
     name: "Run tests"
     needs: build-dakota
-    if: ${{ always() && needs.build-dakota.result != 'failed' }}
+    if: ${{ needs.build-dakota.result != 'failed' }}
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
@@ -99,13 +100,52 @@ jobs:
         python -m pip install pytest
     - name: Install Carolina
       run: |
-        export PATH=${PATH}:${HOME}/local/bin
-        export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/local/lib
-        git apply dakota-6.13.patch
-        git apply dakota-6.16.patch
+        export PATH=${PATH}:${HOME}/${INSTALL_DIR}/bin
+        export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/${INSTALL_DIR}/lib
         python -m pip install .
     - name: Run Tests
       run: |
-        export PATH=${PATH}:${HOME}/local/bin
-        export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/local/lib
+        export PATH=${PATH}:${HOME}/${INSTALL_DIR}/bin
+        export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/${INSTALL_DIR}/lib
         python -m pytest
+
+  publish:
+    name: "Publish Carolina"
+    needs: [build-dakota, tests]
+    if: ${{ needs.build-dakota.result != 'failed' && needs.tests.result != 'failed' }}
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Restore Dakota build from cache
+      uses: actions/cache/restore@v3
+      with:
+        key: dakota
+        path: dakota-${{ env.DAKOTA_VERSION }}.tar.gz
+    - name: Unpack Dakota binaries
+      run: |
+        cd $HOME
+        mv $GITHUB_WORKSPACE/dakota-${{ env.DAKOTA_VERSION }}.tar.gz .
+        tar zxf dakota-${{ env.DAKOTA_VERSION }}.tar.gz
+    - name: Install Dakota/Carolina dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install libboost-python-dev libboost-all-dev
+    - name: Install Python dependencies
+      run: python -m pip install --upgrade pip build twine
+    - name: build artifact
+      run: |  
+        export PATH=${PATH}:${HOME}/${INSTALL_DIR}/bin
+        export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/${INSTALL_DIR}/lib
+        python -m build
+    # - name: Publish artifact
+    #   run: |
+    #     export PATH=${PATH}:${HOME}/${INSTALL_DIR}/bin
+    #     export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/${INSTALL_DIR}/lib
+    #     python -m twine upload --repository carolina dist/*

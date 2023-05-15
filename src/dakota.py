@@ -225,7 +225,7 @@ def run_dakota(infile, stdout=None, stderr=None, restart=0, throw_on_error=True)
             raise exc.type(exc.value).with_traceback(exc.traceback)
 
 
-def dakota_callback(**kwargs):
+def dakota_callback(kwargs):
     """
     Generic callback from DAKOTA, forwards parameters to driver provided as
     the ``driver_instance`` argument to :meth:`DakotaInput.write`.

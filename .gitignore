@@ -1,4 +1,8 @@
 **~
 build
-src/**egg-info/**
-**/__pycache__/**
+dist
+src/*.egg-info
+**/__pycache__
+src/version.py
+src/carolina.cpython-*
+dakota.in
