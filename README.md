@@ -4,7 +4,7 @@ Carolina is a [pyDAKOTA](https://github.com/wisdem/pyDAKOTA) fork maintained by 
 
 ## Installation
 
-Python version: Carolina supports Python version 3.6, 3.7, 3.8.
+Python version: Carolina supports Python version 3.6, 3.7, 3.8, 3.10
 
 In order to build Carolina, [Boost](https://www.boost.org/), including Boost.Python, and [Dakota](https://dakota.sandia.gov/) must be installed. This requires [CMake](https://cmake.org/) and a C/C++ compiler.
 
