@@ -36,7 +36,7 @@ jobs:
     - name: Download Dakota
       if: steps.cache-dakota.outputs.cache-hit != 'true'
       run: |
-        wget --no-check-certificate https://dakota.sandia.gov/sites/default/files/distributions/public/dakota-${{ env.DAKOTA_VERSION }}-release-public-src-cli.tar.gz
+        wget --no-check-certificate https://github.com/snl-dakota/dakota/releases/download/v${{ env.DAKOTA_VERSION }}/dakota-${{ env.DAKOTA_VERSION }}-release-public-src-cli.tar.gz
     - name: Build Dakota
       if: steps.cache-dakota.outputs.cache-hit != 'true'
       run: |
