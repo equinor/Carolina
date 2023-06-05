@@ -72,7 +72,7 @@ int all_but_actual_main(int argc, char* argv[], void *exc, bool throw_on_error=f
 #ifdef DAKOTA_HAVE_MPI
 int all_but_actual_main_mpi(int argc, char* argv[], MPI_Comm comm, void *exc, bool throw_on_error=false)
 {
-  return _main(argc, argv, &comm, exc, trhow_on_error);
+  return _main(argc, argv, &comm, exc, throw_on_error);
 }
 #endif
 
