@@ -25,6 +25,7 @@ RHEL 6.4 and Ubuntu 'pangolin'.
 """
 
 import os
+import platform
 import sys
 import shutil
 
@@ -149,11 +150,14 @@ def get_carolina_extension():
 
     define_macros = get_define_macros(dakota_macros)
 
+    # macOS linker does not support this flag
+    extra_link_args = ['-Wl, -z origin'] if not "Darwin" in platform.system() else []
+
     carolina = Extension(name='carolina',
                          sources=sources,
                          include_dirs=include_dirs,
                          define_macros=define_macros,
-                         extra_link_args=['-Wl,-z origin'],
+                         extra_link_args=extra_link_args,
                          extra_compile_args=['-std=c++11'],
                          library_dirs=library_dirs,
                          libraries=libraries,
