@@ -151,7 +151,7 @@ def get_carolina_extension():
     define_macros = get_define_macros(dakota_macros)
 
     # macOS linker does not support this flag
-    extra_link_args = ['-Wl, -z origin'] if not "Darwin" in platform.system() else []
+    extra_link_args = [] if "Darwin" in platform.system() else ['-Wl,-z origin']
 
     carolina = Extension(name='carolina',
                          sources=sources,
