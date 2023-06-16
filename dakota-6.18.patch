@@ -1,0 +1,55 @@
+From b6d007de26956ee0ebd155bf4eff25aaa654eb94 Mon Sep 17 00:00:00 2001
+From: Andreas Eknes Lie <andrli@equinor.com>
+Date: Fri, 16 Jun 2023 14:01:58 +0200
+Subject: [PATCH] dakota-6.18
+
+---
+ setup.py        | 7 ++++---
+ src/dakface.cpp | 1 -
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/setup.py b/setup.py
+index 58f0eac..8410e2c 100755
+--- a/setup.py
++++ b/setup.py
+@@ -56,10 +56,11 @@ def find_dakota_paths():
+     dakota_bin = os.path.join(dakota_install, 'bin')
+     dakota_include = os.path.join(dakota_install, 'include')
+     dakota_lib = os.path.join(dakota_install, 'lib')
++    eigen_include = os.path.join(dakota_include, 'eigen3')
+     req = (dakota_bin, dakota_include, dakota_lib)
+     if not all(map(os.path.exists, req)):
+         exit("Can't find %s or %s or %s, bummer" % req)
+-    return dakota_install, dakota_bin, dakota_include, dakota_lib
++    return dakota_install, dakota_bin, dakota_include, dakota_lib, eigen_include
+ 
+ 
+ def read_dakota_macros(install_path):
+@@ -115,10 +116,10 @@ def get_boost_inc_lib():
+ 
+ def get_macros_include_library():
+     """Get the dakota macros, include and library dirs."""
+-    dakota_install, dakota_bin, dakota_include, dakota_lib = find_dakota_paths()
++    dakota_install, dakota_bin, dakota_include, dakota_lib, eigen_include = find_dakota_paths()
+     dakota_macros = read_dakota_macros(dakota_install)
+ 
+-    inc = [dakota_include, get_numpy_include()]
++    inc = [dakota_include, eigen_include, get_numpy_include()]
+     lib = [dakota_lib, dakota_bin]
+     return dakota_macros, inc, lib
+ 
+diff --git a/src/dakface.cpp b/src/dakface.cpp
+index 6157e2f..e8edee3 100755
+--- a/src/dakface.cpp
++++ b/src/dakface.cpp
+@@ -32,7 +32,6 @@ namespace mpi = boost::mpi;
+ 
+ #include <iostream>
+ 
+-#include "dakota_windows.h"
+ #include "dakota_system_defs.hpp"
+ #include "ProgramOptions.hpp"
+ #include "LibraryEnvironment.hpp"
+-- 
+2.39.2 (Apple Git-143)
+
