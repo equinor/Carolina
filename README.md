@@ -41,9 +41,22 @@ From Dakota version 6.13 a different set of boost libraries is needed: instead o
 ### Installation for Dakota version 6.16 or above
 
 From Dakota version 6.16 a small change was made in the Python interface. To
-support this, apply the following patch to use Carolina with Dakota 6.13 and
+support this, apply the following patches to use Carolina with Dakota 6.16 and
 above:
 
 ```bash
+    git apply dakota-6.13.patch
     git apply dakota-6.16.patch
+```
+
+### Installation for Dakota version 6.18 or above
+
+From Dakota version 6.18 a file was removed from the source and build script was altered.
+To support this, apply the following patches to use Carolina with Dakota 6.18 and
+above:
+
+```bash
+    git apply dakota-6.13.patch
+    git apply dakota-6.16.patch
+    git apply dakota-6.18.patch
 ```
