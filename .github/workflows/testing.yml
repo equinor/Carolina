@@ -47,7 +47,6 @@ jobs:
         cd build
         cmake \
           -DBUILD_SHARED_LIBS=ON \
-          -DDAKOTA_PYTHON=ON \
           -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
           -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
           -DDAKOTA_DLL_API=OFF \
