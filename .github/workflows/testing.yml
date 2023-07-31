@@ -1,7 +1,7 @@
 name: Python package
 
 env:
-  DAKOTA_VERSION: 6.17.0
+  DAKOTA_VERSION: 6.18.0
 
 on:
   pull_request:
@@ -41,8 +41,8 @@ jobs:
       if: steps.cache-dakota.outputs.cache-hit != 'true'
       run: |
         mkdir local
-        tar zxf dakota-${{ env.DAKOTA_VERSION }}-release-public-src-cli.tar.gz
-        cd dakota-${{ env.DAKOTA_VERSION }}-release-public-src-cli
+        tar zxf dakota-${{ env.DAKOTA_VERSION }}-public-src-cli.tar.gz
+        cd dakota-${{ env.DAKOTA_VERSION }}-public-src-cli
         mkdir build
         cd build
         cmake \
@@ -102,6 +102,7 @@ jobs:
         export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/local/lib
         git apply dakota-6.13.patch
         git apply dakota-6.16.patch
+        git apply dakota-6.18.patch
         python -m pip install .
     - name: Run Tests
       run: |
