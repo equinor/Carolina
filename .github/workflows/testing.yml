@@ -45,6 +45,7 @@ jobs:
         mkdir build
         cd build
         cmake \
+          -DCMAKE_CXX_STANDARD=14 \
           -DBUILD_SHARED_LIBS=ON \
           -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
           -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
