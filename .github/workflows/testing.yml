@@ -100,9 +100,6 @@ jobs:
       run: |
         export PATH=${PATH}:${HOME}/local/bin
         export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/local/lib
-        git apply dakota-6.13.patch
-        git apply dakota-6.16.patch
-        git apply dakota-6.18.patch
         python -m pip install .
     - name: Run Tests
       run: |

@@ -32,7 +32,6 @@ namespace mpi = boost::mpi;
 
 #include <iostream>
 
-#include "dakota_windows.h"
 #include "dakota_system_defs.hpp"
 #include "ProgramOptions.hpp"
 #include "LibraryEnvironment.hpp"

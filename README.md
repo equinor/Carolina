@@ -30,33 +30,9 @@ The library can then be tested by entering the tests directory and execute:
     pytest
 ```
 
-### Installation for Dakota version 6.13 or above
+Carolina requires Dakota 6.18, but will work with older versions as well.
+Pathes can be reverted to allow for building against versions prior to 6.13 or 6.16.
 
-From Dakota version 6.13 a different set of boost libraries is needed: instead of `boost_signals`, `boost_program_options` is used. The Carolina setup script has not yet been updated to detect the Dakota version and use the correct library. Until then, apply the following patch to use Carolina with Dakota 6.13 and above:
-
-```bash
-    git apply dakota-6.13.patch
-```
-
-### Installation for Dakota version 6.16 or above
-
-From Dakota version 6.16 a small change was made in the Python interface. To
-support this, apply the following patches to use Carolina with Dakota 6.16 and
-above:
-
-```bash
-    git apply dakota-6.13.patch
-    git apply dakota-6.16.patch
-```
-
-### Installation for Dakota version 6.18 or above
-
+From Dakota version 6.13 a different set of boost libraries is needed: instead of `boost_signals`, `boost_program_options` is used.
+From Dakota version 6.16 a small change was made in the Python interface.
 From Dakota version 6.18 a file was removed from the source and build script was altered.
-To support this, apply the following patches to use Carolina with Dakota 6.18 and
-above:
-
-```bash
-    git apply dakota-6.13.patch
-    git apply dakota-6.16.patch
-    git apply dakota-6.18.patch
-```
