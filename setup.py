@@ -56,10 +56,11 @@ def find_dakota_paths():
     dakota_bin = os.path.join(dakota_install, 'bin')
     dakota_include = os.path.join(dakota_install, 'include')
     dakota_lib = os.path.join(dakota_install, 'lib')
+    eigen_include = os.path.join(dakota_include, 'eigen3')
     req = (dakota_bin, dakota_include, dakota_lib)
     if not all(map(os.path.exists, req)):
         exit("Can't find %s or %s or %s, bummer" % req)
-    return dakota_install, dakota_bin, dakota_include, dakota_lib
+    return dakota_install, dakota_bin, dakota_include, dakota_lib, eigen_include
 
 
 def read_dakota_macros(install_path):
@@ -115,10 +116,10 @@ def get_boost_inc_lib():
 
 def get_macros_include_library():
     """Get the dakota macros, include and library dirs."""
-    dakota_install, dakota_bin, dakota_include, dakota_lib = find_dakota_paths()
+    dakota_install, dakota_bin, dakota_include, dakota_lib, eigen_include = find_dakota_paths()
     dakota_macros = read_dakota_macros(dakota_install)
 
-    inc = [dakota_include, get_numpy_include()]
+    inc = [dakota_include, eigen_include, get_numpy_include()]
     lib = [dakota_lib, dakota_bin]
     return dakota_macros, inc, lib
 
@@ -141,7 +142,7 @@ def get_carolina_extension():
     
      
     external_libs = ['boost_regex', 'boost_filesystem', 'boost_serialization',
-                     'boost_system', 'boost_signals', boost_python]
+                     'boost_system', 'boost_program_options', boost_python]
 
     print(boost_python)
 
