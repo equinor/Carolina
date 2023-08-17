@@ -24,12 +24,6 @@
 // Replaces Python.h according to boost_python docs.
 #include <boost/python/detail/wrap_python.hpp>
 
-#ifdef DAKOTA_HAVE_MPI
-#include <boost/mpi/environment.hpp>
-#include <boost/mpi/communicator.hpp>
-namespace mpi = boost::mpi;
-#endif
-
 #include <iostream>
 
 #include "dakota_system_defs.hpp"
@@ -68,13 +62,6 @@ int all_but_actual_main(int argc, char* argv[], void *exc, bool throw_on_error=f
   return _main(argc, argv, NULL, exc, throw_on_error);
 }
 
-#ifdef DAKOTA_HAVE_MPI
-int all_but_actual_main_mpi(int argc, char* argv[], MPI_Comm comm, void *exc, bool throw_on_error=false)
-{
-  return _main(argc, argv, &comm, exc, throw_on_error);
-}
-#endif
-
 static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc, bool throw_on_error)
 {
   static bool initialized = false;
@@ -97,14 +84,7 @@ static int _main(int argc, char* argv[], MPI_Comm *pcomm, void *exc, bool throw_
   // input data checks.  Assumes comm rank 0.
   //Dakota::ProgramOptions opts(argc, argv, 0);
   //Dakota::ParallelLibrary(argc, argv);
-#ifdef DAKOTA_HAVE_MPI
-  int rank;
-  // int ok;
-  // ok = MPI_Comm_rank( *pcomm, &rank ) ;
-  Dakota::ProgramOptions opts(argc, argv, rank);
-#else
   Dakota::ProgramOptions opts(argc, argv, 0);
-#endif
 
   if(throw_on_error)
      // Have Dakota throw an exception rather than aborting the process when error occurs
