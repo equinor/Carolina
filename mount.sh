@@ -1,3 +1,2 @@
-container="c304715748de"
-docker cp build_all_the_stuff.sh $container:/tmp 
-docker cp CMakeLists.txt $container:/tmp
+docker cp build_all_the_stuff.sh $1:/tmp 
+docker cp CMakeLists.txt $1:/tmp
