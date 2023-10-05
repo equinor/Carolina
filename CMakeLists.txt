@@ -152,13 +152,14 @@ find_package(Perl REQUIRED)
 
 # Python is optionally required by Dakota, Teuchos, and Acro; probe
 # for components here at top-level:
-# include(DakotaFindPython)
-# dakota_find_python()
-set(PYTHON_EXECUTABLE ${PYTHON_EXECUTABLE})
-find_package(pybind11 REQUIRED)
+add_subdirectory(packages/external/pybind11)
 include_directories(${PYTHON_INCLUDE_DIRS})
-include_directories(${NUMPY_INCLUDE_DIRS})
-find_package(Python3 COMPONENTS Interpreter NumPy REQUIRED)
+set (PYBIND11_PYTHON_VERSION "3.10")
+
+include(DakotaFindPython)
+dakota_find_python()
+#find_package(pybind11 REQUIRED)
+#find_package(Python COMPONENTS Development.Module Interpreter NumPy REQUIRED)
 
 # Conditionally find Java JDK needed for input spec, docs, Java API
 include(DakotaFindJava)
@@ -191,6 +192,7 @@ if(CMAKE_SYSTEM_NAME MATCHES Darwin)
       "${CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS} -undefined dynamic_lookup")
 endif()
 
+link_directories(/usr/lib64)
 
 include(DakotaFindSystemTPLs)
 # Unconditionally find BLAS/LAPACK or equivalent
