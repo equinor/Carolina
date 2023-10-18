@@ -1,0 +1,271 @@
+name: macos-run-tests-build-docs
+
+on:
+  workflow_call:
+    secrets:
+      DEPENDENCY_ACCESS_TOKEN:
+        required: true
+
+    inputs:
+      ERT_SHOW_BACKTRACE:
+        required: true
+        type: string
+      NO_PROJECT_RES:
+        required: true
+        type: string
+      BOOST_VERSION:
+        required: true
+        type: string
+      DAKOTA_VERSION:
+        required: true
+        type: string
+      INSTALL_DIR:
+        required: true
+        type: string
+      SEBA_TAG:
+        required: true
+        type: string
+
+jobs:
+  build_dependencies:
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: [ '3.8','3.9','3.10' ]
+        os: ['macos-latest']
+    runs-on: ${{ matrix.os }}
+    name: "🛞 Build Wheels 🛞 (py${{ matrix.python-version }}, ${{ matrix.os }})"
+    env:
+      INSTALL_DIR: ${{ inputs.INSTALL_DIR }}
+    steps:
+    - name: Echo env and inputs
+      run: |
+        echo "inputs.ERT_SHOW_BACKTRACE=${{ inputs.ERT_SHOW_BACKTRACE }}"
+        echo "inputs.NO_PROJECT_RES=${{ inputs.NO_PROJECT_RES }}"
+        echo "inputs.BOOST_VERSION=${{ inputs.BOOST_VERSION }}"
+        echo "inputs.DAKOTA_VERSION=${{ inputs.DAKOTA_VERSION }}"
+        echo "inputs.INSTALL_DIR=${{ inputs.INSTALL_DIR }}"
+        echo "inputs.SEBA_TAG=${{ inputs.SEBA_TAG }}"
+    - name: Set up Homebrew
+      id: set-up-homebrew
+      uses: Homebrew/actions/setup-homebrew@master
+    - name: Cache Homebrew Bundler RubyGems
+      id: cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.set-up-homebrew.outputs.gems-path }}
+        key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
+        restore-keys: ${{ runner.os }}-rubygems-
+    - name: Install Homebrew Bundler RubyGems
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: brew install-bundler-gems
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - uses: actions/cache@v3
+      id: cache-package
+      with:
+        key: ${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
+        path: ${{ github.workspace }}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz
+    - name: Install dependencies
+      if: steps.cache-package.outputs.cache-hit != 'true'
+      run: |
+        python -m pip install -U pip
+        python -m pip install numpy
+    - name: Build needed boost libraries
+      if: steps.cache-package.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p /tmp/build
+        cd /tmp/build
+        BOOST_VERSION_UNDERSCORES=$(echo ${{ inputs.BOOST_VERSION }} | sed 's/\.//g')
+        wget --quiet https://boostorg.jfrog.io/artifactory/main/release/${{ inputs.BOOST_VERSION }}/source/boost_${BOOST_VERSION_UNDERSCORES}.tar.gz
+        tar -xf boost_${BOOST_VERSION_UNDERSCORES}.tar.gz
+        cd boost_${BOOST_VERSION_UNDERSCORES}
+        ./bootstrap.sh --with-libraries=python,filesystem,program_options,regex,serialization,system --with-python-version=${{ matrix.python_version }}
+        # replace python version
+        python_version=$(python --version | sed -E 's/.*([0-9]+\.[0-9]+)\.([0-9]+).*/\1/')
+        python_bin_include_lib="    using python : $python_version : $(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"$(which python) : {g['include']} : {g['stdlib']} ;\")")"
+        sed -i '' "s|.*using python.*|$python_bin_include_lib|" project-config.jam
+        cd /tmp/build/boost_${BOOST_VERSION_UNDERSCORES}
+        ./b2 install -j4 -a cxxflags="-std=c++17" --prefix=${GITHUB_WORKSPACE}/${INSTALL_DIR}
+    - name: Build dakota
+      if: steps.cache-package.outputs.cache-hit != 'true'
+      run: |
+        mkdir -p /tmp/build
+        cd /tmp/build
+        wget --quiet --no-check-certificate \
+          https://github.com/snl-dakota/dakota/releases/download/v${{ inputs.DAKOTA_VERSION }}/dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli.tar.gz
+        # CMake uses FC as fortran compiler
+        FORTRAN_FULLPATH=$(find /usr/local/Cellar -name "*gfortran")
+        FORTRAN_PATH=$(dirname "$FORTRAN_FULLPATH")
+        export PATH=$FORTRAN_PATH:$PATH
+        tar -xzf dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli.tar.gz
+        cd dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli
+        mkdir -p build
+        cd build
+        cmake \
+          -DCMAKE_CXX_STANDARD=14 \
+          -DBUILD_SHARED_LIBS=ON \
+          -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
+          -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
+          -DDAKOTA_DLL_API=OFF \
+          -DHAVE_X_GRAPHICS=OFF \
+          -DDAKOTA_ENABLE_TESTS=OFF \
+          -DDAKOTA_ENABLE_TPL_TESTS=OFF \
+          -DCMAKE_BUILD_TYPE='Release' \
+          -DDAKOTA_NO_FIND_TRILINOS:BOOL=TRUE \
+          -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}/${INSTALL_DIR}" \
+          ..
+        make -j4 install
+    - name: Package built boost and dakota
+      if: steps.cache-package.outputs.cache-hit != 'true'
+      run: |
+        cd ${GITHUB_WORKSPACE}
+        tar zcf python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz ${INSTALL_DIR}
+    - name: Cache boost and dakota
+      if: steps.cache-package.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v3
+      with:
+        path: ${{ github.workspace }}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz
+        key: ${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
+    - uses: actions/cache/restore@v3
+      id: restore-cached-package
+      with:
+        key: ${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
+        path: ${{ github.workspace }}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz
+    - name: Unpack boost + dakota
+      run: |
+        cd $HOME
+        tar zxf ${GITHUB_WORKSPACE}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz
+    - name: Set some env vars
+      run: |
+        echo "PATH=${PATH}:${HOME}/${INSTALL_DIR}/bin"
+        echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/${INSTALL_DIR}/lib"
+        echo "DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${HOME}/${INSTALL_DIR}/lib:$INSTALL_DIR/bin"
+
+        echo "PATH=${PATH}:${HOME}/${INSTALL_DIR}/bin" >> ${GITHUB_ENV}
+        echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/${INSTALL_DIR}/lib" >> ${GITHUB_ENV}
+        echo "DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${HOME}/${INSTALL_DIR}/lib:$INSTALL_DIR/bin" >> ${GITHUB_ENV}
+    - name: Checkout Carolina
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Install Carolina and make wheel
+      run: |
+        pip install delocate
+        python -m pip install .
+        PYTHON_VERSION_TRIM=$(echo ${{ matrix.python-version }} | tr -d ".")
+        echo $PYTHON_VERSION_TRIM
+        carolina_cpython_lib=carolina.cpython-$PYTHON_VERSION_TRIM-darwin.so
+        site_packages_dir=$(python -c "import site; print(site.getsitepackages()[0])")
+        carolina_so_path=$(find "$site_packages_dir" -name "$carolina_cpython_lib")
+        fortran_dylib_path=$(find /usr -name "libgfortran.dylib" | head -n 1)
+        echo "found site packages @ $site_packages_dir"
+        echo "found $carolina_cpython_lib @ $carolina_so_path"
+        echo "found libgfortran.dylib @ $fortran_dylib_path"
+        fortran_dylib_dir=$(dirname "$fortran_dylib_path")
+        install_lib_dir=$HOME/$INSTALL_DIR/lib
+        
+        libgccpath=$(dirname $(find /usr/local/Cellar/gcc -name libgcc_s.1.1.dylib 2>/dev/null | head -n 1))
+        libdakotapath=$(dirname $(find ${HOME}/${INSTALL_DIR}/lib -name libdakota_util.dylib 2>/dev/null | head -n 1))
+
+        echo "libgccpath=$libgccpath"
+        echo "libdakotapath=$libdakotapath"
+
+        DYLD_LIBRARY_PATH="$DYLD_LIBRARY_PATH:$libgccpath:libdakotapath"
+
+        install_name_tool -add_rpath "$libgccpath" "$carolina_so_path"
+        install_name_tool -add_rpath "${HOME}/${INSTALL_DIR}/lib" "$carolina_so_path"
+
+        mkdir /tmp/carolina_dist
+        mkdir /tmp/carolina_dist_unfixed
+        pip install build
+        python -m build --wheel . --outdir /tmp/carolina_dist_unfixed
+        echo $carolina_so_path
+        otool -l $carolina_so_path
+        echo "Finding missing dylibs"
+
+        ls -lh /tmp/carolina_dist_unfixed
+        pv=$(echo ${{ matrix.python-version }} | sed 's/\.//g')
+        unfixed_wheel_path=$(find /tmp/carolina_dist_unfixed -name "carolina*$pv*whl")
+        echo "Found Carolina wheel at $unfixed_wheel_path"
+        delocate-listdeps $unfixed_wheel_path
+        delocate-wheel -w /tmp/carolina_dist -v $unfixed_wheel_path 
+        echo "Output new carolina wheel to /tmp/carolina_dist"
+        ls -lh /tmp/carolina_dist
+    - uses: actions/upload-artifact@v3
+      id: cache-carolina_wheel
+      with:
+        path: /tmp/carolina_dist/carolina*
+
+  tests:
+    needs: build_dependencies
+    if: ${{ needs.build_dependencies.result != 'failed' }}
+    name: "tests_${{ matrix.os }}_py-${{ matrix.python-version }}_${{ matrix.test_type }}_ert-${{ matrix.ert_version }}"
+    env:
+      ERT_SHOW_BACKTRACE: ${{ inputs.ERT_SHOW_BACKTRACE }}
+      NO_PROJECT_RES: ${{ inputs.NO_PROJECT_RES }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ '3.8','3.9','3.10' ]
+        os: ['macos-latest']
+        test_type: ['doc', 'test', 'integration-test']
+        ert_version: ['release', 'main']
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: "pip"
+        cache-dependency-path: |
+          setup.py
+          test_requirements.txt
+          requirements.txt
+    - name: Download Carolina artifact
+      uses: actions/download-artifact@v3
+      with:
+        path: /tmp/artifacts
+    - name: Find the Carolina wheel
+      run: |
+        pyver_nodot=$(echo ${{ matrix.python-version }} | sed 's/\.//g')
+        wheel_path=$(find /tmp/artifacts -name "carolina*$pyver_nodot*macos*whl")
+        echo "Found Carolina wheel at $wheel_path"
+        pip install $wheel_path
+    - name: Install Everest and dependencies
+      run: |
+        pip install git+https://${{ secrets.DEPENDENCY_ACCESS_TOKEN }}@github.com/equinor/everest-models.git
+        pip install git+https://${{ secrets.DEPENDENCY_ACCESS_TOKEN }}@github.com/TNO-Everest/seba.git@${{ inputs.SEBA_TAG }}
+        git clone https://${{ secrets.DEPENDENCY_ACCESS_TOKEN }}@github.com/equinor/everest.git
+        pushd everest
+        pip install -r requirements.txt
+        pip install .[test,docs]
+        pip install pytest-asyncio # Should be added to Everest pyproject.toml
+        popd
+    - name: Install latest ert main
+      if: matrix.ert_version == 'main'
+      run: pip install git+https://github.com/equinor/ert.git
+    - name: Run Tests
+      if: matrix.test_type == 'test'
+      run: |
+        pushd everest
+        python -m pytest tests -n 4 -m "not ui_test and not integration_test and not fails_on_macos_github_workflow" --dist loadgroup
+        popd
+    - name: Run Integration Tests
+      if: matrix.test_type == 'integration-test'
+      run: |
+        pushd everest
+        python -m pytest tests -n 4 -m "integration_test and not fails_on_macos_github_workflow" --dist loadgroup
+        popd
+    - name: Build Documentation
+      if: matrix.test_type == 'doc'
+      run: |
+        pushd everest
+        mkdir /tmp/everestdocs
+        sphinx-build -W -b html -d /tmp/everestdocs/doctrees ./docs/source {envtmpdir}/html
+        popd

@@ -1,0 +1,98 @@
+name: 🏎️ Make & Test Wheels 🏎️
+
+env: 
+  ERT_SHOW_BACKTRACE: 1
+  NO_PROJECT_RES: 1
+  BOOST_VERSION: 1.83.0
+  DAKOTA_VERSION: 6.18.0
+  SEBA_TAG: 6.12.0
+  INSTALL_DIR: local
+  NEEDS_REBUILD: true
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      publish:
+        type: boolean
+        default: false
+
+jobs:
+  build-settings:
+    runs-on: ubuntu-latest
+    outputs: # We define the globals here (reason: passing global env variables to wf inputs does not work)
+      ERT_SHOW_BACKTRACE: ${{ env.ERT_SHOW_BACKTRACE }}
+      NO_PROJECT_RES: ${{ env.NO_PROJECT_RES }}
+      BOOST_VERSION: ${{ env.BOOST_VERSION }}
+      DAKOTA_VERSION: ${{ env.DAKOTA_VERSION }}
+      SEBA_TAG: ${{ env.SEBA_TAG }}
+      INSTALL_DIR: ${{ env.INSTALL_DIR }}
+      NEEDS_REBUILD: ${{ env.NEEDS_REBUILD }}
+
+    steps:
+      - uses: actions/cache@v3
+        name: Check cache for already built wheels
+        id: cache-package
+        with:
+          key: carolina_wheels_boost${{ env.BOOST_VERSION }}_dakota${{ env.DAKOTA_VERSION }}_seba${{ env.SEBA_TAG }}
+          path: /tmp/dist
+      - name: Write cache status to outputs
+        if: steps.cache-package.outputs.cache-hit == 'true'
+        run:
+          echo NEEDS_REBUILD=false >> $GITHUB_OUTPUT
+
+  build_macos_wheels:
+    needs: build-settings
+    if: ${{ needs.build-settings.outputs.NEEDS_REBUILD == 'true' }}
+    uses: ./.github/workflows/bundle_with_dakota_macos.yml
+    with:
+      ERT_SHOW_BACKTRACE: ${{ needs.build-settings.outputs.ERT_SHOW_BACKTRACE}}
+      NO_PROJECT_RES: ${{ needs.build-settings.outputs.NO_PROJECT_RES}}
+      BOOST_VERSION: ${{ needs.build-settings.outputs.BOOST_VERSION}}
+      DAKOTA_VERSION: ${{ needs.build-settings.outputs.DAKOTA_VERSION}}
+      SEBA_TAG: ${{ needs.build-settings.outputs.SEBA_TAG}}
+      INSTALL_DIR: ${{ needs.build-settings.outputs.INSTALL_DIR}}
+    secrets: inherit
+
+  build_linux_wheels:
+    if: ${{ needs.build-settings.outputs.NEEDS_REBUILD == 'true' }}
+    needs: build-settings
+    uses: ./.github/workflows/bundle_with_dakota_linux.yml
+    with:
+      ERT_SHOW_BACKTRACE: ${{ needs.build-settings.outputs.ERT_SHOW_BACKTRACE}}
+      NO_PROJECT_RES: ${{ needs.build-settings.outputs.NO_PROJECT_RES}}
+      BOOST_VERSION: ${{ needs.build-settings.outputs.BOOST_VERSION}}
+      DAKOTA_VERSION: ${{ needs.build-settings.outputs.DAKOTA_VERSION}}
+      SEBA_TAG: ${{ needs.build-settings.outputs.SEBA_TAG}}
+      INSTALL_DIR: ${{ needs.build-settings.outputs.INSTALL_DIR}}
+    secrets: inherit
+
+  publish_wheels:
+    needs: [ build-settings, build_macos_wheels, build_linux_wheels ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Download built artifacts"
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+      - name: Create dist/ folder with all the wheels
+        run: |
+          mkdir /tmp/dist
+          find artifacts -type f -name "carolina*.whl" -exec mv {} /tmp/dist/ \;
+          ls /tmp/dist
+      - name: Cache wheels folder
+        if: steps.cache-package.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v3
+        with:
+          path: /tmp/dist
+          key: carolina_wheels_boost${{ needs.build-settings.outputs.BOOST_VERSION }}_dakota${{ needs.build-settings.outputs.DAKOTA_VERSION }}_seba${{ needs.build-settings.outputs.SEBA_TAG }}
+      
+      - name: Publish to pypi
+        uses: pypa/gh-action-pypi-publish@v1.8.10
+        if: >
+          (github.event_name == 'workflow_dispatch' && inputs.publish) ||
+          (github.event_name == 'push' && startsWith(github.ref, 'refs/tags'))
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
+          packages-dir: /tmp/dist
