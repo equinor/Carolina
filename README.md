@@ -1,11 +1,15 @@
 # Carolina
 
-Carolina is a [pyDAKOTA](https://github.com/wisdem/pyDAKOTA) fork maintained by Equinor.  Its raison d'être is to have easier building of a Python [Dakota](https://dakota.sandia.gov/) wrapper, without any MPI support.
+Carolina is a [pyDAKOTA](https://github.com/wisdem/pyDAKOTA) fork maintained by Equinor.  Its raison d'être is to have easier building of a Python [Dakota](https://dakota.sandia.gov/) wrapper, without any MPI support. Carolina supports Python version 3.8, 3.9, 3.10
 
 ## Installation
+For Linux: 
 
-Python version: Carolina supports Python version 3.6, 3.7, 3.8, 3.10
+```pip install carolina```
 
+If not on Linux, build Carolina youself as described below.
+
+## Building and installing Carolina
 In order to build Carolina, [Boost](https://www.boost.org/), including Boost.Python, and [Dakota](https://dakota.sandia.gov/) must be installed. This requires [CMake](https://cmake.org/) and a C/C++ compiler.
 
 The `BOOST_ROOT` environment variable can be set to the location of the boost library, if not in a default location.

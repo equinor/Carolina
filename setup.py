@@ -156,6 +156,8 @@ setup(
     name="carolina",
     version="%s" % CAROLINA_VERSION,
     description="A Python wrapper for DAKOTA",
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     py_modules=["dakota"],
     ext_modules=[CAROLINA],
     package_dir={"": "src"},
