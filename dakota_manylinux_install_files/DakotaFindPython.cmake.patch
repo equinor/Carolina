@@ -1,0 +1,11 @@
+--- a/dakota-6.18.0-public-src-cli/cmake/DakotaFindPython.cmake	2023-05-11 03:08:25
++++ b/dakota-6.18.0-public-src-cli/cmake/DakotaFindPython.cmake	2023-10-26 08:43:44
+@@ -17,7 +17,7 @@
+ 
+     endif()
+ 
+-    find_package(Python REQUIRED ${dakota_python_components})
++    find_package(Python COMPONENTS ${dakota_python_components} REQUIRED)
+ 
+     # pybind11, C3, Acro, etc., use older CMake FindPythonInterp, so we
+     # coerce it to use same as Dakota; more complex situations may

@@ -1,0 +1,162 @@
+name: 🏎️ Make & Test Wheels 🏎️
+
+on: [pull_request]
+
+env:
+  ERT_SHOW_BACKTRACE: 1
+  NO_PROJECT_RES: 1
+  BOOST_VERSION: 1.83.0
+  BOOST_VERSION_UNDERSCORES: 1_83_0
+  DAKOTA_VERSION: 6.18.0
+  SEBA_TAG: 6.12.0
+  INSTALL_DIR: local
+  FORCE_REBUILD: false
+
+jobs:
+  build_wheels:
+    name: 🛞 Build Wheels 🛞
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.8','3.9','3.10'] # Versions > 3.10 excluded. Reason: not supported by Everest.
+        os: [ubuntu-latest]
+        ert-version: ['main']
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/cache@v3
+      id: cache-package-check
+      with:
+        key: carolina_dist_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ env.BOOST_VERSION }}_dakota-${{ env.DAKOTA_VERSION }}
+        path: ./carolina_dist
+
+    - uses: actions/checkout@v3
+      if: env.FORCE_REBUILD == 'true' || steps.cache-package-check.outputs.cache-hit != 'true'
+      with:
+        fetch-depth: 0
+
+    - name: Build Linux Wheel
+      if: env.FORCE_REBUILD == 'true' || steps.cache-package-check.outputs.cache-hit != 'true'
+      uses: docker://quay.io/pypa/manylinux2014_x86_64
+      env:
+        PYTHON_VERSION: ${{ matrix.python-version }}
+        BOOST_VERSION: ${{ env.BOOST_VERSION }}
+        BOOST_VERSION_UNDERSCORES: ${{ env.BOOST_VERSION_UNDERSCORES }}
+        DAKOTA_VERSION: ${{ env.DAKOTA_VERSION }}
+      with:
+        entrypoint: /bin/bash
+        args: '-c "sh dakota_manylinux_install_files/build_wheels_gha.sh ${{ matrix.python-version }}"'
+
+    - uses: actions/cache/save@v3
+      if: env.FORCE_REBUILD == 'true' || steps.cache-package-check.outputs.cache-hit != 'true'
+      id: cache-package-store
+      with:
+        key: carolina_dist_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ env.BOOST_VERSION }}_dakota-${{ env.DAKOTA_VERSION }}
+        path: ./carolina_dist
+
+    - name: Get Carolina wheel from cache
+      uses: actions/cache/restore@v3
+      id: restore-cached-package
+      with:
+        key: carolina_dist_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ env.BOOST_VERSION }}_dakota-${{ env.DAKOTA_VERSION }}
+        path: /local/carolina_dist
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Set up python venv
+      run: |
+        python -m venv myvenv
+
+    - name: Install Carolina from wheel
+      run: |
+        source myvenv/bin/activate
+        pyv=$(echo ${{matrix.python-version}} | sed 's/\.//g')
+        pip install carolina_dist/carolina-1.0-cp$pyv-cp$pyv-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+
+    - name: Install other Everest dependencies
+      run: |
+        source myvenv/bin/activate
+        pip install git+https://${{ secrets.DEPENDENCY_ACCESS_TOKEN }}@github.com/equinor/spinningjenny.git
+        pip install git+https://${{ secrets.DEPENDENCY_ACCESS_TOKEN }}@github.com/TNO-Everest/seba.git@${{ env.SEBA_TAG }}
+      
+    - name: Install Everest
+      run: |
+        source myvenv/bin/activate
+        git clone https://${{ secrets.DEPENDENCY_ACCESS_TOKEN }}@github.com/equinor/everest.git
+        cd everest
+        pip install .[test,docs]
+
+    - name: Install latest ert main
+      if: matrix.ert-version == 'main'
+      run: |
+        source myvenv/bin/activate
+        sudo apt-get install build-essential
+        pip install git+https://github.com/equinor/ert.git
+
+    - name: Run Tests
+      run: |
+        source myvenv/bin/activate
+        cd everest
+        pytest tests -n 4 -m "not ui_test and not integration_test" --dist loadgroup -sv
+
+    - name: Run Integration Tests
+      run: |
+        source myvenv/bin/activate
+        cd everest
+        pytest tests -n 4 -m "integration_test" --dist loadgroup
+
+    - name: Build Documentation
+      run: |
+        source myvenv/bin/activate
+        cd everest
+        mkdir tmp
+        sphinx-build -W -b html -d tmp/doctrees docs/source {envtmpdir}/html
+
+    - name: Run UI Tests
+      env:
+        QT_QPA_PLATFORM: 'minimal'
+      run: |
+        source myvenv/bin/activate
+        cd everest
+        python -m pytest  -m "ui_test"
+ 
+    - name: Upload wheel as artifact
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.os }} Python ${{ matrix.python-version }} wheel
+        path: |
+          carolina_dist/*
+          trace/*
+
+  publish:
+    name: 👾 Publish 👾
+    runs-on: ubuntu-latest
+    needs: [ build_wheels ]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    steps:
+      - name: Get wheels
+        uses: actions/download-artifact@v3
+        with:
+          path: artifacts
+
+      - name: Create dist/ folder with all python wheels
+        run: |
+          mkdir dist
+          find artifacts -name "carolina*.whl" -exec mv '{}' dist/ \;
+
+      - name: Upload dist/ folder as artifact (debug)
+        uses: actions/upload-artifact@v3
+        with:
+          path: dist/*
+        
+      - name: Publish to pypi
+        uses: pypa/gh-action-pypi-publish@v1.8.10
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_TOKEN }}
