@@ -1,2 +1,21 @@
 [build-system]
     requires = ["setuptools", "wheel", "numpy"]
+
+[project]
+name="carolina"
+requires-python = ">=3.8"
+version = "1.0"
+
+[metadata]
+authors = [
+  { name = "Equinor ASA", email = "fg_sib-scout@equinor.com" },
+  { name = "National Renewable Energy Laboratory (NREL)" },
+]
+description = "Python wrapper around Dakota"
+long_description = "Carolina is a pyDAKOTA fork maintained by Equinor. Its raison d'être is to have easier building of a Python Dakota wrapper, without any MPI support."
+requires-python = ">=3.8"
+version = "1.0"
+readme = "README.md"
+license = {text = "Apache 2.0"}
+homepage = "https://github.com/equinor/carolina"
+repository = "https://github.com/equinor/carolina"
