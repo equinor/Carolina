@@ -1,0 +1,20 @@
+Carolina
+Copyright 2023 Equinor ASA
+
+This product includes software from PyDakota (https://github.com/WISDEM/pyDAKOTA)
+
+The Initial Developer of this library is the NREL WISDEM Team. 
+Copyright 2013 National Renewable Energy Laboratory (NREL)
+
+Portions of this project have been modified by Equinor ASA, and these modifications are subject to the Apache License, Version 2.0. Copyright for these modifications is held by Equinor ASA, and the years of modification are 2015-2023.
+
+* Add support for Python 3
+* Add support for Dakota 6.18
+* Remove MPI support
+* Update build to use C++17
+
+
+Additional Components:
+This project includes new components that have been added by Equinor. These components were not part of the original work by NREL and are not modifications of the original code. Copyright for these additional components is held by Equinor, and they are subject to the Apache License, Version 2.0.
+
+1. Github workflows for creating pip wheels containing boost & dakota
