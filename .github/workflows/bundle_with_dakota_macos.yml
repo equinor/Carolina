@@ -78,7 +78,7 @@ jobs:
       run: |
         mkdir -p /tmp/build
         cd /tmp/build
-        BOOST_VERSION_UNDERSCORES=$(echo ${{ inputs.BOOST_VERSION }} | sed 's/\.//g')
+        BOOST_VERSION_UNDERSCORES=$(echo ${{ inputs.BOOST_VERSION }} | sed 's/\./_/g')
         wget --quiet https://boostorg.jfrog.io/artifactory/main/release/${{ inputs.BOOST_VERSION }}/source/boost_${BOOST_VERSION_UNDERSCORES}.tar.gz
         tar -xf boost_${BOOST_VERSION_UNDERSCORES}.tar.gz
         cd boost_${BOOST_VERSION_UNDERSCORES}
