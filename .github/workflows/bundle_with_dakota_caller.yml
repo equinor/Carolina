@@ -39,7 +39,7 @@ jobs:
       - name: Write cache status to outputs
         if: steps.cache-package.outputs.cache-hit == 'true'
         run:
-          echo NEEDS_REBUILD=false >> $GITHUB_OUTPUT
+          echo "NEEDS_REBUILD=false" >> $GITHUB_OUTPUT
 
   build_macos_wheels:
     needs: build-settings
@@ -75,18 +75,32 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: artifacts
+    
       - name: Create dist/ folder with all the wheels
         run: |
-          mkdir /tmp/dist
-          find artifacts -type f -name "carolina*.whl" -exec mv {} /tmp/dist/ \;
-          ls /tmp/dist
+          mkdir dist
+          find artifacts -type f -name "carolina*.whl" -exec mv {} dist/ \;
+          ls dist
+      
       - name: Cache wheels folder
         if: steps.cache-package.outputs.cache-hit != 'true'
         uses: actions/cache/save@v3
         with:
-          path: /tmp/dist
+          path: dist
           key: carolina_wheels_boost${{ needs.build-settings.outputs.BOOST_VERSION }}_dakota${{ needs.build-settings.outputs.DAKOTA_VERSION }}_seba${{ needs.build-settings.outputs.SEBA_TAG }}
-      
+
+      - uses: actions/cache/restore@v3
+        id: restore-cached-package
+        with:
+          key: carolina_wheels_boost${{ needs.build-settings.outputs.BOOST_VERSION }}_dakota${{ needs.build-settings.outputs.DAKOTA_VERSION }}_seba${{ needs.build-settings.outputs.SEBA_TAG }}
+          path: dist
+
+      - name: Validate dist with twine check
+        run: |
+          ls dist
+          pip install twine
+          twine check dist/*
+
       - name: Publish to pypi
         uses: pypa/gh-action-pypi-publish@v1.8.10
         if: >
@@ -95,4 +109,34 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_TOKEN }}
-          packages-dir: /tmp/dist
+          packages-dir: dist/
+          skip-existing: true
+    
+  test_install_from_pypi:
+    needs: [ publish_wheels ]
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: [ '3.8','3.9','3.10' ]
+        os: [ 'macos-12', 'macos-13', 'ubuntu-latest' ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Carolina from pypi
+        run: pip install Carolina
+
+      - name: Checkout Carolina
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          
+      - name: Test Carolina
+        run: |
+          pip install pytest
+          python -m pytest ./tests
