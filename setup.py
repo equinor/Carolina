@@ -19,7 +19,6 @@ from setuptools import setup
 from setuptools.extension import Extension
 
 
-CAROLINA_VERSION = '1.0'
 DAKOTA_EXEC = shutil.which("dakota")
 if not DAKOTA_EXEC:
     exit('Unable to find dakota executable.')
@@ -154,7 +153,6 @@ CAROLINA = get_carolina_extension()
 
 setup(
     name="carolina",
-    version="%s" % CAROLINA_VERSION,
     description="A Python wrapper for DAKOTA",
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
