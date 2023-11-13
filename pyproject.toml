@@ -16,9 +16,8 @@ license = {text = "Apache 2.0"}
 dynamic = ["version"]
 
 [tool.setuptools_scm]
-write_to = "src/version.py"
+write_to = "src/_version.py"
 
 [metadata]
-version = "1.0"
 homepage = "https://github.com/equinor/carolina"
 repository = "https://github.com/equinor/carolina"
