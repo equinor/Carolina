@@ -193,8 +193,12 @@ jobs:
 
         pip install build
         python -m build --wheel . --outdir /tmp/carolina_dist_unfixed
-        # pip install cibuildwheel
-        # python -m cibuildwheel --platform macos --archs "universal2 arm64 x86_64" --output-dir /tmp/carolina_dist_unfixed
+
+        echo "Pip list ...... "
+        pip list | grep carolina
+
+        echo "Git desribe ...... "
+        git describe
 
         echo $carolina_so_path
         otool -l $carolina_so_path

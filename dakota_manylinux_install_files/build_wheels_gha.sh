@@ -150,6 +150,11 @@ cd $INSTALL_DIR/..
 git clone https://github.com/equinor/Carolina.git
 cd Carolina
 pip install . &> $INSTALL_DIR/carolina_install.log
+echo "Pip list ...... "
+pip list | grep carolina
+
+echo "Git desribe ...... "
+git describe
 
 pip install pytest
 pytest tests
