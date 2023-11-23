@@ -89,8 +89,10 @@ jobs:
     - name: Install Carolina from wheel
       run: |
         source myvenv/bin/activate
-        pyv=$(echo ${{matrix.python-version}} | sed 's/\.//g')
-        pip install carolina_dist/carolina-1.0-cp$pyv-cp$pyv-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+        pyver_nodot=$(echo ${{ matrix.python-version }} | sed 's/\.//g')
+        wheel_path=$(find carolina_dist -name "carolina*$pyver_nodot*whl")
+        echo "Found Carolina wheel at $wheel_path"
+        pip install $wheel_path
 
     - name: Install other Everest dependencies
       run: |
