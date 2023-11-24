@@ -45,7 +45,7 @@ jobs:
     - uses: actions/cache@v3
       id: cache-package-check
       with:
-        key: carolina_dist_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
+        key: carolina_dist_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}_seba-${{ inputs.SEBA_TAG }}
         path: ./carolina_dist
 
     - uses: actions/checkout@v3
@@ -68,14 +68,14 @@ jobs:
       if: steps.cache-package-check.outputs.cache-hit != 'true'
       id: cache-package-store
       with:
-        key: carolina_dist_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
+        key: carolina_dist_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}_seba-${{ inputs.SEBA_TAG }}
         path: ./carolina_dist
 
     - name: Get Carolina wheel from cache
       uses: actions/cache/restore@v3
       id: restore-cached-package
       with:
-        key: carolina_dist_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
+        key: carolina_dist_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}_seba-${{ inputs.SEBA_TAG }}
         path: /local/carolina_dist
 
     - name: Set up Python ${{ matrix.python-version }}
