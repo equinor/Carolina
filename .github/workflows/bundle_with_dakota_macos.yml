@@ -197,9 +197,6 @@ jobs:
         echo "Pip list ...... "
         pip list | grep carolina
 
-        echo "Git desribe ...... "
-        git describe
-
         echo $carolina_so_path
         otool -l $carolina_so_path
         echo "Finding missing dylibs"
