@@ -1,4 +1,0 @@
-there is no clang support for the DAKOTA libraries, which is cumbersome on OSX (as clang is the default compiler). Because of this, all of DAKOTA's dependancies must be build using a gcc compiler. including boost libraries. 
-
-from the developers manual:
-Finally, it is important to use the same C++ compiler (possibly an MPI wrapper) for compiling Dakota and your application and potentially include Dakota-related preprocessor defines as emitted by CMake during com- pilation of Dakota and included in Makefile.export.Dakota. This ensures that the platform configuration settings are properly synchronized across Dakota and your application.
