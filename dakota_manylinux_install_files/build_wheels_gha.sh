@@ -153,9 +153,6 @@ pip install . &> $INSTALL_DIR/carolina_install.log
 echo "Pip list ...... "
 pip list | grep carolina
 
-echo "Git desribe ...... "
-git describe
-
 pip install pytest
 pytest tests
 
