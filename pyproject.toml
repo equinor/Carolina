@@ -13,8 +13,8 @@ name="carolina"
 requires-python = ">=3.8"
 description = "Python wrapper around Dakota"
 authors = [
-  { name = "National Renewable Energy Laboratory (NREL)" },
   { name = "Equinor ASA", email = "fg_sib-scout@equinor.com" },
+  { name = "National Renewable Energy Laboratory (NREL)" },
 ]
 readme = "README.md"
 license = {text = "Apache 2.0"}
