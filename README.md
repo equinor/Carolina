@@ -1,6 +1,6 @@
 # Carolina
 
-Carolina is a [pyDAKOTA](https://github.com/wisdem/pyDAKOTA) fork maintained by Equinor.  Its raison d'être is to have easier building of a Python [Dakota](https://dakota.sandia.gov/) wrapper, without any MPI support. Carolina supports Python version 3.8, 3.9, 3.10
+Carolina is a [pyDAKOTA](https://github.com/wisdem/pyDAKOTA) fork maintained by Equinor.  Its raison d'être is to have easier building of a Python [Dakota](https://dakota.sandia.gov/) wrapper, without any MPI support. Carolina supports Python version 3.8, 3.9, 3.10, 3.11
 
 ## Installation
 For Linux and MacOS: 
@@ -65,6 +65,8 @@ The library can then be tested by entering the tests directory and execute:
 ```bash
     pytest
 ```
+
+In the case of testing newer versions of Dakota, scripts can be found in the script folder.
 
 Carolina requires Dakota 6.18, but will work with older versions as well.
 Pathes can be reverted to allow for building against versions prior to 6.13 or 6.16.
