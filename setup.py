@@ -48,7 +48,7 @@ def read_dakota_macros(install_path):
     """Read make macros from `install_path`/include/Makefile.export.Dakota."""
     dakota_macros = {}
     with open(os.path.join(install_path, 'include',
-                           'Makefile.export.Dakota'), 'rU') as inp:
+                           'Makefile.export.Dakota'), 'r') as inp:
         for line in inp:
             line = line.strip()
             if not line or line.startswith('#'):

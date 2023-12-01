@@ -166,6 +166,8 @@ echo "# make --debug=b -j8 install" >> /github/workspace/trace/env
 echo "Building Dakota ..."
 make --debug=b -j8 install &> /github/workspace/trace/dakota_install.log
 
+echo "Installing Carolina .."
+
 cd $CAROLINA_DIR
 pip install . &> $INSTALL_DIR/carolina_install.log
 echo "Pip list ...... "
