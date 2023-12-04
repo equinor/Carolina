@@ -1,11 +1,9 @@
-"""Build carolina Python 'egg' for linux, assuming DAKOTA has been installed.
-
-The linux platform is built using mpicxx.
-
-DAKOTA graphics has been disabled to reduce the number of library dependencies.
-This is built on RHEL 6.4 to mimic the DAKOTA release, and has been tested on
-RHEL 6.4 and Ubuntu 'pangolin'.
-
+"""Build carolina Python, assuming DAKOTA (thus also BOOST) has been installed.
+It expects to have a dakota executable in the PATH such that os.which("dakota")
+finds an executable. Furthermore, it expects a BOOST_ROOT environment variable
+pointing to an existing boost installation folder (with the folders "include" and "lib").
+Optionally, you may specify the BOOST_PYTHON environment variable, though this should
+ideally not be required. Tested on Linux and MacOS.
 """
 
 import os
