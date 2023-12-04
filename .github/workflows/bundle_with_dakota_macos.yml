@@ -270,8 +270,7 @@ jobs:
         cache: "pip"
         cache-dependency-path: |
           setup.py
-          test_requirements.txt
-          requirements.txt
+          pyproject.toml
     - name: Download Carolina artifact
       uses: actions/download-artifact@v3
       with:
@@ -288,7 +287,6 @@ jobs:
         pip install git+https://${{ secrets.DEPENDENCY_ACCESS_TOKEN }}@github.com/TNO-Everest/seba.git@${{ inputs.SEBA_TAG }}
         git clone https://${{ secrets.DEPENDENCY_ACCESS_TOKEN }}@github.com/equinor/everest.git
         pushd everest
-        pip install -r requirements.txt
         pip install .[test,docs]
         pip install pytest-asyncio # Should be added to Everest pyproject.toml
         popd
