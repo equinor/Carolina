@@ -278,7 +278,7 @@ jobs:
     - name: Find the Carolina wheel
       run: |
         pyver_nodot=$(echo ${{ matrix.python-version }} | sed 's/\.//g')
-        wheel_path=$(find /tmp/artifacts -name "carolina*$pyver_nodot*macos*whl")
+        wheel_path=$(find /tmp/artifacts -name "carolina*-cp$pyver_nodot*-cp$pyver_nodot*macos*whl")
         echo "Found Carolina wheel at $wheel_path"
         pip install $wheel_path
     - name: Install Everest and dependencies
