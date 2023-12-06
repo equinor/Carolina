@@ -1,5 +1,10 @@
 # Carolina
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/carolina)](https://img.shields.io/pypi/pyversions/carolina)
+[![PyPI version](https://img.shields.io/pypi/v/Carolina)](https://badge.fury.io/py/carolina)
+[![Platform](https://img.shields.io/badge/platform-macos%20%7C%20linux-lightgrey)](https://img.shields.io/badge/platform-macos%20%7C%20linux-lightgrey)
+
 Carolina is a [pyDAKOTA](https://github.com/wisdem/pyDAKOTA) fork maintained by Equinor.  Its raison d'être is to have easier building of a Python [Dakota](https://dakota.sandia.gov/) wrapper, without any MPI support. Carolina supports Python version 3.8, 3.9, 3.10, 3.11
 
 ## Installation
