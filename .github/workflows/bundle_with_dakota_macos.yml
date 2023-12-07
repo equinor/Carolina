@@ -247,7 +247,7 @@ jobs:
   tests:
     needs: build_dependencies
     if: ${{ needs.build_dependencies.result != 'failed' }}
-    name: "tests_${{ matrix.os }}_py-${{ matrix.python-version }}_${{ matrix.test_type }}_ert-${{ matrix.ert_version }}"
+    name: "tests_${{ matrix.os }}_py-${{ matrix.python-version }}_${{ matrix.test_type }}"
     env:
       ERT_SHOW_BACKTRACE: ${{ inputs.ERT_SHOW_BACKTRACE }}
       NO_PROJECT_RES: ${{ inputs.NO_PROJECT_RES }}
@@ -256,8 +256,6 @@ jobs:
       matrix:
         python-version: [ '3.8','3.9','3.10','3.11','3.12' ]
         os: ['macos-latest']
-        test_type: ['doc', 'test', 'integration-test']
-        ert_version: ['release', 'main']
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
@@ -281,34 +279,8 @@ jobs:
         wheel_path=$(find /tmp/artifacts -name "carolina*-cp$pyver_nodot*-cp$pyver_nodot*macos*whl")
         echo "Found Carolina wheel at $wheel_path"
         pip install $wheel_path
-    - name: Install Everest and dependencies
+
+    - name: Test Carolina
       run: |
-        pip install git+https://${{ secrets.DEPENDENCY_ACCESS_TOKEN }}@github.com/equinor/everest-models.git
-        pip install git+https://${{ secrets.DEPENDENCY_ACCESS_TOKEN }}@github.com/TNO-Everest/seba.git@${{ inputs.SEBA_TAG }}
-        git clone https://${{ secrets.DEPENDENCY_ACCESS_TOKEN }}@github.com/equinor/everest.git
-        pushd everest
-        pip install .[test,docs]
-        pip install pytest-asyncio # Should be added to Everest pyproject.toml
-        popd
-    - name: Install latest ert main
-      if: matrix.ert_version == 'main'
-      run: pip install git+https://github.com/equinor/ert.git
-    - name: Run Tests
-      if: matrix.test_type == 'test'
-      run: |
-        pushd everest
-        python -m pytest tests -n 4 -m "not ui_test and not integration_test and not fails_on_macos_github_workflow" --dist loadgroup
-        popd
-    - name: Run Integration Tests
-      if: matrix.test_type == 'integration-test'
-      run: |
-        pushd everest
-        python -m pytest tests -n 4 -m "integration_test and not fails_on_macos_github_workflow" --dist loadgroup
-        popd
-    - name: Build Documentation
-      if: matrix.test_type == 'doc'
-      run: |
-        pushd everest
-        mkdir /tmp/everestdocs
-        sphinx-build -W -b html -d /tmp/everestdocs/doctrees ./docs/source {envtmpdir}/html
-        popd
+        pip install pytest numpy
+        python -m pytest ./tests
