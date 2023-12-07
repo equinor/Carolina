@@ -173,7 +173,7 @@ pip install . &> $INSTALL_DIR/carolina_install.log
 echo "Pip list ...... "
 pip list | grep carolina
 
-pip install pytest
+pip install pytest numpy
 pytest tests
 
 pip wheel . -w wheelhouse &> $INSTALL_DIR/carolina_pipwheel.log

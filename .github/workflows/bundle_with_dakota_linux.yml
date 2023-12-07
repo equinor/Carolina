@@ -35,7 +35,6 @@ jobs:
       matrix:
         python-version: ['3.8','3.9','3.10','3.11','3.12']
         os: [ubuntu-latest]
-        ert-version: ['main']
     runs-on: ${{ matrix.os }}
     env:
       ERT_SHOW_BACKTRACE: ${{ inputs.ERT_SHOW_BACKTRACE }}
@@ -71,6 +70,12 @@ jobs:
         key: carolina_dist_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}_seba-${{ inputs.SEBA_TAG }}
         path: ./carolina_dist
 
+    - name: Checkout Carolina
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        path: carolina-main
+
     - name: Get Carolina wheel from cache
       uses: actions/cache/restore@v3
       id: restore-cached-package
@@ -94,53 +99,12 @@ jobs:
         echo "Found Carolina wheel at $wheel_path"
         pip install $wheel_path
 
-    - name: Install other Everest dependencies
+    - name: Test Carolina
       run: |
         source myvenv/bin/activate
-        pip install git+https://${{ secrets.DEPENDENCY_ACCESS_TOKEN }}@github.com/equinor/spinningjenny.git
-        pip install git+https://${{ secrets.DEPENDENCY_ACCESS_TOKEN }}@github.com/TNO-Everest/seba.git@${{ inputs.SEBA_TAG }}
-      
-    - name: Install Everest
-      run: |
-        source myvenv/bin/activate
-        git clone https://${{ secrets.DEPENDENCY_ACCESS_TOKEN }}@github.com/equinor/everest.git
-        cd everest
-        pip install .[test,docs]
+        pip install pytest numpy
+        python -m pytest ./carolina-main/tests
 
-    - name: Install latest ert main
-      if: matrix.ert-version == 'main'
-      run: |
-        source myvenv/bin/activate
-        sudo apt-get install build-essential
-        pip install git+https://github.com/equinor/ert.git
-
-    - name: Run Tests
-      run: |
-        source myvenv/bin/activate
-        cd everest
-        pytest tests -n 4 -m "not ui_test and not integration_test" --dist loadgroup -sv
-
-    - name: Run Integration Tests
-      run: |
-        source myvenv/bin/activate
-        cd everest
-        pytest tests -n 4 -m "integration_test" --dist loadgroup
-
-    - name: Build Documentation
-      run: |
-        source myvenv/bin/activate
-        cd everest
-        mkdir tmp
-        sphinx-build -W -b html -d tmp/doctrees docs/source {envtmpdir}/html
-
-    - name: Run UI Tests
-      env:
-        QT_QPA_PLATFORM: 'minimal'
-      run: |
-        source myvenv/bin/activate
-        cd everest
-        python -m pytest  -m "ui_test"
- 
     - name: Upload wheel as artifact
       if: always()
       uses: actions/upload-artifact@v3
