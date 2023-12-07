@@ -116,7 +116,7 @@ jobs:
           packages-dir: dist/
           skip-existing: true
     
-  test_install_from_pypi:
+  test_install_from_wheel_cache:
     needs: [ publish_wheels ]
     strategy:
       fail-fast: true
@@ -132,8 +132,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install Carolina from pypi
-        run: pip install Carolina
+      - name: Install Carolina from cached wheel
+        run: |
+          pyver_nodot=$(echo ${{ matrix.python-version }} | sed 's/\.//g')
+          wheel_path=$(find dist -name "carolina*$pyver_nodot*whl")
+          echo "Found Carolina wheel at $wheel_path"
+          pip install $wheel_path
 
       - name: Checkout Carolina
         uses: actions/checkout@v3
