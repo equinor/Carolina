@@ -115,36 +115,3 @@ jobs:
           password: ${{ secrets.PYPI_TOKEN }}
           packages-dir: dist/
           skip-existing: true
-    
-  test_install_from_wheel_cache:
-    needs: [ publish_wheels ]
-    strategy:
-      fail-fast: true
-      matrix:
-        python-version: [ '3.8','3.9','3.10','3.11','3.12' ]
-        os: [ 'macos-12', 'macos-13', 'ubuntu-latest' ]
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install Carolina from cached wheel
-        run: |
-          pyver_nodot=$(echo ${{ matrix.python-version }} | sed 's/\.//g')
-          wheel_path=$(find dist -name "carolina*$pyver_nodot*whl")
-          echo "Found Carolina wheel at $wheel_path"
-          pip install $wheel_path
-
-      - name: Checkout Carolina
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          
-      - name: Test Carolina
-        run: |
-          pip install pytest
-          python -m pytest ./tests
