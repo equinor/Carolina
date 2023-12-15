@@ -81,7 +81,7 @@ jobs:
       id: restore-cached-package
       with:
         key: carolina_dist_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}_seba-${{ inputs.SEBA_TAG }}
-        path: /local/carolina_dist
+        path: ./carolina_dist
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
