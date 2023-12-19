@@ -242,6 +242,7 @@ jobs:
     - uses: actions/upload-artifact@v3
       id: cache-carolina_wheel
       with:
+        name: macOS_python_wheels
         path: /tmp/carolina_dist/carolina*
 
   tests:
