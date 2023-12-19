@@ -103,7 +103,9 @@ jobs:
       run: |
         source myvenv/bin/activate
         pip install pytest numpy
-        python -m pytest ./carolina-main/tests
+        cd carolina-main/tests
+        python -m pytest .
+        cd -
 
     - name: Upload wheel as artifact
       if: always()
