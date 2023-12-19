@@ -106,9 +106,12 @@ jobs:
           twine check dist/*
 
           # remove carolina dev-wheels if any
-          echo "Removes dev-wheels: matching on carolina*dev*.whl"
-          ls -lah dist/carolina*dev*.whl
-          rm dist/carolina*dev*.whl
+          echo "Looking for dev-wheels: matching on carolina*dev*.whl"
+          if [ -n "$(find dist . -name 'carolina*dev*.whl' -print -quit)" ]; then
+            echo "Removing dev-wheels.."
+            rm dist/carolina*dev*.whl
+          fi
+          ls dist
 
       - name: Publish to pypi
         uses: pypa/gh-action-pypi-publish@v1.8.10
