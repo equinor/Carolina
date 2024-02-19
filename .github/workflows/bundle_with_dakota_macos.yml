@@ -32,7 +32,13 @@ jobs:
       fail-fast: true
       matrix:
         python-version: [ '3.8','3.9','3.10','3.11','3.12' ]
-        os: [ 'macos-12', 'macos-13']
+        os: [ 'macos-13', 'macos-latest-xlarge']
+        exclude:
+          - os: macos-latest-xlarge
+            python-version: '3.8'
+          - os: macos-latest-xlarge
+            python-version: '3.9'
+
     runs-on: ${{ matrix.os }}
     name: "🛞 Build Wheels 🛞 (py${{ matrix.python-version }}, ${{ matrix.os }})"
     env:
@@ -107,7 +113,8 @@ jobs:
           https://github.com/snl-dakota/dakota/releases/download/v${{ inputs.DAKOTA_VERSION }}/dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli.tar.gz
 
         # CMake uses FC as fortran compiler
-        FORTRAN_FULLPATH=$(find /usr/local/Cellar -name "*gfortran")
+        BREW_CELLAR=$(brew --prefix)/Cellar
+        FORTRAN_FULLPATH=$(find $BREW_CELLAR -name "*gfortran")
         FORTRAN_PATH=$(dirname "$FORTRAN_FULLPATH")
         export PATH=$FORTRAN_PATH:$PATH
 
@@ -201,7 +208,8 @@ jobs:
         fortran_dylib_dir=$(dirname "$fortran_dylib_path")
         install_lib_dir=$HOME/$INSTALL_DIR/lib
         
-        libgccpath=$(dirname $(find /usr/local/Cellar/gcc -name libgcc_s.1.1.dylib 2>/dev/null | head -n 1))
+        BREW_CELLAR=$(brew --prefix)/Cellar
+        libgccpath=$(dirname $(find $BREW_CELLAR/gcc -name libgcc_s.1.1.dylib 2>/dev/null | head -n 1))
         libdakotapath=$(dirname $(find ${HOME}/${INSTALL_DIR}/lib -name libdakota_util.dylib 2>/dev/null | head -n 1))
 
         echo "libgccpath=$libgccpath"
@@ -256,7 +264,13 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [ '3.8','3.9','3.10','3.11','3.12' ]
-        os: ['macos-12', 'macos-13']
+        os: ['macos-13', 'macos-latest-xlarge']
+        exclude:
+          - os: macos-latest-xlarge
+            python-version: '3.8'
+          - os: macos-latest-xlarge
+            python-version: '3.9'
+
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
