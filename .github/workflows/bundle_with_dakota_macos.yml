@@ -32,7 +32,12 @@ jobs:
       fail-fast: true
       matrix:
         python-version: [ '3.8','3.9','3.10','3.11','3.12' ]
-        os: [ 'macos-12', 'macos-13']
+        os: [ 'macos-13', 'macos-latest-xlarge']
+        exclude:
+          - os: 'macos-latest-xlarge'
+            python-version: '3.8'
+          - os: 'macos-latest-xlarge'
+            python-version: '3.9'
     runs-on: ${{ matrix.os }}
     name: "🛞 Build Wheels 🛞 (py${{ matrix.python-version }}, ${{ matrix.os }})"
     env:
@@ -256,7 +261,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [ '3.8','3.9','3.10','3.11','3.12' ]
-        os: ['macos-12', 'macos-13']
+        os: ['macos-13', 'macos-latest-xlarge']
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
