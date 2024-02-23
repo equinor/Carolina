@@ -19,9 +19,6 @@ readme = "README.md"
 license = {text = "Apache 2.0"}
 dynamic = ["version"]
 
-[tool.setuptools.wheel]
-universal = false
-
 classifiers = ['Intended Audience :: Science/Research',
                'Natural Language :: English',
                'License :: OSI Approved :: Apache Software License',
