@@ -226,7 +226,12 @@ jobs:
         pip debug -v|grep -v macosx_10_
 
         pip install build
-        python -m build --wheel . --outdir /tmp/carolina_dist_unfixed
+
+        if [ ${{ matrix.os }} == "macos-latest-xlarge" ]; then
+            python -m build --wheel  --plat-name=macosx-11.0-arm64 . --outdir /tmp/carolina_dist_unfixed
+        else
+            python -m build --wheel . --outdir /tmp/carolina_dist_unfixed
+        fi
 
         echo "Pip list ...... "
         pip list | grep carolina
