@@ -232,8 +232,6 @@ jobs:
         echo "$(python -c "import platform; mac_version=platform.mac_ver(); print('macOS version from py: '+mac_version[0])")"
         pip debug -v|grep -v macosx_10_
 
-        #export ARCHFLAGS="-arch aarch64"
-
         pip install build
 
         python -m build --wheel . --outdir /tmp/carolina_dist_unfixed
@@ -255,10 +253,10 @@ jobs:
                 
         # Avoid MacOS security features prohibiting setting DYLD_LIBRARY_PATH
         # ref issue: https://github.com/pypa/cibuildwheel/issues/816
-        EXTENDED_DYLD_LIBRARY_PATH="${libgccpath}:${HOME}/${INSTALL_DIR}/lib:$INSTALL_DIR/bin"
+        #EXTENDED_DYLD_LIBRARY_PATH="${libgccpath}:${HOME}/${INSTALL_DIR}/lib:$INSTALL_DIR/bin"
 
-        echo "delocate-listdeps"
-        echo ${EXTENDED_DYLD_LIBRARY_PATH}
+        #echo "delocate-listdeps"
+        #echo ${EXTENDED_DYLD_LIBRARY_PATH}
 
         #DYLD_LIBRARY_PATH=${EXTENDED_DYLD_LIBRARY_PATH} delocate-listdeps $unfixed_wheel_path
 
@@ -272,8 +270,15 @@ jobs:
     - uses: actions/upload-artifact@v3
       id: cache-carolina_wheel_debug
       with:
-        name: macOS_python_wheels
+        name: macOS_python_wheels_pre
         path: /tmp/carolina_dist_unfixed
+
+    - uses: actions/upload-artifact@v3
+      id: cache-carolina_wheel_debug_extra
+      with:
+        name: macOS_python_wheels_extra
+        path: .
+
 
     - uses: actions/upload-artifact@v3
       id: cache-carolina_wheel
