@@ -179,6 +179,8 @@ jobs:
       run: |
         cd $HOME
         tar zxf ${GITHUB_WORKSPACE}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz
+        mkdir /tmp/cache
+        cp ${GITHUB_WORKSPACE}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz /tmp/cache
     - name: Set some env vars
       run: |
         echo "PATH=${PATH}:${HOME}/${INSTALL_DIR}/bin"
@@ -274,11 +276,10 @@ jobs:
         path: /tmp/carolina_dist_unfixed
 
     - uses: actions/upload-artifact@v3
-      id: cache-carolina_wheel_debug_extra
+      id: cache-carolina_wheel_debug_cache
       with:
-        name: macOS_python_wheels_extra
-        path: .
-
+        name: macOS_python_wheels_cache
+        path: /tmp/cache
 
     - uses: actions/upload-artifact@v3
       id: cache-carolina_wheel
