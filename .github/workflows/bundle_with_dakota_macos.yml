@@ -258,14 +258,15 @@ jobs:
         EXTENDED_DYLD_LIBRARY_PATH="${libgccpath}:${HOME}/${INSTALL_DIR}/lib:$INSTALL_DIR/bin"
 
         echo "delocate-listdeps"
+        echo ${EXTENDED_DYLD_LIBRARY_PATH}
 
-        DYLD_LIBRARY_PATH=${EXTENDED_DYLD_LIBRARY_PATH} delocate-listdeps $unfixed_wheel_path
+        #DYLD_LIBRARY_PATH=${EXTENDED_DYLD_LIBRARY_PATH} delocate-listdeps $unfixed_wheel_path
 
-        echo "delocate-wheels"
+        #echo "delocate-wheels"
 
-        DYLD_LIBRARY_PATH=${EXTENDED_DYLD_LIBRARY_PATH} delocate-wheel -w /tmp/carolina_dist -v $unfixed_wheel_path
-        echo "Output new carolina wheel to /tmp/carolina_dist"
-        ls -lh /tmp/carolina_dist
+        #DYLD_LIBRARY_PATH=${EXTENDED_DYLD_LIBRARY_PATH} delocate-wheel -w /tmp/carolina_dist -v $unfixed_wheel_path
+        #echo "Output new carolina wheel to /tmp/carolina_dist"
+        #ls -lh /tmp/carolina_dist
         echo $(env) >> /tmp/carolina_dist_unfixed/environment.txt
 
     - uses: actions/upload-artifact@v3
