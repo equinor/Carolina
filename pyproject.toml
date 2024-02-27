@@ -17,7 +17,7 @@ authors = [
 ]
 readme = "README.md"
 license = {text = "Apache 2.0"}
-dynamic = ["version"]
+dynamic = ["version", "dependencies"]
 
 classifiers = ['Intended Audience :: Science/Research',
                'Natural Language :: English',
