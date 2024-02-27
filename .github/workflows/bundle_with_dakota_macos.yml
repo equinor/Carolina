@@ -32,13 +32,14 @@ jobs:
       fail-fast: true
       matrix:
         python-version: [ '3.8','3.9','3.10','3.11','3.12' ]
-        os: [ 'macos-12', 'macos-13']
+        os: [ 'macos-13', 'macos-latest-xlarge']
     runs-on: ${{ matrix.os }}
-    name: "🛞 Build Wheels 🛞 (py${{ matrix.python-version }}, ${{ matrix.os }})"
+    name: "Build 🛞 (${{ matrix.python-version }}, ${{ matrix.os }})"
     env:
       INSTALL_DIR: ${{ inputs.INSTALL_DIR }}
       SYSTEM_VERSION_COMPAT: 0
     steps:
+
     - name: Echo env and inputs
       run: |
         echo "inputs.ERT_SHOW_BACKTRACE=${{ inputs.ERT_SHOW_BACKTRACE }}"
@@ -47,9 +48,11 @@ jobs:
         echo "inputs.DAKOTA_VERSION=${{ inputs.DAKOTA_VERSION }}"
         echo "inputs.INSTALL_DIR=${{ inputs.INSTALL_DIR }}"
         echo "inputs.SEBA_TAG=${{ inputs.SEBA_TAG }}"
+
     - name: Set up Homebrew
       id: set-up-homebrew
       uses: Homebrew/actions/setup-homebrew@master
+
     - name: Cache Homebrew Bundler RubyGems
       id: cache
       uses: actions/cache@v3
@@ -57,15 +60,35 @@ jobs:
         path: ${{ steps.set-up-homebrew.outputs.gems-path }}
         key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
         restore-keys: ${{ runner.os }}-rubygems-
+
     - name: Install Homebrew Bundler RubyGems
       if: steps.cache.outputs.cache-hit != 'true'
       run: brew install-bundler-gems
+
+    - name: Install Homebrew Python
+      if: matrix.os == 'macos-latest-xlarge'
+      run: |
+        brew install python@${{ matrix.python-version }}
+        BREW_BIN=$(brew --prefix)/bin
+        PYTHON3=$BREW_BIN/python${{ matrix.python-version }}
+
+        $PYTHON3 -m venv /tmp/build-env
+        source /tmp/build-env/bin/activate
+        python --version
+
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      if: matrix.os != 'macos-latest-xlarge'
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Check MacOS version
       run: |
+        if [ -d /tmp/build-env ]; then
+          source /tmp/build-env/bin/activate
+        fi
+        python --version
+
         echo "matrix.os = ${{ matrix.os }}"
         sw_vers -productVersion
         which python
@@ -76,14 +99,25 @@ jobs:
       with:
         key: ${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}_seba-${{ inputs.SEBA_TAG }}
         path: ${{ github.workspace }}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz
+
     - name: Install dependencies
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
+        if [ -d /tmp/build-env ]; then
+          source /tmp/build-env/bin/activate
+        fi
+
         python -m pip install -U pip
         python -m pip install numpy
+
     - name: Build needed boost libraries
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
+        if [ -d /tmp/build-env ]; then
+          source /tmp/build-env/bin/activate
+        fi
+        python --version
+
         mkdir -p /tmp/build
         cd /tmp/build
         BOOST_VERSION_UNDERSCORES=$(echo ${{ inputs.BOOST_VERSION }} | sed 's/\./_/g')
@@ -97,9 +131,18 @@ jobs:
         sed -i '' "s|.*using python.*|$python_bin_include_lib|" project-config.jam
         cd /tmp/build/boost_${BOOST_VERSION_UNDERSCORES}
         ./b2 install -j4 -a cxxflags="-std=c++17" --prefix=${GITHUB_WORKSPACE}/${INSTALL_DIR}
+
     - name: Build dakota
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
+        if [ -d /tmp/build-env ]; then
+          source /tmp/build-env/bin/activate
+        fi
+        python --version
+
+        export PYTHON_EXECUTABLE=$(which python)
+        export PYTHON_INCLUDE_DIR=$(python -c "from sysconfig import get_paths as gp; print(gp()['include'])")
+
         mkdir -p /tmp/build
         cd /tmp/build
 
@@ -107,7 +150,8 @@ jobs:
           https://github.com/snl-dakota/dakota/releases/download/v${{ inputs.DAKOTA_VERSION }}/dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli.tar.gz
 
         # CMake uses FC as fortran compiler
-        FORTRAN_FULLPATH=$(find /usr/local/Cellar -name "*gfortran")
+        BREW_CELLAR=$(brew --prefix)/Cellar
+        FORTRAN_FULLPATH=$(find $BREW_CELLAR -name "*gfortran")
         FORTRAN_PATH=$(dirname "$FORTRAN_FULLPATH")
         export PATH=$FORTRAN_PATH:$PATH
 
@@ -123,7 +167,7 @@ jobs:
                https://github.com/snl-dakota/dakota/releases/download/v${{ inputs.DAKOTA_VERSION }}/dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli.zip
 
             # extract file from zip archive only
-            unzip dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli.zip
+            unzip -qq dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli.zip
 
             cp $EIGEN_CMAKE_PATH/Eigen3Config.cmake ..
             cd ..
@@ -151,27 +195,33 @@ jobs:
           -DDAKOTA_NO_FIND_TRILINOS:BOOL=TRUE \
           -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}/${INSTALL_DIR}" \
           ..
+
         make -j4 install
+
     - name: Package built boost and dakota
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
         cd ${GITHUB_WORKSPACE}
         tar zcf python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz ${INSTALL_DIR}
+
     - name: Cache boost and dakota
       if: steps.cache-package.outputs.cache-hit != 'true'
       uses: actions/cache/save@v3
       with:
         path: ${{ github.workspace }}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz
         key: ${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}_seba-${{ inputs.SEBA_TAG }}
+
     - uses: actions/cache/restore@v3
       id: restore-cached-package
       with:
         key: ${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}_seba-${{ inputs.SEBA_TAG }}
         path: ${{ github.workspace }}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz
+
     - name: Unpack boost + dakota
       run: |
         cd $HOME
         tar zxf ${GITHUB_WORKSPACE}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz
+
     - name: Set some env vars
       run: |
         echo "PATH=${PATH}:${HOME}/${INSTALL_DIR}/bin"
@@ -181,12 +231,30 @@ jobs:
         echo "PATH=${PATH}:${HOME}/${INSTALL_DIR}/bin" >> ${GITHUB_ENV}
         echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${HOME}/${INSTALL_DIR}/lib" >> ${GITHUB_ENV}
         echo "DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${HOME}/${INSTALL_DIR}/lib:$INSTALL_DIR/bin" >> ${GITHUB_ENV}
+
     - name: Checkout Carolina
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
+
     - name: Install Carolina and make wheel
       run: |
+        if [ -d /tmp/build-env ]; then
+          source /tmp/build-env/bin/activate
+        fi
+        python --version
+
+        arch_ver=$(uname -m)
+
+        # hint regarding architecture to avoid universal wheel generated
+        export _PYTHON_HOST_PLATFORM="macosx-11.0-$arch_ver"
+        export ARCHFLAGS="-arch $arch_ver"
+
+        # the arm64 builds require deployment target >= 13.0
+        if [ "$arch_ver" == "arm64" ]; then
+          export MACOSX_DEPLOYMENT_TARGET="13.0"
+        fi
+
         pip install delocate
         python -m pip install .
         PYTHON_VERSION_TRIM=$(echo ${{ matrix.python-version }} | tr -d ".")
@@ -201,7 +269,8 @@ jobs:
         fortran_dylib_dir=$(dirname "$fortran_dylib_path")
         install_lib_dir=$HOME/$INSTALL_DIR/lib
         
-        libgccpath=$(dirname $(find /usr/local/Cellar/gcc -name libgcc_s.1.1.dylib 2>/dev/null | head -n 1))
+        BREW_CELLAR=$(brew --prefix)/Cellar
+        libgccpath=$(dirname $(find $BREW_CELLAR/gcc -name libgcc_s.1.1.dylib 2>/dev/null | head -n 1))
         libdakotapath=$(dirname $(find ${HOME}/${INSTALL_DIR}/lib -name libdakota_util.dylib 2>/dev/null | head -n 1))
 
         echo "libgccpath=$libgccpath"
@@ -256,13 +325,15 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [ '3.8','3.9','3.10','3.11','3.12' ]
-        os: ['macos-12', 'macos-13']
+        os: ['macos-13', 'macos-latest-xlarge']
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
+
     - name: Set up Python ${{ matrix.python-version }}
+      if: matrix.os != 'macos-latest-xlarge'
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
@@ -270,18 +341,48 @@ jobs:
         cache-dependency-path: |
           setup.py
           pyproject.toml
+
+    - name: Set up Homebrew
+      if: matrix.os == 'macos-latest-xlarge'
+      id: set-up-homebrew
+      uses: Homebrew/actions/setup-homebrew@master
+
+    - name: Install Homebrew Python
+      if: matrix.os == 'macos-latest-xlarge'
+      run: |
+        brew install python@${{ matrix.python-version }}
+        BREW_BIN=$(brew --prefix)/bin
+        PYTHON3=$BREW_BIN/python${{ matrix.python-version }}
+        $PYTHON3 -m venv /tmp/build-env
+        source /tmp/build-env/bin/activate
+        python --version
+
     - name: Download Carolina artifact
       uses: actions/download-artifact@v3
       with:
         path: /tmp/artifacts
+
     - name: Find the Carolina wheel
       run: |
+        if [ -d /tmp/build-env ]; then
+          source /tmp/build-env/bin/activate
+        fi
+        python --version
+
         pyver_nodot=$(echo ${{ matrix.python-version }} | sed 's/\.//g')
-        wheel_path=$(find /tmp/artifacts -name "carolina*-cp$pyver_nodot*-cp$pyver_nodot*macos*whl")
+        arch_ver=$(uname -m)
+        ls -lah /tmp/artifacts/macOS_python_wheels
+        wheel_path=$(find /tmp/artifacts -name "carolina*-cp$pyver_nodot*-cp$pyver_nodot*macos*$arch_ver*whl")
+
         echo "Found Carolina wheel at $wheel_path"
         pip install $wheel_path
 
     - name: Test Carolina
       run: |
+        if [ -d /tmp/build-env ]; then
+          source /tmp/build-env/bin/activate
+        fi
+        python --version
+
         pip install pytest numpy
         python -m pytest ./tests

@@ -28,7 +28,7 @@ on:
 
 jobs:
   build_wheels:
-    name: 🛞 Build Wheels 🛞
+    name: Build 🛞
     timeout-minutes: 120
     strategy:
       fail-fast: false
