@@ -5,7 +5,6 @@ env:
   NO_PROJECT_RES: 1
   BOOST_VERSION: 1.84.0
   DAKOTA_VERSION: 6.19.0
-  SEBA_TAG: 7.3.1
   INSTALL_DIR: local
   NEEDS_REBUILD: true
 
@@ -29,7 +28,6 @@ jobs:
       NO_PROJECT_RES: ${{ env.NO_PROJECT_RES }}
       BOOST_VERSION: ${{ env.BOOST_VERSION }}
       DAKOTA_VERSION: ${{ env.DAKOTA_VERSION }}
-      SEBA_TAG: ${{ env.SEBA_TAG }}
       INSTALL_DIR: ${{ env.INSTALL_DIR }}
       NEEDS_REBUILD: ${{ env.NEEDS_REBUILD }}
 
@@ -38,7 +36,7 @@ jobs:
         name: Check cache for already built wheels
         id: cache-package
         with:
-          key: carolina_wheels_boost${{ env.BOOST_VERSION }}_dakota${{ env.DAKOTA_VERSION }}_seba${{ env.SEBA_TAG }}
+          key: carolina_wheels_boost${{ env.BOOST_VERSION }}_dakota${{ env.DAKOTA_VERSION }}
           path: /tmp/dist
       - name: Write cache status to outputs
         if: steps.cache-package.outputs.cache-hit == 'true'
@@ -54,7 +52,6 @@ jobs:
       NO_PROJECT_RES: ${{ needs.build-settings.outputs.NO_PROJECT_RES}}
       BOOST_VERSION: ${{ needs.build-settings.outputs.BOOST_VERSION}}
       DAKOTA_VERSION: ${{ needs.build-settings.outputs.DAKOTA_VERSION}}
-      SEBA_TAG: ${{ needs.build-settings.outputs.SEBA_TAG}}
       INSTALL_DIR: ${{ needs.build-settings.outputs.INSTALL_DIR}}
     secrets: inherit
 
@@ -67,7 +64,6 @@ jobs:
       NO_PROJECT_RES: ${{ needs.build-settings.outputs.NO_PROJECT_RES}}
       BOOST_VERSION: ${{ needs.build-settings.outputs.BOOST_VERSION}}
       DAKOTA_VERSION: ${{ needs.build-settings.outputs.DAKOTA_VERSION}}
-      SEBA_TAG: ${{ needs.build-settings.outputs.SEBA_TAG}}
       INSTALL_DIR: ${{ needs.build-settings.outputs.INSTALL_DIR}}
     secrets: inherit
 
@@ -91,12 +87,12 @@ jobs:
         uses: actions/cache/save@v3
         with:
           path: dist
-          key: carolina_wheels_boost${{ needs.build-settings.outputs.BOOST_VERSION }}_dakota${{ needs.build-settings.outputs.DAKOTA_VERSION }}_seba${{ needs.build-settings.outputs.SEBA_TAG }}
+          key: carolina_wheels_boost${{ needs.build-settings.outputs.BOOST_VERSION }}_dakota${{ needs.build-settings.outputs.DAKOTA_VERSION }}
 
       - uses: actions/cache/restore@v3
         id: restore-cached-package
         with:
-          key: carolina_wheels_boost${{ needs.build-settings.outputs.BOOST_VERSION }}_dakota${{ needs.build-settings.outputs.DAKOTA_VERSION }}_seba${{ needs.build-settings.outputs.SEBA_TAG }}
+          key: carolina_wheels_boost${{ needs.build-settings.outputs.BOOST_VERSION }}_dakota${{ needs.build-settings.outputs.DAKOTA_VERSION }}
           path: dist
 
       - name: Validate dist with twine check
