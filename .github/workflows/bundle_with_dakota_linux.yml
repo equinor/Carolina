@@ -38,19 +38,35 @@ jobs:
       NO_PROJECT_RES: ${{ inputs.NO_PROJECT_RES }}
 
     steps:
-    - uses: actions/cache@v3
-      id: cache-package-check
-      with:
-        key: carolina_dist_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
-        path: ./carolina_dist
-
     - uses: actions/checkout@v3
-      if: steps.cache-package-check.outputs.cache-hit != 'true'
       with:
         fetch-depth: 0
 
-    - name: Build Linux Wheel
+    - uses: actions/cache@v3
+      id: cache-package-check
+      with:
+        key: carolina_deps_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
+        path: ./deps_build
+
+    - name: Build Boost & Dakota
       if: steps.cache-package-check.outputs.cache-hit != 'true'
+      uses: docker://quay.io/pypa/manylinux2014_x86_64
+      env:
+        PYTHON_VERSION: ${{ matrix.python-version }}
+        BOOST_VERSION: ${{ inputs.BOOST_VERSION }}
+        DAKOTA_VERSION: ${{ inputs.DAKOTA_VERSION }}
+      with:
+        entrypoint: /bin/bash
+        args: '-c "sh dakota_manylinux_install_files/build_deps_gha.sh ${{ matrix.python-version }}"'
+
+    - uses: actions/cache/save@v3
+      if: steps.cache-package-check.outputs.cache-hit != 'true'
+      id: cache-package-store
+      with:
+        key: carolina_deps_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
+        path: ./deps_build
+
+    - name: Build Linux Wheel
       uses: docker://quay.io/pypa/manylinux2014_x86_64
       env:
         PYTHON_VERSION: ${{ matrix.python-version }}
@@ -60,25 +76,11 @@ jobs:
         entrypoint: /bin/bash
         args: '-c "sh dakota_manylinux_install_files/build_wheels_gha.sh ${{ matrix.python-version }}"'
 
-    - uses: actions/cache/save@v3
-      if: steps.cache-package-check.outputs.cache-hit != 'true'
-      id: cache-package-store
-      with:
-        key: carolina_dist_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
-        path: ./carolina_dist
-
     - name: Checkout Carolina
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
         path: carolina-main
-
-    - name: Get Carolina wheel from cache
-      uses: actions/cache@v3
-      id: restore-cached-package
-      with:
-        key: carolina_dist_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
-        path: ./carolina_dist
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
@@ -86,11 +88,11 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Set up python venv
-      run: python -m venv myvenv
+      run: python -m venv othervenv
 
     - name: Install Carolina from wheel
       run: |
-        source myvenv/bin/activate
+        source othervenv/bin/activate
         pyver_nodot=$(echo ${{ matrix.python-version }} | sed 's/\.//g')
         wheel_path=$(find carolina_dist -name "carolina*$pyver_nodot*whl")
         echo "Found Carolina wheel at $wheel_path"
@@ -98,8 +100,8 @@ jobs:
 
     - name: Test Carolina
       run: |
-        source myvenv/bin/activate
-        pip install pytest numpy
+        source othervenv/bin/activate
+        pip install pytest
         cd carolina-main/tests
         python -m pytest .
         cd -
