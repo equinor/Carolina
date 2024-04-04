@@ -28,8 +28,15 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: [ '3.8','3.9','3.10','3.11','3.12' ]
-        os: [ 'macos-13', 'macos-latest-xlarge']
+        # https://github.com/actions/runner-images?tab=readme-ov-file#available-images
+        python-version: [ '3.8', '3.11', '3.12' ]
+        os: [ 'macos-14', 'macos-14-large', 'macos-13' ]
+        exclude:
+          - os: 'macos-14'
+            python-version: '3.8'
+          - os: 'macos-14-large'
+            python-version: '3.8'
+
     runs-on: ${{ matrix.os }}
     name: "Build 🛞 (${{ matrix.python-version }}, ${{ matrix.os }})"
     env:
@@ -51,7 +58,7 @@ jobs:
 
     - name: Cache Homebrew Bundler RubyGems
       id: cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ steps.set-up-homebrew.outputs.gems-path }}
         key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
@@ -61,28 +68,13 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: brew install-bundler-gems
 
-    - name: Install Homebrew Python
-      if: matrix.os == 'macos-latest-xlarge'
-      run: |
-        brew install python@${{ matrix.python-version }}
-        BREW_BIN=$(brew --prefix)/bin
-        PYTHON3=$BREW_BIN/python${{ matrix.python-version }}
-
-        $PYTHON3 -m venv /tmp/build-env
-        source /tmp/build-env/bin/activate
-        python --version
-
     - name: Set up Python ${{ matrix.python-version }}
-      if: matrix.os != 'macos-latest-xlarge'
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
 
     - name: Check MacOS version
       run: |
-        if [ -d /tmp/build-env ]; then
-          source /tmp/build-env/bin/activate
-        fi
         python --version
 
         echo "matrix.os = ${{ matrix.os }}"
@@ -90,7 +82,7 @@ jobs:
         which python
         which pip
         python -c "import platform; mac_version=platform.mac_ver(); print('macOS version: '+mac_version[0])"
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       id: cache-package
       with:
         key: ${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
@@ -99,19 +91,12 @@ jobs:
     - name: Install dependencies
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
-        if [ -d /tmp/build-env ]; then
-          source /tmp/build-env/bin/activate
-        fi
-
         python -m pip install -U pip
         python -m pip install numpy
 
     - name: Build needed boost libraries
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
-        if [ -d /tmp/build-env ]; then
-          source /tmp/build-env/bin/activate
-        fi
         python --version
 
         mkdir -p /tmp/build
@@ -131,9 +116,6 @@ jobs:
     - name: Build dakota
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
-        if [ -d /tmp/build-env ]; then
-          source /tmp/build-env/bin/activate
-        fi
         python --version
 
         export PYTHON_EXECUTABLE=$(which python)
@@ -202,12 +184,12 @@ jobs:
 
     - name: Cache boost and dakota
       if: steps.cache-package.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@v4
       with:
         path: ${{ github.workspace }}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz
         key: ${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
 
-    - uses: actions/cache/restore@v3
+    - uses: actions/cache/restore@v4
       id: restore-cached-package
       with:
         key: ${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
@@ -229,15 +211,12 @@ jobs:
         echo "DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${HOME}/${INSTALL_DIR}/lib:$INSTALL_DIR/bin" >> ${GITHUB_ENV}
 
     - name: Checkout Carolina
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
     - name: Install Carolina and make wheel
       run: |
-        if [ -d /tmp/build-env ]; then
-          source /tmp/build-env/bin/activate
-        fi
         python --version
 
         arch_ver=$(uname -m)
@@ -246,12 +225,14 @@ jobs:
         export _PYTHON_HOST_PLATFORM="macosx-11.0-$arch_ver"
         export ARCHFLAGS="-arch $arch_ver"
 
-        # the arm64 builds require deployment target >= 13.0
+        target_version=$(sw_vers --productVersion | cut -d . -f 1)
+
+        # the arm64 builds require deployment targets >= 13.0
         if [ "$arch_ver" == "arm64" ]; then
-          export MACOSX_DEPLOYMENT_TARGET="13.0"
+          export MACOSX_DEPLOYMENT_TARGET="${target_version}.0"
         fi
 
-        pip install delocate
+        pip install delocate==0.10.7
         python -m pip install .
         PYTHON_VERSION_TRIM=$(echo ${{ matrix.python-version }} | tr -d ".")
         echo $PYTHON_VERSION_TRIM
@@ -304,10 +285,10 @@ jobs:
         DYLD_LIBRARY_PATH=${EXTENDED_DYLD_LIBRARY_PATH} delocate-wheel -w /tmp/carolina_dist -v $unfixed_wheel_path 
         echo "Output new carolina wheel to /tmp/carolina_dist"
         ls -lh /tmp/carolina_dist
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       id: cache-carolina_wheel
       with:
-        name: macOS_python_wheels
+        name: ${{ matrix.os }}_py-${{ matrix.python-version }}_wheel
         path: /tmp/carolina_dist/carolina*
 
   tests:
@@ -320,8 +301,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ '3.8','3.9','3.10','3.11','3.12' ]
-        os: ['macos-13', 'macos-latest-xlarge']
+        python-version: [ '3.8', '3.11', '3.12' ]
+        os: [ 'macos-14', 'macos-14-large', 'macos-13' ]
+        exclude:
+          - os: 'macos-14'
+            python-version: '3.8'
+          - os: 'macos-14-large'
+            python-version: '3.8'
+
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
@@ -329,8 +316,7 @@ jobs:
         fetch-depth: 0
 
     - name: Set up Python ${{ matrix.python-version }}
-      if: matrix.os != 'macos-latest-xlarge'
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         cache: "pip"
@@ -338,46 +324,24 @@ jobs:
           setup.py
           pyproject.toml
 
-    - name: Set up Homebrew
-      if: matrix.os == 'macos-latest-xlarge'
-      id: set-up-homebrew
-      uses: Homebrew/actions/setup-homebrew@master
-
-    - name: Install Homebrew Python
-      if: matrix.os == 'macos-latest-xlarge'
-      run: |
-        brew install python@${{ matrix.python-version }}
-        BREW_BIN=$(brew --prefix)/bin
-        PYTHON3=$BREW_BIN/python${{ matrix.python-version }}
-        $PYTHON3 -m venv /tmp/build-env
-        source /tmp/build-env/bin/activate
-        python --version
-
     - name: Download Carolina artifact
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         path: /tmp/artifacts
 
     - name: Find the Carolina wheel
       run: |
-        if [ -d /tmp/build-env ]; then
-          source /tmp/build-env/bin/activate
-        fi
         python --version
 
         pyver_nodot=$(echo ${{ matrix.python-version }} | sed 's/\.//g')
         arch_ver=$(uname -m)
-        ls -lah /tmp/artifacts/macOS_python_wheels
-        wheel_path=$(find /tmp/artifacts -name "carolina*-cp$pyver_nodot*-cp$pyver_nodot*macos*$arch_ver*whl")
+        wheel_path=$(find /tmp/artifacts/${{ matrix.os }}_py-${{ matrix.python-version }}_wheel -name "carolina*-cp$pyver_nodot*-cp$pyver_nodot*macos*$arch_ver*whl")
 
         echo "Found Carolina wheel at $wheel_path"
         pip install $wheel_path
 
     - name: Test Carolina
       run: |
-        if [ -d /tmp/build-env ]; then
-          source /tmp/build-env/bin/activate
-        fi
         python --version
 
         pip install pytest numpy
