@@ -224,7 +224,7 @@ jobs:
         # hint regarding architecture to avoid universal wheel generated
         export _PYTHON_HOST_PLATFORM="macosx-11.0-$arch_ver"
         export ARCHFLAGS="-arch $arch_ver"
-
+        export MACOSX_DEPLOYMENT_TARGET="11.0"
         target_version=$(sw_vers --productVersion | cut -d . -f 1)
 
         # the arm64 builds require deployment targets >= 13.0
@@ -232,7 +232,9 @@ jobs:
           export MACOSX_DEPLOYMENT_TARGET="${target_version}.0"
         fi
 
-        pip install delocate==0.10.7
+        echo "$MACOSX_DEPLOYMENT_TARGET" >> $GITHUB_STEP_SUMMARY
+
+        pip install delocate
         python -m pip install .
         PYTHON_VERSION_TRIM=$(echo ${{ matrix.python-version }} | tr -d ".")
         echo $PYTHON_VERSION_TRIM
