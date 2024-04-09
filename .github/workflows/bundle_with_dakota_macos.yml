@@ -284,6 +284,13 @@ jobs:
         # ref issue: https://github.com/pypa/cibuildwheel/issues/816
         EXTENDED_DYLD_LIBRARY_PATH="${libgccpath}:${HOME}/${INSTALL_DIR}/lib:$INSTALL_DIR/bin"
         DYLD_LIBRARY_PATH=${EXTENDED_DYLD_LIBRARY_PATH} delocate-listdeps $unfixed_wheel_path
+
+        echo "Done"
+
+        DYLD_LIBRARY_PATH=${EXTENDED_DYLD_LIBRARY_PATH} delocate-listdeps $unfixed_wheel_path | otool -l
+
+        echo "Delocating wheel .."
+
         DYLD_LIBRARY_PATH=${EXTENDED_DYLD_LIBRARY_PATH} delocate-wheel -w /tmp/carolina_dist -v $unfixed_wheel_path 
         echo "Output new carolina wheel to /tmp/carolina_dist"
         ls -lh /tmp/carolina_dist
