@@ -234,7 +234,7 @@ jobs:
 
         echo "$MACOSX_DEPLOYMENT_TARGET" >> $GITHUB_STEP_SUMMARY
 
-        pip install delocate
+        pip install delocate==0.10.7
         python -m pip install .
         PYTHON_VERSION_TRIM=$(echo ${{ matrix.python-version }} | tr -d ".")
         echo $PYTHON_VERSION_TRIM
