@@ -3,7 +3,7 @@ name: 🏎️ Make & Test Wheels 🏎️
 env: 
   ERT_SHOW_BACKTRACE: 1
   NO_PROJECT_RES: 1
-  BOOST_VERSION: 1.84.0
+  BOOST_VERSION: 1.85.0
   DAKOTA_VERSION: 6.19.0
   INSTALL_DIR: local
   NEEDS_REBUILD: true
