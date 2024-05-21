@@ -88,6 +88,10 @@ jobs:
         key: ${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
         path: ${{ github.workspace }}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz
 
+    - name: Install brew gcc
+      if: steps.cache-package.outputs.cache-hit != 'true'
+      run: brew install gcc
+
     - name: Install dependencies
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
