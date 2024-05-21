@@ -88,6 +88,10 @@ jobs:
         key: ${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
         path: ${{ github.workspace }}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz
 
+    - name: Install brew gcc
+      if: steps.cache-package.outputs.cache-hit != 'true'
+      run: brew install gcc
+
     - name: Install dependencies
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
@@ -132,6 +136,9 @@ jobs:
         FORTRAN_FULLPATH=$(find $BREW_CELLAR -name "*gfortran")
         FORTRAN_PATH=$(dirname "$FORTRAN_FULLPATH")
         export PATH=$FORTRAN_PATH:$PATH
+
+        gcc --version
+        gfortran --version
 
         tar xf dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli.tar.gz
         EIGEN_CMAKE_PATH=dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli/packages/external/eigen3/share/eigen3/cmake
