@@ -49,6 +49,7 @@ jobs:
         path: ./deps_build
 
     - name: Build Boost & Dakota
+      timeout-minutes: 75
       if: steps.cache-package-check.outputs.cache-hit != 'true'
       uses: docker://quay.io/pypa/manylinux2014_x86_64
       env:

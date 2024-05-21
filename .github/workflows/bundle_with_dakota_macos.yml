@@ -99,6 +99,7 @@ jobs:
         python -m pip install numpy
 
     - name: Build needed boost libraries
+      timeout-minutes: 30
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
         python --version
@@ -118,6 +119,7 @@ jobs:
         ./b2 install -j4 -a cxxflags="-std=c++17" --prefix=${GITHUB_WORKSPACE}/${INSTALL_DIR}
 
     - name: Build dakota
+      timeout-minutes: 30
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
         python --version
