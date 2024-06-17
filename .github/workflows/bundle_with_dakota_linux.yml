@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.8','3.9','3.10','3.11','3.12']
+        python-version: ['3.11']
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     env:
@@ -49,6 +49,7 @@ jobs:
         path: ./deps_build
 
     - name: Build Boost & Dakota
+      timeout-minutes: 75
       if: steps.cache-package-check.outputs.cache-hit != 'true'
       uses: docker://quay.io/pypa/manylinux2014_x86_64
       env:

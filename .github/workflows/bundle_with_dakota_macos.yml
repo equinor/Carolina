@@ -29,8 +29,8 @@ jobs:
       fail-fast: true
       matrix:
         # https://github.com/actions/runner-images?tab=readme-ov-file#available-images
-        python-version: [ '3.8', '3.11', '3.12' ]
-        os: [ 'macos-14', 'macos-14-large', 'macos-13' ]
+        python-version: [ '3.11' ]
+        os: [ 'macos-14' ]
         exclude:
           - os: 'macos-14'
             python-version: '3.8'
@@ -99,6 +99,7 @@ jobs:
         python -m pip install numpy
 
     - name: Build needed boost libraries
+      timeout-minutes: 30
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
         python --version
@@ -115,9 +116,12 @@ jobs:
         python_bin_include_lib="    using python : $python_version : $(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"$(which python) : {g['include']} : {g['stdlib']} ;\")")"
         sed -i '' "s|.*using python.*|$python_bin_include_lib|" project-config.jam
         cd /tmp/build/boost_${BOOST_VERSION_UNDERSCORES}
-        ./b2 install -j4 -a cxxflags="-std=c++17" --prefix=${GITHUB_WORKSPACE}/${INSTALL_DIR}
+
+        ncpu=$(sysctl -n hw.ncpu)
+        ./b2 install -j"$ncpu" -a cxxflags="-std=c++17" --prefix=${GITHUB_WORKSPACE}/${INSTALL_DIR}
 
     - name: Build dakota
+      timeout-minutes: 30
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
         python --version
@@ -136,6 +140,9 @@ jobs:
         FORTRAN_FULLPATH=$(find $BREW_CELLAR -name "*gfortran")
         FORTRAN_PATH=$(dirname "$FORTRAN_FULLPATH")
         export PATH=$FORTRAN_PATH:$PATH
+
+        gcc --version
+        gfortran --version
 
         tar xf dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli.tar.gz
         EIGEN_CMAKE_PATH=dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli/packages/external/eigen3/share/eigen3/cmake
@@ -178,7 +185,8 @@ jobs:
           -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}/${INSTALL_DIR}" \
           ..
 
-        make -j4 install
+        ncpu=$(sysctl -n hw.ncpu)
+        make -j"$ncpu" install
 
     - name: Package built boost and dakota
       if: steps.cache-package.outputs.cache-hit != 'true'
@@ -305,8 +313,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ '3.8', '3.11', '3.12' ]
-        os: [ 'macos-14', 'macos-14-large', 'macos-13' ]
+        python-version: [ '3.11' ]
+        os: [ 'macos-14' ]
         exclude:
           - os: 'macos-14'
             python-version: '3.8'
