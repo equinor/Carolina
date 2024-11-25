@@ -29,13 +29,8 @@ jobs:
       fail-fast: true
       matrix:
         # https://github.com/actions/runner-images?tab=readme-ov-file#available-images
-        python-version: [ '3.8', '3.11', '3.12' ]
-        os: [ 'macos-14', 'macos-14-large', 'macos-13' ]
-        exclude:
-          - os: 'macos-14'
-            python-version: '3.8'
-          - os: 'macos-14-large'
-            python-version: '3.8'
+        python-version: [ '3.11', '3.12' ]
+        os: [ 'macos-14', 'macos-14-large' ]
 
     runs-on: ${{ matrix.os }}
     name: "Build 🛞 (${{ matrix.python-version }}, ${{ matrix.os }})"
@@ -96,7 +91,7 @@ jobs:
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
         python -m pip install -U pip
-        python -m pip install numpy
+        python -m pip install numpy==1.26.4
 
     - name: Build needed boost libraries
       if: steps.cache-package.outputs.cache-hit != 'true'
@@ -305,13 +300,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ '3.8', '3.11', '3.12' ]
-        os: [ 'macos-14', 'macos-14-large', 'macos-13' ]
-        exclude:
-          - os: 'macos-14'
-            python-version: '3.8'
-          - os: 'macos-14-large'
-            python-version: '3.8'
+        python-version: [ '3.11', '3.12' ]
+        os: [ 'macos-14', 'macos-14-large' ]
 
     runs-on: ${{ matrix.os }}
     steps:
