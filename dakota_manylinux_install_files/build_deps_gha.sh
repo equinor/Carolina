@@ -164,8 +164,8 @@ $($cmake_command &> /github/workspace/trace/dakota_bootstrap.log)
 
 echo "# make --debug=b -j8 install" >> /github/workspace/trace/env
 echo "Building Dakota ..."
-make --debug=b -j8 install &> /github/workspace/trace/dakota_install.log
-
+#make --debug=b -j8 install &> /github/workspace/trace/dakota_install.log
+make --debug=b -j8 install
 
 DEPS_BUILD=/github/workspace/deps_build
 
