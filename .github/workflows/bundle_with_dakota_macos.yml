@@ -94,6 +94,7 @@ jobs:
         python -m pip install numpy==1.26.4
 
     - name: Build needed boost libraries
+      timeout-minutes: 30
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
         python --version
@@ -110,9 +111,12 @@ jobs:
         python_bin_include_lib="    using python : $python_version : $(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"$(which python) : {g['include']} : {g['stdlib']} ;\")")"
         sed -i '' "s|.*using python.*|$python_bin_include_lib|" project-config.jam
         cd /tmp/build/boost_${BOOST_VERSION_UNDERSCORES}
-        ./b2 install -j4 -a cxxflags="-std=c++17" --prefix=${GITHUB_WORKSPACE}/${INSTALL_DIR}
+
+        ncpu=$(sysctl -n hw.ncpu)
+        ./b2 install -j"$ncpu" -a cxxflags="-std=c++17" --prefix=${GITHUB_WORKSPACE}/${INSTALL_DIR}
 
     - name: Build dakota
+      timeout-minutes: 30
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
         python --version
@@ -173,7 +177,8 @@ jobs:
           -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}/${INSTALL_DIR}" \
           ..
 
-        make -j4 install
+        ncpu=$(sysctl -n hw.ncpu)
+        make -j"$ncpu" install
 
     - name: Package built boost and dakota
       if: steps.cache-package.outputs.cache-hit != 'true'

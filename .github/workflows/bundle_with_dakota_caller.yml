@@ -4,7 +4,7 @@ env:
   ERT_SHOW_BACKTRACE: 1
   NO_PROJECT_RES: 1
   BOOST_VERSION: 1.84.0
-  DAKOTA_VERSION: 6.19.0
+  DAKOTA_VERSION: 6.21.0
   INSTALL_DIR: local
   NEEDS_REBUILD: true
 
@@ -19,6 +19,10 @@ on:
       publish:
         type: boolean
         default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   build-settings:
