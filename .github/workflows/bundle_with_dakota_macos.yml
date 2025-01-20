@@ -29,8 +29,8 @@ jobs:
       fail-fast: true
       matrix:
         # https://github.com/actions/runner-images?tab=readme-ov-file#available-images
-        python-version: [ '3.11', '3.12' ]
-        os: [ 'macos-14', 'macos-14-large' ]
+        python-version: [ '3.11' ]
+        os: [ 'macos-latest' ]
 
     runs-on: ${{ matrix.os }}
     name: "Build 🛞 (${{ matrix.python-version }}, ${{ matrix.os }})"
@@ -300,8 +300,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ '3.11', '3.12' ]
-        os: [ 'macos-14', 'macos-14-large' ]
+        python-version: [ '3.11' ]
+        os: [ 'macos-14' ]
 
     runs-on: ${{ matrix.os }}
     steps:
