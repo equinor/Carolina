@@ -30,7 +30,7 @@ yum install -y wget
 cd /tmp
 
 BOOST_VERSION_UNDERSCORES=$(echo $BOOST_VERSION | sed 's/\./_/g')
-wget https://boostorg.jfrog.io/artifactory/main/release/$BOOST_VERSION/source/boost_$BOOST_VERSION_UNDERSCORES.tar.bz2 --no-check-certificate > /dev/null
+wget --quiet https://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION}/boost_${BOOST_VERSION_UNDERSCORES}.tar.bz2 --no-check-certificate > /dev/null
 python_exec=$(which python$1)
 $python_exec -m venv myvenv
 source ./myvenv/bin/activate
