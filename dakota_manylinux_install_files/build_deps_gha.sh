@@ -80,30 +80,30 @@ tar xf dakota-$DAKOTA_VERSION-public-src-cli.tar.gz
 
 CAROLINA_DIR=/github/workspace
 
-EIGEN_CMAKE_PATH=dakota-$DAKOTA_VERSION-public-src-cli/packages/external/eigen3/share/eigen3/cmake
+#EIGEN_CMAKE_PATH=dakota-$DAKOTA_VERSION-public-src-cli/packages/external/eigen3/share/eigen3/cmake
 
-# resolve issue where tar (v6.19) could contain corrupt Eigen3Config.cmake file
-if [ ! -f $EIGEN_CMAKE_PATH/Eigen3Config.cmake ]; then
-  mkdir temp_dakota
-  cd temp_dakota
-  wget --quiet --no-check-certificate \
-    https://github.com/snl-dakota/dakota/releases/download/v$DAKOTA_VERSION/dakota-$DAKOTA_VERSION-public-src-cli.zip
-
-  # extract file from zip archive only
-  unzip dakota-$DAKOTA_VERSION-public-src-cli.zip
-  cp $EIGEN_CMAKE_PATH/Eigen3Config.cmake ..
-  cd ..
-  rm -rf temp_dakota
-
-  # replace the offending file
-  rm $EIGEN_CMAKE_PATH/EIGEN3Config.cmake
-  cp Eigen3Config.cmake $EIGEN_CMAKE_PATH
-fi
+## resolve issue where tar (v6.19) could contain corrupt Eigen3Config.cmake file
+#if [ ! -f $EIGEN_CMAKE_PATH/Eigen3Config.cmake ]; then
+#  mkdir temp_dakota
+#  cd temp_dakota
+#  wget --quiet --no-check-certificate \
+#    https://github.com/snl-dakota/dakota/releases/download/v$DAKOTA_VERSION/dakota-$DAKOTA_VERSION-public-src-cli.zip
+#
+#  # extract file from zip archive only
+#  unzip dakota-$DAKOTA_VERSION-public-src-cli.zip
+#  cp $EIGEN_CMAKE_PATH/Eigen3Config.cmake ..
+#  cd ..
+#  rm -rf temp_dakota
+#
+#  # replace the offending file
+#  rm $EIGEN_CMAKE_PATH/EIGEN3Config.cmake
+#  cp Eigen3Config.cmake $EIGEN_CMAKE_PATH
+#fi
 
 cd dakota-$DAKOTA_VERSION-public-src-cli
 
-patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/CMakeLists.txt.patch
-patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/DakotaFindPython.cmake.patch
+#patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/CMakeLists.txt.patch
+#patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/DakotaFindPython.cmake.patch
 
 mkdir build
 cd build
@@ -127,7 +127,13 @@ numpy_lib_dir=$(find /tmp/myvenv/ -name numpy.libs)
 export LD_LIBRARY_PATH="/usr/lib:/usr/lib64:$INSTALL_DIR/lib:$INSTALL_DIR/bin:$numpy_lib_dir:$NUMPY_INCLUDE_PATH"
 export CMAKE_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed 's/::/:/g' | sed 's/:/;/g')
 export PYTHON_LIBRARIES="/usr/lib64/"
+
 export PYTHON_INCLUDE_DIR="/opt/_internal/cpython-3.7.17/include/python3.7m"
+ls -lah $PYTHON_INCLUDE_DIR
+which python3
+python3 --version
+ls -lah /opt/_internal
+
 export CMAKE_LINK_OPTS="-Wl,--copy-dt-needed-entries,-l pthread"
 
 echo "export BOOST_PYTHON=$BOOST_PYTHON" >> /github/workspace/trace/env
