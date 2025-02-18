@@ -80,31 +80,11 @@ tar xf dakota-$DAKOTA_VERSION-public-src-cli.tar.gz
 
 CAROLINA_DIR=/github/workspace
 
-#EIGEN_CMAKE_PATH=dakota-$DAKOTA_VERSION-public-src-cli/packages/external/eigen3/share/eigen3/cmake
-
-## resolve issue where tar (v6.19) could contain corrupt Eigen3Config.cmake file
-#if [ ! -f $EIGEN_CMAKE_PATH/Eigen3Config.cmake ]; then
-#  mkdir temp_dakota
-#  cd temp_dakota
-#  wget --quiet --no-check-certificate \
-#    https://github.com/snl-dakota/dakota/releases/download/v$DAKOTA_VERSION/dakota-$DAKOTA_VERSION-public-src-cli.zip
-#
-#  # extract file from zip archive only
-#  unzip dakota-$DAKOTA_VERSION-public-src-cli.zip
-#  cp $EIGEN_CMAKE_PATH/Eigen3Config.cmake ..
-#  cd ..
-#  rm -rf temp_dakota
-#
-#  # replace the offending file
-#  rm $EIGEN_CMAKE_PATH/EIGEN3Config.cmake
-#  cp Eigen3Config.cmake $EIGEN_CMAKE_PATH
-#fi
-
 cd dakota-$DAKOTA_VERSION-public-src-cli
 
 patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/workdirhelper_boost_filesystem.patch
-
-#patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/DakotaFindPython.cmake.patch
+patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/DakotaFindPython.cmake.patch
+patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/CMakeLists.txt.patch
 
 mkdir build
 cd build
@@ -129,11 +109,19 @@ export LD_LIBRARY_PATH="/usr/lib:/usr/lib64:$INSTALL_DIR/lib:$INSTALL_DIR/bin:$n
 export CMAKE_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed 's/::/:/g' | sed 's/:/;/g')
 export PYTHON_LIBRARIES="/usr/lib64/"
 
-export PYTHON_INCLUDE_DIR="/opt/_internal/cpython-3.7.17/include/python3.7m"
-ls -lah $PYTHON_INCLUDE_DIR
-which python3
-python3 --version
-ls -lah /opt/_internal
+export PYTHON_INCLUDE_DIR=$PYTHON_DEV_HEADERS_DIR
+#export PYTHON_INCLUDE_DIR="/opt/_internal/cpython-3.7.17/include/python3.7m"
+#ls -lah $PYTHON_INCLUDE_DIR >> /github/workspace/trace/env
+#which python3 >> /github/workspace/trace/env
+#python3 --version >> /github/workspace/trace/env
+#ls -lah /opt/_internal >> /github/workspace/trace/env
+#echo "----------------------" >> /github/workspace/trace/env
+#ls -lah /opt/python/cp311-cp311/include/python3.11 >> /github/workspace/trace/env
+#ls -lah /opt/_internal/cpython-3.7.17/include/python3.7m >> /github/workspace/trace/env
+#echo "----------------------" >> /github/workspace/trace/env
+#ls -lah /opt/_internal/cpython-3.11.11/include/python3.11m >> /github/workspace/trace/env
+#ls -lah /opt/_internal/cpython-3.11.11 >> /github/workspace/trace/env
+#ls -lah /opt/_internal/cpython-3.11.11/lib >> /github/workspace/trace/env
 
 export CMAKE_LINK_OPTS="-Wl,--copy-dt-needed-entries,-l pthread"
 
@@ -145,12 +133,13 @@ echo "export CMAKE_LIBRARY_PATH=\"$CMAKE_LIBRARY_PATH\"" >> /github/workspace/tr
 echo "export PYTHON_LIBRARIES=\"$PYTHON_LIBRARIES\"" >> /github/workspace/trace/env
 echo "export PYTHON_INCLUDE_DIR=\"$PYTHON_INCLUDE_DIR\"" >> /github/workspace/trace/env
 
+ls -lah $INSTALL_DIR/lib >> /github/workspace/trace/env
+
 cmake_command="""
 cmake \
       -DCMAKE_CXX_STANDARD=14 \
       -DBUILD_SHARED_LIBS=ON \
       -DDAKOTA_PYTHON=ON \
-      -DCMAKE_CXX_FLAGS=\"-I$PYTHON_INCLUDE_DIR\" \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
       -DDAKOTA_DLL_API=OFF \
@@ -160,7 +149,7 @@ cmake \
       -DCMAKE_BUILD_TYPE="Release" \
       -DDAKOTA_NO_FIND_TRILINOS:BOOL=TRUE \
       -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
-      -DPYTHON_LIBRARIES=$PYTHON_LIBRARIES \
+      -DPYTHON_LIBRARIES="$PYTHON_LIBRARIES" \
       -DCMAKE_LINK_OPTIONS=\"$CMAKE_LINK_OPTS\" \
       .. &> "$INSTALL_DIR/dakota_bootstrap.log"
 
