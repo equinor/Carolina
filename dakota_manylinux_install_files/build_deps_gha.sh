@@ -135,11 +135,16 @@ echo "export PYTHON_INCLUDE_DIR=\"$PYTHON_INCLUDE_DIR\"" >> /github/workspace/tr
 
 ls -lah $INSTALL_DIR/lib >> /github/workspace/trace/env
 
+#      -DCMAKE_CXX_FLAGS=\"-I$PYTHON_INCLUDE_DIR\" \
+#      -DCMAKE_EXE_LINKER_FLAGS=\"-L/tmp/INSTALL_DIR/lib\" \
+
+
 cmake_command="""
 cmake \
       -DCMAKE_CXX_STANDARD=14 \
       -DBUILD_SHARED_LIBS=ON \
       -DDAKOTA_PYTHON=ON \
+      -DCMAKE_CXX_FLAGS=\"-I$PYTHON_INCLUDE_DIR\" \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
       -DDAKOTA_DLL_API=OFF \
