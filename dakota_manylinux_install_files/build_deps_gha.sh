@@ -105,7 +105,7 @@ export PATH="$PATH:$INSTALL_DIR/bin"
 
 # More stable approach: Go via python
 numpy_lib_dir=$(find /tmp/myvenv/ -name numpy.libs)
-export LD_LIBRARY_PATH="/usr/lib:/usr/lib64:$INSTALL_DIR/lib:$INSTALL_DIR/bin:$numpy_lib_dir:$NUMPY_INCLUDE_PATH"
+#export LD_LIBRARY_PATH="/usr/lib:/usr/lib64:$INSTALL_DIR/lib:$INSTALL_DIR/bin:$numpy_lib_dir:$NUMPY_INCLUDE_PATH"
 export CMAKE_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed 's/::/:/g' | sed 's/:/;/g')
 export PYTHON_LIBRARIES="/usr/lib64/"
 
@@ -144,7 +144,7 @@ cmake \
       -DCMAKE_CXX_STANDARD=14 \
       -DBUILD_SHARED_LIBS=ON \
       -DDAKOTA_PYTHON=ON \
-      -DCMAKE_CXX_FLAGS=\"-I$PYTHON_INCLUDE_DIR\" \
+      -DCMAKE_CXX_FLAGS=\"$CMAKE_CXX_FLAGS -I$PYTHON_INCLUDE_DIR\" \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
       -DDAKOTA_DLL_API=OFF \
