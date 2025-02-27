@@ -138,13 +138,20 @@ ls -lah $INSTALL_DIR/lib >> /github/workspace/trace/env
 #      -DCMAKE_CXX_FLAGS=\"-I$PYTHON_INCLUDE_DIR\" \
 #      -DCMAKE_EXE_LINKER_FLAGS=\"-L/tmp/INSTALL_DIR/lib\" \
 
+echo "CMAKE_CXX_FLAGS" >> /github/workspace/trace/env
+echo $CMAKE_CXX_FLAGS >> /github/workspace/trace/env
+
+CMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS -I$PYTHON_INCLUDE_DIR"
+
+echo "CMAKE_CXX_FLAGS appended" >> /github/workspace/trace/env
+echo $CMAKE_CXX_FLAGS >> /github/workspace/trace/env
 
 cmake_command="""
 cmake \
       -DCMAKE_CXX_STANDARD=14 \
       -DBUILD_SHARED_LIBS=ON \
       -DDAKOTA_PYTHON=ON \
-      -DCMAKE_CXX_FLAGS=\"$CMAKE_CXX_FLAGS -I$PYTHON_INCLUDE_DIR\" \
+      -DCMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS" \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
       -DDAKOTA_DLL_API=OFF \
