@@ -151,7 +151,7 @@ cmake \
       -DCMAKE_CXX_STANDARD=14 \
       -DBUILD_SHARED_LIBS=ON \
       -DDAKOTA_PYTHON=ON \
-      -DCMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS" \
+      -DCMAKE_CXX_FLAGS=\"$CMAKE_CXX_FLAGS\" \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
       -DDAKOTA_DLL_API=OFF \
@@ -168,18 +168,22 @@ cmake \
 """
 echo "# $cmake_command" >> /github/workspace/trace/env
 
+set +e
+
 echo "Boostrapping Dakota ..."
 $($cmake_command &> /github/workspace/trace/dakota_bootstrap.log)
 
 echo "# make --debug=b -j8 install" >> /github/workspace/trace/env
 echo "Building Dakota ..."
-make --debug=b -j8 install &> /github/workspace/trace/dakota_install.log
+make --debug=b -j8 VERBOSE=1 install &> /github/workspace/trace/dakota_install.log
 
+echo "ldd" >> /github/workspace/trace/env
+ldd /tmp/INSTALL_DIR/libdakota_src.so > /github/workspace/trace/env
 
-DEPS_BUILD=/github/workspace/deps_build
-
-mkdir -p $DEPS_BUILD
-
-cp -r $INSTALL_DIR/bin $DEPS_BUILD
-cp -r $INSTALL_DIR/lib $DEPS_BUILD
-cp -r $INSTALL_DIR/include $DEPS_BUILD
+#DEPS_BUILD=/github/workspace/deps_build
+#
+#mkdir -p $DEPS_BUILD
+#
+#cp -r $INSTALL_DIR/bin $DEPS_BUILD
+#cp -r $INSTALL_DIR/lib $DEPS_BUILD
+#cp -r $INSTALL_DIR/include $DEPS_BUILD
