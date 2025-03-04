@@ -178,7 +178,12 @@ echo "Building Dakota ..."
 make --debug=b -j8 VERBOSE=1 install &> /github/workspace/trace/dakota_install.log
 
 echo "ldd" >> /github/workspace/trace/env
-ldd /tmp/INSTALL_DIR/libdakota_src.so > /github/workspace/trace/env
+find / -name "libdakota_src.so" >> /github/workspace/trace/env
+find / -name "libdakota_src.so" | xargs -I {} ldd {} >> /github/workspace/trace/env
+
+echo "ldd python" >> /github/workspace/trace/env
+find / -name "libpython3.11*.so*" >> /github/workspace/trace/env
+find / -name "libpython3.11*.so*" | xargs -I {} ldd {} >> /github/workspace/trace/env
 
 #DEPS_BUILD=/github/workspace/deps_build
 #
