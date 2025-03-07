@@ -112,9 +112,18 @@ jobs:
         cd /tmp/build/boost_${BOOST_VERSION_UNDERSCORES}
         ./b2 install -j4 -a cxxflags="-std=c++17" --prefix=${GITHUB_WORKSPACE}/${INSTALL_DIR}
 
+    - name: Checkout Carolina
+      if: steps.cache-package.outputs.cache-hit != 'true'
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: Build dakota
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
+        CAROLINA_DIR=$(pwd)
+        ls $CAROLINA_DIR/dakota_manylinux_install_files
+
         python --version
 
         export PYTHON_EXECUTABLE=$(which python)
@@ -136,11 +145,6 @@ jobs:
 
         PYTHON_INCLUDE_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['include']} \")")"
         echo $PYTHON_INCLUDE_DIR
-
-        CAROLINA_DIR=/Users/runner/work/Carolina/Carolina
-        echo $CAROLINA_DIR
-        ls $CAROLINA_DIR
-        ls $CAROLINA_DIR/dakota_manylinux_install_files
 
         cd dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli
 
