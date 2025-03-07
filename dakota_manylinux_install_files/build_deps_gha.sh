@@ -139,13 +139,13 @@ ls -lah $INSTALL_DIR/lib >> /github/workspace/trace/env
 #      -DCMAKE_CXX_FLAGS=\"-I$PYTHON_INCLUDE_DIR\" \
 #      -DCMAKE_EXE_LINKER_FLAGS=\"-L/tmp/INSTALL_DIR/lib\" \
 
-#echo "CMAKE_CXX_FLAGS" >> /github/workspace/trace/env
-#echo $CMAKE_CXX_FLAGS >> /github/workspace/trace/env
-#
-#CMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS -I$PYTHON_INCLUDE_DIR"
-#
-#echo "CMAKE_CXX_FLAGS appended" >> /github/workspace/trace/env
-#echo $CMAKE_CXX_FLAGS >> /github/workspace/trace/env
+echo "CMAKE_CXX_FLAGS" >> /github/workspace/trace/env
+echo $CMAKE_CXX_FLAGS >> /github/workspace/trace/env
+
+CMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS -I$PYTHON_INCLUDE_DIR"
+
+echo "CMAKE_CXX_FLAGS appended" >> /github/workspace/trace/env
+echo $CMAKE_CXX_FLAGS >> /github/workspace/trace/env
 
 cmake_command="""
 cmake \
@@ -177,20 +177,19 @@ $($cmake_command &> /github/workspace/trace/dakota_bootstrap.log)
 
 echo "# make --debug=b -j8 install" >> /github/workspace/trace/env
 echo "Building Dakota ..."
-make --debug=b -j8 VERBOSE=1 install &> /github/workspace/trace/dakota_install.log
+make --debug=b -j8 install &> /github/workspace/trace/dakota_install.log
 
-echo "ldd" >> /github/workspace/trace/env
-find / -name "libdakota_src.so" >> /github/workspace/trace/env
-find / -name "libdakota_src.so" | xargs -I {} ldd {} >> /github/workspace/trace/env
-
-echo "ldd python" >> /github/workspace/trace/env
-find / -name "libpython3.11*.so*" >> /github/workspace/trace/env
-find / -name "libpython3.11*.so*" | xargs -I {} ldd {} >> /github/workspace/trace/env
-
-#DEPS_BUILD=/github/workspace/deps_build
+#echo "ldd" >> /github/workspace/trace/env
+#find / -name "libdakota_src.so" >> /github/workspace/trace/env
+#find / -name "libdakota_src.so" | xargs -I {} ldd {} >> /github/workspace/trace/env
 #
-#mkdir -p $DEPS_BUILD
-#
-#cp -r $INSTALL_DIR/bin $DEPS_BUILD
-#cp -r $INSTALL_DIR/lib $DEPS_BUILD
-#cp -r $INSTALL_DIR/include $DEPS_BUILD
+#echo "ldd python" >> /github/workspace/trace/env
+#find / -name "libpython$python_version*.so*" >> /github/workspace/trace/env
+#find / -name "libpython$python_version*.so*" | xargs -I {} ldd {} >> /github/workspace/trace/env
+
+DEPS_BUILD=/github/workspace/deps_build
+
+mkdir -p $DEPS_BUILD
+cp -r $INSTALL_DIR/bin $DEPS_BUILD
+cp -r $INSTALL_DIR/lib $DEPS_BUILD
+cp -r $INSTALL_DIR/include $DEPS_BUILD
