@@ -87,6 +87,10 @@ jobs:
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: brew install gcc
 
+    - name: Install brew eigen
+      if: steps.cache-package.outputs.cache-hit != 'true'
+      run: brew install eigen
+
     - name: Install dependencies
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |

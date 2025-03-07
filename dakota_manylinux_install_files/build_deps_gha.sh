@@ -45,6 +45,8 @@ python_version=$(python --version | sed -E 's/.*([0-9]+\.[0-9]+)\.([0-9]+).*/\1/
 python_version_no_dots="$(echo "${python_version//\./}")"
 python_bin_include_lib="    using python : $python_version : $(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"$python_exec : {g['include']} : {g['stdlib']} ;\")")"
 
+PYTHON_LIB_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['stdlib']} \")")"
+
 echo "Found dev headers $PYTHON_DEV_HEADERS_DIR"
 echo "Found numpy include path $NUMPY_INCLUDE_PATH"
 echo "Found python include path $PYTHON_INCLUDE_PATH"
@@ -61,6 +63,7 @@ echo "python_root=$python_root" >> /github/workspace/trace/env
 echo "python_version=$python_version" >> /github/workspace/trace/env
 echo "python_version_no_dots=$python_version_no_dots" >> /github/workspace/trace/env
 echo "python_bin_include_lib=$python_bin_include_lib" >> /github/workspace/trace/env
+echo "PYTHON_LIB_DIR=$PYTHON_LIB_DIR" >> /github/workspace/trace/env
 echo "bootstrap_cmd=./bootstrap.sh --with-libraries=python,filesystem,program_options,regex,serialization,system --with-python=$(which python) --with-python-root=$python_root &> "$INSTALL_DIR/boost_bootstrap.log"" >> /github/workspace/trace/env
 
 ./bootstrap.sh --with-libraries=python,filesystem,program_options,regex,serialization,system --with-python=$(which python) --with-python-root="$python_root" &> "$INSTALL_DIR/boost_bootstrap.log"
@@ -93,7 +96,7 @@ cd build
 export PATH=/tmp/INSTALL_DIR/bin:$PATH
 export PYTHON_INCLUDE_DIRS="$PYTHON_INCLUDE_PATH $PYTHON_DEV_HEADERS_DIR /tmp/INSTALL_DIR/lib"
 export PYTHON_EXECUTABLE=$(which python)
-export LD_LIBRARY_PATH="$INSTALL_DIR/lib:/usr/local/lib:$PYTHON_INCLUDE_PATH:$NUMPY_INCLUDE_PATH:$NUMPY_INCLUDE_PATH/numpy:$PYTHON_DEV_HEADERS_DIR:/tmp/INSTALL_DIR/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$INSTALL_DIR/lib:/usr/local/lib:$PYTHON_LIB_DIR:$PYTHON_INCLUDE_PATH:$NUMPY_INCLUDE_PATH:$NUMPY_INCLUDE_PATH/numpy:$PYTHON_DEV_HEADERS_DIR:/tmp/INSTALL_DIR/lib:$LD_LIBRARY_PATH"
 
 echo "export PATH=$PATH" >> /github/workspace/trace/env
 echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> /github/workspace/trace/env
