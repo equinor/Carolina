@@ -101,8 +101,8 @@ jobs:
         mkdir -p /tmp/build
         cd /tmp/build
         BOOST_VERSION_UNDERSCORES=$(echo ${{ inputs.BOOST_VERSION }} | sed 's/\./_/g')
-        wget --quiet https://sourceforge.net/projects/boost/files/boost/${{ inputs.BOOST_VERSION }}/boost_${BOOST_VERSION_UNDERSCORES}.tar.gz
-        tar -xf boost_${BOOST_VERSION_UNDERSCORES}.tar.gz
+        wget --quiet https://sourceforge.net/projects/boost/files/boost/${{ inputs.BOOST_VERSION }}/boost_${BOOST_VERSION_UNDERSCORES}.tar.bz2
+        tar -xf boost_${BOOST_VERSION_UNDERSCORES}.tar.bz2
         cd boost_${BOOST_VERSION_UNDERSCORES}
         ./bootstrap.sh --with-libraries=python,filesystem,program_options,regex,serialization,system --with-python-version=${{ matrix.python_version }}
         # replace python version
@@ -133,35 +133,25 @@ jobs:
         export PATH=$FORTRAN_PATH:$PATH
 
         tar xf dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli.tar.gz
-        EIGEN_CMAKE_PATH=dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli/packages/external/eigen3/share/eigen3/cmake
 
-        # resolve issue where tar (v6.19) could contain corrupt Eigen3Config.cmake file
-        if [ ! -f $EIGEN_CMAKE_PATH/Eigen3Config.cmake ]; then
-            echo "Fetching alternative source to replace corrupted Eigen cmake file.."
-            mkdir temp_dakota
-            cd temp_dakota
-            wget --quiet --no-check-certificate \
-               https://github.com/snl-dakota/dakota/releases/download/v${{ inputs.DAKOTA_VERSION }}/dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli.zip
-
-            # extract file from zip archive only
-            unzip -qq dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli.zip
-
-            cp $EIGEN_CMAKE_PATH/Eigen3Config.cmake ..
-            cd ..
-            rm -rf temp_dakota
-
-            # replace the offending file
-            rm $EIGEN_CMAKE_PATH/EIGEN3Config.cmake
-            cp Eigen3Config.cmake $EIGEN_CMAKE_PATH
-        fi
+        PYTHON_INCLUDE_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['include']} \")")"
+        echo $PYTHON_INCLUDE_DIR
 
         cd dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli
+
+        patch -p1 < ../../../dakota_manylinux_install_files/workdirhelper_boost_filesystem.patch
+        patch -p1 < ../../../dakota_manylinux_install_files/DakotaFindPython.cmake.patch
+        patch -p1 < ../../../dakota_manylinux_install_files/CMakeLists.txt.patch
+        patch -p1 < ../../../dakota_manylinux_install_files/CMakeLists_includes.patch
 
         mkdir -p build
         cd build
         cmake \
           -DCMAKE_CXX_STANDARD=14 \
           -DBUILD_SHARED_LIBS=ON \
+          -DCMAKE_CXX_FLAGS="-I$PYTHON_INCLUDE_DIR" \
+          -DDAKOTA_PYTHON=ON \
+          -DDAKOTA_PYTHON_SURROGATES=ON \
           -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
           -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
           -DDAKOTA_DLL_API=OFF \
@@ -301,7 +291,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [ '3.11' ]
-        os: [ 'macos-14' ]
+        os: [ 'macos-lastest' ]
 
     runs-on: ${{ matrix.os }}
     steps:

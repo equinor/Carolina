@@ -85,6 +85,7 @@ cd dakota-$DAKOTA_VERSION-public-src-cli
 patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/workdirhelper_boost_filesystem.patch
 patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/DakotaFindPython.cmake.patch
 patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/CMakeLists.txt.patch
+patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/CMakeLists_includes.patch
 
 mkdir build
 cd build
@@ -138,13 +139,13 @@ ls -lah $INSTALL_DIR/lib >> /github/workspace/trace/env
 #      -DCMAKE_CXX_FLAGS=\"-I$PYTHON_INCLUDE_DIR\" \
 #      -DCMAKE_EXE_LINKER_FLAGS=\"-L/tmp/INSTALL_DIR/lib\" \
 
-echo "CMAKE_CXX_FLAGS" >> /github/workspace/trace/env
-echo $CMAKE_CXX_FLAGS >> /github/workspace/trace/env
-
-CMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS -I$PYTHON_INCLUDE_DIR"
-
-echo "CMAKE_CXX_FLAGS appended" >> /github/workspace/trace/env
-echo $CMAKE_CXX_FLAGS >> /github/workspace/trace/env
+#echo "CMAKE_CXX_FLAGS" >> /github/workspace/trace/env
+#echo $CMAKE_CXX_FLAGS >> /github/workspace/trace/env
+#
+#CMAKE_CXX_FLAGS="$CMAKE_CXX_FLAGS -I$PYTHON_INCLUDE_DIR"
+#
+#echo "CMAKE_CXX_FLAGS appended" >> /github/workspace/trace/env
+#echo $CMAKE_CXX_FLAGS >> /github/workspace/trace/env
 
 cmake_command="""
 cmake \
