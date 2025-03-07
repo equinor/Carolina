@@ -2,24 +2,10 @@
 # exit early if encounter failure
 set -e
 
-BOOST_VERSION="1.83.0"
-DAKOTA_VERSION="6.19.0"
+BOOST_VERSION="1.87.0"
+DAKOTA_VERSION="6.21.0"
 
 BOOST_VER_NODOTS=$(echo $BOOST_VERSION | sed 's/\./_/g')
-
-if [ "$(uname -m)" != "x86_64" ]; then
-  echo "This script is untested for $(uname -m) architecture"
-  echo "It is recommended to use x86_64 architecture"
-  echo "Do you want to continue? (y/n)"
-  read -r response
-
-  if [ "$response" = "y" ]; then
-    echo "Continuing..."
-  else
-    echo "Exiting ..."
-    exit
-  fi
-fi
 
 INSTALL_DIR="$(pwd)/everdeps"
 CACHE_DIR="$(pwd)/download_cache"
@@ -64,8 +50,12 @@ write_to_setenv() {
 
 write_to_setenv INSTALL_DIR "$INSTALL_DIR"
 
+
+
 python_version=$(python --version | sed -E 's/.*([0-9]+\.[0-9]+)\.([0-9]+).*/\1/')
 python_bin_include_lib="    using python : $python_version : $(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"$(which python) : {g['include']} : {g['stdlib']} ;\")")"
+PYTHON_INCLUDE_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['include']} \")")"
+
 echo "Detected python version $python_version"
 
 write_to_setenv python_version "$python_version"
@@ -79,7 +69,7 @@ echo "Downloading and extracting Boost .."
 boost_file=boost_$BOOST_VER_NODOTS.tar.bz2
 
 if [ ! -f "$CACHE_DIR/$boost_file" ]; then
-  wget https://boostorg.jfrog.io/artifactory/main/release/$BOOST_VERSION/source/boost_$BOOST_VER_NODOTS.tar.bz2 -P "$CACHE_DIR"
+  wget https://sourceforge.net/projects/boost/files/boost/$BOOST_VERSION/boost_$BOOST_VER_NODOTS.tar.bz2
 else
   echo "Found $boost_file in download cache .."
 fi
@@ -110,7 +100,7 @@ touch "$TRACE_DIR/dakota_install.log"
 # since we use DAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON
 # If it is installed under arm64 arch, this will fail,
 # solution is to uninstall and reinstall when in intel arch
-pip install numpy
+pip install numpy --upgrade
 pip install cmake
 
 echo "Download and extract Dakota .."
@@ -127,13 +117,23 @@ tar xf "$CACHE_DIR"/$dakota_file
 
 cd dakota-$DAKOTA_VERSION-public-src-cli
 
+patch -p1 < ../../../dakota_manylinux_install_files/workdirhelper_boost_filesystem.patch
+patch -p1 < ../../../dakota_manylinux_install_files/DakotaFindPython.cmake.patch
+patch -p1 < ../../../dakota_manylinux_install_files/CMakeLists.txt.patch
+patch -p1 < ../../../dakota_manylinux_install_files/CMakeLists_includes.patch
+
 mkdir -p build
 cd build
+
+echo "export PYTHON_INCLUDE_DIR=\"$PYTHON_INCLUDE_DIR\""
 
 echo "Building Dakota with cmake, logging to $TRACE_DIR/dakota_build.log"
 cmake \
       -DCMAKE_CXX_STANDARD=14 \
       -DBUILD_SHARED_LIBS=ON \
+      -DCMAKE_CXX_FLAGS="-I$PYTHON_INCLUDE_DIR" \
+      -DDAKOTA_PYTHON=ON \
+      -DDAKOTA_PYTHON_SURROGATES=ON \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
       -DDAKOTA_DLL_API=OFF \
@@ -181,31 +181,12 @@ echo "Building Carolina .."
 pip install . &> "$TRACE_DIR/carolina_install.log"
 echo "Done"
 
-cd "$INSTALL_DIR"
-echo "Pulling Seba from git .."
-git clone git@github.com:TNO-Everest/seba.git
-cd seba
-git checkout tags/6.13.0
-
-echo "Building Seba .."
-pip install .
-echo "Done"
-
-cd "$INSTALL_DIR"
-echo "Pulling Everest-models from git .."
-git clone git@github.com:equinor/everest-models.git
-cd everest-models
-
-echo "Building Everest-models .."
-pip install .
-echo "Done building Everest-models"
-
 site_packages_dir=$(python -c "import site; print(site.getsitepackages()[0])")
-carolina_so_path=$(find "$site_packages_dir" -name "carolina.cpython-310-darwin.so")
+carolina_so_path=$(find "$site_packages_dir" -name "carolina.cpython-$python_version_no_dots-darwin.so")
 fortran_dylib_path=$(find /usr -name "libgfortran.dylib" | head -n 1)
 
 echo "found site packages @ $site_packages_dir"
-echo "found carolina.cpython-310-darwin.so @ $carolina_so_path"
+echo "found carolina.cpython-$python_version_no_dots-darwin.so @ $carolina_so_path"
 echo "found libgfortran.dylib @ $fortran_dylib_path"
 
 fortran_dylib_dir=$(dirname "$fortran_dylib_path")
