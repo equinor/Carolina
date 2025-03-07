@@ -143,6 +143,10 @@ jobs:
         echo $PYTHON_INCLUDE_DIR
 
         CAROLINA_DIR=/github/workspace
+        echo $CAROLINA_DIR
+        ls $CAROLINA_DIR
+        ls $CAROLINA_DIR/dakota_manylinux_install_files
+
         cd dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli
 
         patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/workdirhelper_boost_filesystem.patch
