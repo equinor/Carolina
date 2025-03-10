@@ -111,21 +111,12 @@ export PATH="$PATH:$INSTALL_DIR/bin"
 numpy_lib_dir=$(find /tmp/myvenv/ -name numpy.libs)
 #export LD_LIBRARY_PATH="/usr/lib:/usr/lib64:$INSTALL_DIR/lib:$INSTALL_DIR/bin:$numpy_lib_dir:$NUMPY_INCLUDE_PATH"
 export CMAKE_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed 's/::/:/g' | sed 's/:/;/g')
-export PYTHON_LIBRARIES="/usr/lib64/"
+
+export PYTHON_LIBRARIES=$PYTHON_LIB_DIR
+#export PYTHON_LIBRARIES="/usr/lib64/"
 
 export PYTHON_INCLUDE_DIR=$PYTHON_DEV_HEADERS_DIR
 #export PYTHON_INCLUDE_DIR="/opt/_internal/cpython-3.7.17/include/python3.7m"
-#ls -lah $PYTHON_INCLUDE_DIR >> /github/workspace/trace/env
-#which python3 >> /github/workspace/trace/env
-#python3 --version >> /github/workspace/trace/env
-#ls -lah /opt/_internal >> /github/workspace/trace/env
-#echo "----------------------" >> /github/workspace/trace/env
-#ls -lah /opt/python/cp311-cp311/include/python3.11 >> /github/workspace/trace/env
-#ls -lah /opt/_internal/cpython-3.7.17/include/python3.7m >> /github/workspace/trace/env
-#echo "----------------------" >> /github/workspace/trace/env
-#ls -lah /opt/_internal/cpython-3.11.11/include/python3.11m >> /github/workspace/trace/env
-#ls -lah /opt/_internal/cpython-3.11.11 >> /github/workspace/trace/env
-#ls -lah /opt/_internal/cpython-3.11.11/lib >> /github/workspace/trace/env
 
 export CMAKE_LINK_OPTS="-Wl,--copy-dt-needed-entries,-l pthread"
 
@@ -173,22 +164,12 @@ cmake \
 """
 echo "# $cmake_command" >> /github/workspace/trace/env
 
-set +e
-
 echo "Boostrapping Dakota ..."
 $($cmake_command &> /github/workspace/trace/dakota_bootstrap.log)
 
 echo "# make --debug=b -j8 install" >> /github/workspace/trace/env
 echo "Building Dakota ..."
 make --debug=b -j8 install &> /github/workspace/trace/dakota_install.log
-
-#echo "ldd" >> /github/workspace/trace/env
-#find / -name "libdakota_src.so" >> /github/workspace/trace/env
-#find / -name "libdakota_src.so" | xargs -I {} ldd {} >> /github/workspace/trace/env
-#
-#echo "ldd python" >> /github/workspace/trace/env
-#find / -name "libpython$python_version*.so*" >> /github/workspace/trace/env
-#find / -name "libpython$python_version*.so*" | xargs -I {} ldd {} >> /github/workspace/trace/env
 
 DEPS_BUILD=/github/workspace/deps_build
 
