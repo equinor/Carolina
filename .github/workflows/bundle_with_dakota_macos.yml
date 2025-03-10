@@ -132,6 +132,11 @@ jobs:
 
         export PYTHON_EXECUTABLE=$(which python)
         export PYTHON_INCLUDE_DIR=$(python -c "from sysconfig import get_paths as gp; print(gp()['include'])")
+        export PATH="$PATH:$INSTALL_DIR/bin"
+        export DYLD_LIBRARY_PATH=$INSTALL_DIR/lib:$INSTALL_DIR/bin
+
+        echo "DYLD_LIBRARY_PATH:" $DYLD_LIBRARY_PATH
+        echo "INSTALL_DIR:" $INSTALL_DIR
 
         mkdir -p /tmp/build
         cd /tmp/build
