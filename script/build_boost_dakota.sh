@@ -115,6 +115,7 @@ tar xf "$CACHE_DIR"/$dakota_file
 cd dakota-$DAKOTA_VERSION-public-src-cli
 
 patch -p1 < ../../../dakota_manylinux_install_files/workdirhelper_boost_filesystem.patch
+patch -p1 < ../../../dakota_manylinux_install_files/CMakeLists_includes.patch
 
 mkdir -p build
 cd build
