@@ -2,8 +2,8 @@
 # exit early if encounter failure
 set -e
 
-BOOST_VERSION="1.83.0"
-DAKOTA_VERSION="6.19.0"
+BOOST_VERSION="1.87.0"
+DAKOTA_VERSION="6.21.0"
 
 BOOST_VER_NODOTS=$(echo $BOOST_VERSION | sed 's/\./_/g')
 
