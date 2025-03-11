@@ -110,6 +110,8 @@ export PYTHON_LIBRARIES="/usr/lib64/"
 export PYTHON_INCLUDE_DIR="/opt/_internal/cpython-3.7.17/include/python3.7m"
 export CMAKE_LINK_OPTS="-Wl,--copy-dt-needed-entries,-l pthread"
 
+export PYTHON_INCLUDE_DIR=$PYTHON_DEV_HEADERS_DIR
+
 echo "export BOOST_PYTHON=$BOOST_PYTHON" >> /github/workspace/trace/env
 echo "export BOOST_ROOT=$BOOST_ROOT" >> /github/workspace/trace/env
 echo "export PATH=$PATH" >> /github/workspace/trace/env
@@ -123,6 +125,7 @@ cmake \
       -DCMAKE_CXX_STANDARD=14 \
       -DBUILD_SHARED_LIBS=ON \
       -DDAKOTA_PYTHON=ON \
+      -DCMAKE_CXX_FLAGS=\"-I$PYTHON_INCLUDE_DIR\" \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
       -DDAKOTA_DLL_API=OFF \

@@ -145,11 +145,14 @@ jobs:
 
         patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/workdirhelper_boost_filesystem.patch
 
+        PYTHON_INCLUDE_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['include']} \")")"
+
         mkdir -p build
         cd build
         cmake \
           -DCMAKE_CXX_STANDARD=14 \
           -DBUILD_SHARED_LIBS=ON \
+          -DCMAKE_CXX_FLAGS="-I$PYTHON_INCLUDE_DIR" \
           -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
           -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
           -DDAKOTA_DLL_API=OFF \

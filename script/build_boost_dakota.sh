@@ -66,6 +66,7 @@ write_to_setenv INSTALL_DIR "$INSTALL_DIR"
 
 python_version=$(python --version | sed -E 's/.*([0-9]+\.[0-9]+)\.([0-9]+).*/\1/')
 python_bin_include_lib="    using python : $python_version : $(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"$(which python) : {g['include']} : {g['stdlib']} ;\")")"
+PYTHON_INCLUDE_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['include']} \")")"
 echo "Detected python version $python_version"
 
 write_to_setenv python_version "$python_version"
@@ -136,6 +137,7 @@ echo "Building Dakota with cmake, logging to $TRACE_DIR/dakota_build.log"
 cmake \
       -DCMAKE_CXX_STANDARD=14 \
       -DBUILD_SHARED_LIBS=ON \
+      -DCMAKE_CXX_FLAGS="-I$PYTHON_INCLUDE_DIR" \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
       -DDAKOTA_DLL_API=OFF \
