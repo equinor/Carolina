@@ -174,11 +174,11 @@ echo "Done"
 cd "$INSTALL_DIR"
 
 site_packages_dir=$(python -c "import site; print(site.getsitepackages()[0])")
-carolina_so_path=$(find "$site_packages_dir" -name "carolina.cpython-310-darwin.so")
+carolina_so_path=$(find "$site_packages_dir" -name "carolina.cpython-$python_version_no_dots-darwin.so")
 fortran_dylib_path=$(find /usr -name "libgfortran.dylib" | head -n 1)
 
 echo "found site packages @ $site_packages_dir"
-echo "found carolina.cpython-310-darwin.so @ $carolina_so_path"
+echo "found carolina.cpython-$python_version_no_dots-darwin.so @ $carolina_so_path"
 echo "found libgfortran.dylib @ $fortran_dylib_path"
 
 fortran_dylib_dir=$(dirname "$fortran_dylib_path")
