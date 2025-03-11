@@ -30,8 +30,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ '3.11' ]
-        os: [ubuntu-latest]
+        python-version: [ '3.11', '3.12' ]
+        os: [ ubuntu-24.04 ]
     runs-on: ${{ matrix.os }}
     env:
       ERT_SHOW_BACKTRACE: ${{ inputs.ERT_SHOW_BACKTRACE }}
