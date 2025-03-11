@@ -104,6 +104,7 @@ cd dakota-$DAKOTA_VERSION-public-src-cli
 
 patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/CMakeLists.txt.patch
 patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/DakotaFindPython.cmake.patch
+patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/workdirhelper_boost_filesystem.patch
 
 mkdir build
 cd build
