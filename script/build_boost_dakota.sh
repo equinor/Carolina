@@ -7,20 +7,6 @@ DAKOTA_VERSION="6.21.0"
 
 BOOST_VER_NODOTS=$(echo $BOOST_VERSION | sed 's/\./_/g')
 
-if [ "$(uname -m)" != "x86_64" ]; then
-  echo "This script is untested for $(uname -m) architecture"
-  echo "It is recommended to use x86_64 architecture"
-  echo "Do you want to continue? (y/n)"
-  read -r response
-
-  if [ "$response" = "y" ]; then
-    echo "Continuing..."
-  else
-    echo "Exiting ..."
-    exit
-  fi
-fi
-
 INSTALL_DIR="$(pwd)/everdeps"
 CACHE_DIR="$(pwd)/download_cache"
 
@@ -186,23 +172,6 @@ pip install . &> "$TRACE_DIR/carolina_install.log"
 echo "Done"
 
 cd "$INSTALL_DIR"
-echo "Pulling Seba from git .."
-git clone git@github.com:TNO-Everest/seba.git
-cd seba
-git checkout tags/6.13.0
-
-echo "Building Seba .."
-pip install .
-echo "Done"
-
-cd "$INSTALL_DIR"
-echo "Pulling Everest-models from git .."
-git clone git@github.com:equinor/everest-models.git
-cd everest-models
-
-echo "Building Everest-models .."
-pip install .
-echo "Done building Everest-models"
 
 site_packages_dir=$(python -c "import site; print(site.getsitepackages()[0])")
 carolina_so_path=$(find "$site_packages_dir" -name "carolina.cpython-310-darwin.so")
