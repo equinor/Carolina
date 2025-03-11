@@ -101,8 +101,8 @@ jobs:
         mkdir -p /tmp/build
         cd /tmp/build
         BOOST_VERSION_UNDERSCORES=$(echo ${{ inputs.BOOST_VERSION }} | sed 's/\./_/g')
-        wget --quiet https://boostorg.jfrog.io/artifactory/main/release/${{ inputs.BOOST_VERSION }}/source/boost_${BOOST_VERSION_UNDERSCORES}.tar.gz
-        tar -xf boost_${BOOST_VERSION_UNDERSCORES}.tar.gz
+        wget --quiet https://sourceforge.net/projects/boost/files/boost/${{ inputs.BOOST_VERSION }}/boost_${BOOST_VERSION_UNDERSCORES}.tar.bz2
+        tar -xf boost_${BOOST_VERSION_UNDERSCORES}.tar.bz2
         cd boost_${BOOST_VERSION_UNDERSCORES}
         ./bootstrap.sh --with-libraries=python,filesystem,program_options,regex,serialization,system --with-python-version=${{ matrix.python_version }}
         # replace python version

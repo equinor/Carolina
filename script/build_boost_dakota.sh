@@ -79,7 +79,7 @@ echo "Downloading and extracting Boost .."
 boost_file=boost_$BOOST_VER_NODOTS.tar.bz2
 
 if [ ! -f "$CACHE_DIR/$boost_file" ]; then
-  wget https://boostorg.jfrog.io/artifactory/main/release/$BOOST_VERSION/source/boost_$BOOST_VER_NODOTS.tar.bz2 -P "$CACHE_DIR"
+  wget --quiet https://sourceforge.net/projects/boost/files/boost/$BOOST_VERSION/boost_${$BOOST_VER_NODOTS}.tar.bz2 -P "$CACHE_DIR"
 else
   echo "Found $boost_file in download cache .."
 fi
