@@ -4,15 +4,15 @@
  # Perl is required for examples, docs, and system tests
  find_package(Perl REQUIRED)
  
-+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wall -lpthread -lutil")
++set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wall -lpthread -lutil -lpython3.6m")
  # Python is optionally required by Dakota, Teuchos, and Acro; probe
  # for components here at top-level:
 +include_directories(${PYTHON_INCLUDE_DIRS})
 +include_directories(/usr/include)
 +include_directories(/usr/lib64)
-+include_directories(/tmp/INSTALL_DIR/dakota-6.19.0-public-src-cli/packages/external/eigen3/include/)
++include_directories(/tmp/INSTALL_DIR/dakota-6.21.0-public-src-cli/packages/external/eigen3/include/)
 +find_package(Threads REQUIRED)
-+set (PYBIND11_PYTHON_VERSION "3.10")
++set (PYBIND11_PYTHON_VERSION "3.11")
 +
  include(DakotaFindPython)
  dakota_find_python()
