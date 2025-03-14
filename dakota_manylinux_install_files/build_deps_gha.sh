@@ -44,11 +44,15 @@ python_root=$(python -c "import sys; print(sys.prefix)")
 python_version=$(python --version | sed -E 's/.*([0-9]+\.[0-9]+)\.([0-9]+).*/\1/')
 python_version_no_dots="$(echo "${python_version//\./}")"
 python_bin_include_lib="    using python : $python_version : $(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"$python_exec : {g['include']} : {g['stdlib']} ;\")")"
+PYTHON_INCLUDE_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['include']} \")")"
+PYTHON_LIB_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['stdlib']} \")")"
 
 echo "Found dev headers $PYTHON_DEV_HEADERS_DIR"
 echo "Found numpy include path $NUMPY_INCLUDE_PATH"
 echo "Found python include path $PYTHON_INCLUDE_PATH"
 echo "Found python root $python_root"
+echo "Found PYTHON_INCLUDE_DIR $PYTHON_INCLUDE_DIR"
+echo "Found PYTHON_LIB_DIR $PYTHON_LIB_DIR"
 
 tar xf boost_$BOOST_VERSION_UNDERSCORES.tar.bz2
 cd boost_$BOOST_VERSION_UNDERSCORES
@@ -79,42 +83,20 @@ wget https://github.com/snl-dakota/dakota/releases/download/v$DAKOTA_VERSION/dak
 tar xf dakota-$DAKOTA_VERSION-public-src-cli.tar.gz
 
 CAROLINA_DIR=/github/workspace
-
-EIGEN_CMAKE_PATH=dakota-$DAKOTA_VERSION-public-src-cli/packages/external/eigen3/share/eigen3/cmake
-
-# resolve issue where tar (v6.19) could contain corrupt Eigen3Config.cmake file
-if [ ! -f $EIGEN_CMAKE_PATH/Eigen3Config.cmake ]; then
-  mkdir temp_dakota
-  cd temp_dakota
-  wget --quiet --no-check-certificate \
-    https://github.com/snl-dakota/dakota/releases/download/v$DAKOTA_VERSION/dakota-$DAKOTA_VERSION-public-src-cli.zip
-
-  # extract file from zip archive only
-  unzip dakota-$DAKOTA_VERSION-public-src-cli.zip
-  cp $EIGEN_CMAKE_PATH/Eigen3Config.cmake ..
-  cd ..
-  rm -rf temp_dakota
-
-  # replace the offending file
-  rm $EIGEN_CMAKE_PATH/EIGEN3Config.cmake
-  cp Eigen3Config.cmake $EIGEN_CMAKE_PATH
-fi
-
 cd dakota-$DAKOTA_VERSION-public-src-cli
 
 patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/CMakeLists.txt.patch
 patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/DakotaFindPython.cmake.patch
-
+patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/workdirhelper_boost_filesystem.patch
+patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/CMakeLists_includes.patch
 mkdir build
 cd build
 
 export PATH=/tmp/INSTALL_DIR/bin:$PATH
 export PYTHON_INCLUDE_DIRS="$PYTHON_INCLUDE_PATH $PYTHON_DEV_HEADERS_DIR /tmp/INSTALL_DIR/lib"
 export PYTHON_EXECUTABLE=$(which python)
-export LD_LIBRARY_PATH="$INSTALL_DIR/lib:/usr/local/lib:$PYTHON_INCLUDE_PATH:$NUMPY_INCLUDE_PATH:$NUMPY_INCLUDE_PATH/numpy:$PYTHON_DEV_HEADERS_DIR:/tmp/INSTALL_DIR/lib:$LD_LIBRARY_PATH"
 
 echo "export PATH=$PATH" >> /github/workspace/trace/env
-echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> /github/workspace/trace/env
 echo "export PYTHON_INCLUDE_DIRS=$PYTHON_INCLUDE_DIRS" >> /github/workspace/trace/env
 echo "export PYTHON_EXECUTABLE=$PYTHON_EXECUTABLE" >> /github/workspace/trace/env
 
@@ -124,11 +106,14 @@ export PATH="$PATH:$INSTALL_DIR/bin"
 
 # More stable approach: Go via python
 numpy_lib_dir=$(find /tmp/myvenv/ -name numpy.libs)
-export LD_LIBRARY_PATH="/usr/lib:/usr/lib64:$INSTALL_DIR/lib:$INSTALL_DIR/bin:$numpy_lib_dir:$NUMPY_INCLUDE_PATH"
+export LD_LIBRARY_PATH="$PYTHON_LIB_DIR:/usr/lib:/usr/lib64:$INSTALL_DIR/lib:$INSTALL_DIR/bin:$numpy_lib_dir:$NUMPY_INCLUDE_PATH:$PYTHON_DEV_HEADERS_DIR"
 export CMAKE_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed 's/::/:/g' | sed 's/:/;/g')
 export PYTHON_LIBRARIES="/usr/lib64/"
-export PYTHON_INCLUDE_DIR="/opt/_internal/cpython-3.7.17/include/python3.7m"
+export PYTHON_INCLUDE_DIR="/usr/include/python3.6m"
+
 export CMAKE_LINK_OPTS="-Wl,--copy-dt-needed-entries,-l pthread"
+
+export PYTHON_INCLUDE_DIR=$PYTHON_DEV_HEADERS_DIR
 
 echo "export BOOST_PYTHON=$BOOST_PYTHON" >> /github/workspace/trace/env
 echo "export BOOST_ROOT=$BOOST_ROOT" >> /github/workspace/trace/env
@@ -137,12 +122,13 @@ echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> /github/workspace/trace/env
 echo "export CMAKE_LIBRARY_PATH=\"$CMAKE_LIBRARY_PATH\"" >> /github/workspace/trace/env
 echo "export PYTHON_LIBRARIES=\"$PYTHON_LIBRARIES\"" >> /github/workspace/trace/env
 echo "export PYTHON_INCLUDE_DIR=\"$PYTHON_INCLUDE_DIR\"" >> /github/workspace/trace/env
+echo "export CMAKE_LINK_OPTS=\"$CMAKE_LINK_OPTS\"" >> /github/workspace/trace/env
 
 cmake_command="""
 cmake \
       -DCMAKE_CXX_STANDARD=14 \
       -DBUILD_SHARED_LIBS=ON \
-      -DDAKOTA_PYTHON=ON \
+      -DCMAKE_CXX_FLAGS=\"-I$PYTHON_INCLUDE_DIR\" \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
       -DDAKOTA_DLL_API=OFF \

@@ -1,0 +1,13 @@
+diff --color -Naur a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2025-03-07 12:31:37
++++ b/CMakeLists.txt	2025-03-07 12:48:56
+@@ -317,6 +317,9 @@
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/VERSION DESTINATION
+     ${DAKOTA_TOPFILES_INSTALL})
+ endif()
++
++install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/packages/external/eigen3/include/eigen3/Eigen DESTINATION include)
++install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/packages/external/json/single_include/nlohmann DESTINATION include)
+  
+ # Final CPack settings
+ dakota_cpack_finalize()
