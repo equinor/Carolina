@@ -83,6 +83,11 @@ jobs:
         key: ${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
         path: ${{ github.workspace }}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz
 
+    - name: Checkout Carolina
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
     - name: Install brew gcc
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: brew install gcc
@@ -112,17 +117,9 @@ jobs:
         cd /tmp/build/boost_${BOOST_VERSION_UNDERSCORES}
         ./b2 install -j4 -a cxxflags="-std=c++17" --prefix=${GITHUB_WORKSPACE}/${INSTALL_DIR}
 
-    - name: Checkout Carolina
-      if: steps.cache-package.outputs.cache-hit != 'true'
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-
     - name: Build dakota
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
-        python --version
-
         CAROLINA_DIR=$(pwd)
 
         export PYTHON_EXECUTABLE=$(which python)
@@ -141,21 +138,21 @@ jobs:
         export PATH=$FORTRAN_PATH:$PATH
 
         tar xf dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli.tar.gz
-        EIGEN_CMAKE_PATH=dakota-$DAKOTA_VERSION-public-src-cli/packages/external/eigen3/share/eigen3/cmake
+        EIGEN_CMAKE_PATH=dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli/packages/external/eigen3/share/eigen3/cmake
 
         # resolve issue where tar could contain corrupt Eigen3Config.cmake file
         if [ ! -f $EIGEN_CMAKE_PATH/Eigen3Config.cmake ]; then
           mkdir temp_dakota
           cd temp_dakota
           wget --quiet --no-check-certificate \
-            https://github.com/snl-dakota/dakota/releases/download/v$DAKOTA_VERSION/dakota-$DAKOTA_VERSION-public-src-cli.zip
+            https://github.com/snl-dakota/dakota/releases/download/v${{ inputs.DAKOTA_VERSION }}/dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli.zip
 
           # extract file from zip archive only
-          unzip dakota-$DAKOTA_VERSION-public-src-cli.zip
+          unzip dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli.zip
           cp $EIGEN_CMAKE_PATH/Eigen3Config.cmake ..
           cd ..
-          rm -rf temp_dakota
 
+          rm -rf temp_dakota
           # replace the offending file
           rm $EIGEN_CMAKE_PATH/EIGEN3Config.cmake
           cp Eigen3Config.cmake $EIGEN_CMAKE_PATH
@@ -164,11 +161,17 @@ jobs:
         cd dakota-${{ inputs.DAKOTA_VERSION }}-public-src-cli
 
         patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/workdirhelper_boost_filesystem.patch
+        patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/CMakeLists_includes.patch
 
         PYTHON_INCLUDE_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['include']} \")")"
 
+        python_version_no_dots="$(echo "${{inputs.python_version}}//\./}")"
+        export BOOST_PYTHON="boost_python$python_version_no_dots"
+        export BOOST_ROOT=${GITHUB_WORKSPACE}/${{ inputs.INSTALL_DIR }}
+
         mkdir -p build
         cd build
+
         cmake \
           -DCMAKE_CXX_STANDARD=14 \
           -DBUILD_SHARED_LIBS=ON \
