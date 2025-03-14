@@ -329,5 +329,5 @@ jobs:
       run: |
         python --version
 
-        pip install pytest numpy
+        pip install pytest numpy==1.26.4
         python -m pytest ./tests
