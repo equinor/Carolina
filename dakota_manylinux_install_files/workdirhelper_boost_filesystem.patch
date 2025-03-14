@@ -1,0 +1,11 @@
+diff --color -Naur a/src/WorkdirHelper.hpp b/src/WorkdirHelper.hpp
+--- a/src/WorkdirHelper.hpp	2024-11-12 03:02:00
++++ b/src/WorkdirHelper.hpp	2025-01-24 12:24:14
+@@ -19,6 +19,7 @@
+ 
+ #include <boost/filesystem/operations.hpp>
+ #include <boost/filesystem/path.hpp>
++#include <boost/filesystem.hpp>
+ namespace bfs = boost::filesystem;
+ 
+ #include <boost/function.hpp>
