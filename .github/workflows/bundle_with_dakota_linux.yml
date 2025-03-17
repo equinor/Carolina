@@ -101,7 +101,7 @@ jobs:
     - name: Test Carolina
       run: |
         source othervenv/bin/activate
-        pip install pytest
+        pip install pytest numpy
         cd carolina-main/tests
         python -m pytest .
         cd -
