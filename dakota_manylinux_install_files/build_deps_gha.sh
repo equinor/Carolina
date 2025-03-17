@@ -34,7 +34,7 @@ wget --quiet https://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION}
 python_exec=$(which python$1)
 $python_exec -m venv myvenv
 source ./myvenv/bin/activate
-pip install numpy==1.26.4
+pip install numpy
 pip install pybind11[global]
 
 PYTHON_DEV_HEADERS_DIR=$(rpm -ql python3-devel.x86_64 | grep '\.h$' | head -n 1 | xargs dirname)

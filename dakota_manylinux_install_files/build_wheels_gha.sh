@@ -15,7 +15,7 @@ python_exec=$(which python$1)
 $python_exec -m venv myvenv
 source ./myvenv/bin/activate
 
-pip install pytest numpy==1.26.4
+pip install pytest numpy
 NUMPY_INCLUDE_PATH=$(find /tmp -type d -path "*site-packages/numpy/core/include")
 numpy_lib_dir=$(find /tmp/myvenv/ -name numpy.libs)
 yum install lapack-devel -y
