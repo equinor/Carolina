@@ -29,7 +29,9 @@ ldd $INSTALL_DIR/bin/dakota
 echo "-----"
 ldd $INSTALL_DIR/lib/libdakota_src.so
 echo "-----"
-nm -gD /lib64/libpython3.6.so | grep _PyThreadState_UncheckedGet
+nm -gD $INSTALL_DIR/lib/libdakota_src.so | grep _PyThreadState_UncheckedGet
+echo "-----"
+nm -gD /usr/lib64/libpython3.6m.so.1.0 | grep _PyThreadState_UncheckedGet
 
 cd $CAROLINA_DIR
 
