@@ -19,9 +19,17 @@ pip install pytest numpy
 NUMPY_INCLUDE_PATH=$(find /tmp -type d -path "*site-packages/numpy/core/include")
 numpy_lib_dir=$(find /tmp/myvenv/ -name numpy.libs)
 yum install lapack-devel -y
+yum install python3-devel.x86_64 -y
 
 export PATH="$PATH:$INSTALL_DIR/bin"
 export LD_LIBRARY_PATH="/usr/lib:/usr/lib64:$INSTALL_DIR/lib:$INSTALL_DIR/bin:$numpy_lib_dir:$NUMPY_INCLUDE_PATH"
+
+echo "-----"
+ldd $INSTALL_DIR/bin/dakota
+echo "-----"
+ldd $INSTALL_DIR/lib/libdakota_src.so
+echo "-----"
+nm -gD /lib64/libpython3.6.so | grep _PyThreadState_UncheckedGet
 
 cd $CAROLINA_DIR
 
