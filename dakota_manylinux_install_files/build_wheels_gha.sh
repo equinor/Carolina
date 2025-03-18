@@ -14,6 +14,12 @@ cd /tmp
 python_exec=$(which python$1)
 $python_exec -m venv myvenv
 source ./myvenv/bin/activate
+echo "-----"
+ldd $INSTALL_DIR/bin/dakota
+echo "-----"
+ldd $INSTALL_DIR/lib/libdakota_src.so
+echo "-----"
+nm -gD /lib64/libpython3.6.so | grep _PyThreadState_UncheckedGet
 
 pip install pytest numpy
 NUMPY_INCLUDE_PATH=$(find /tmp -type d -path "*site-packages/numpy/core/include")
