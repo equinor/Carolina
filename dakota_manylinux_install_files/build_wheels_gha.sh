@@ -33,6 +33,10 @@ nm -gD $INSTALL_DIR/lib/libdakota_src.so | grep _PyThreadState_UncheckedGet
 echo "-----"
 nm -gD /usr/lib64/libpython3.6m.so.1.0 | grep _PyThreadState_UncheckedGet
 
+
+cd $INSTALL_DIR/bin/
+./dakota --version
+
 cd $CAROLINA_DIR
 
 pip install .
