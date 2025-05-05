@@ -15,6 +15,7 @@ python_exec=$(which python$1)
 $python_exec -m venv myvenv
 source ./myvenv/bin/activate
 
+pip install -U pip
 pip install pytest numpy
 NUMPY_INCLUDE_PATH=$(find /tmp -type d -path "*site-packages/numpy/core/include")
 numpy_lib_dir=$(find /tmp/myvenv/ -name numpy.libs)

@@ -6,7 +6,7 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
-BOOST_VERSION="1.87.0"
+BOOST_VERSION="1.88.0"
 DAKOTA_VERSION="6.21.0"
 
 cd /tmp
@@ -31,7 +31,7 @@ echo "pushd /opt/_internal && tar -xJf static-libs-for-embedding-only.tar.xz && 
 echo "INSTALL_DIR=$INSTALL_DIR" >> $WORKSPACE/trace/env
 
 yum install lapack-devel -y
-yum install python3-devel.x86_64 -y
+# yum install python3-devel.x86_64 -y
 yum install -y wget
 cd /tmp
 
@@ -44,13 +44,20 @@ else
   echo "Found cached boost archive!"
 fi
 
-python_exec=$(which python$1)
+# Find the non-free-threaded Python directory
+PYTHON_VERSION_NO_DOTS="${1//./}"
+PYTHON_DIR=$(find /opt/python -type d -name "cp${PYTHON_VERSION_NO_DOTS}-cp${PYTHON_VERSION_NO_DOTS}" -not -name "*t" | head -1)
+PYTHON_EXECUTABLE="$PYTHON_DIR/bin/python"
+
+echo "Using Python from: $PYTHON_DIR"
+
+python_exec="$PYTHON_DIR/bin/python"
 $python_exec -m venv myvenv
 source ./myvenv/bin/activate
 pip install numpy
 pip install pybind11[global]
 
-PYTHON_DEV_HEADERS_DIR=$(rpm -ql python3-devel.x86_64 | grep '\.h$' | head -n 1 | xargs dirname)
+PYTHON_DEV_HEADERS_DIR=$(python -c "from sysconfig import get_paths; print(get_paths()['include'])")
 NUMPY_INCLUDE_PATH=$(find /tmp -type d -path "*site-packages/numpy/core/include")
 PYTHON_INCLUDE_PATH=$(python -c "from sysconfig import get_paths; print(get_paths()['include'])")
 python_root=$(python -c "import sys; print(sys.prefix)")

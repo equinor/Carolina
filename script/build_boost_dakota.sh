@@ -98,7 +98,7 @@ touch "$TRACE_DIR/dakota_install.log"
 # If it is installed under arm64 arch, this will fail,
 # solution is to uninstall and reinstall when in intel arch
 pip install numpy
-pip install cmake
+pip install cmake<4
 
 echo "Download and extract Dakota .."
 
@@ -135,14 +135,14 @@ cmake \
       -DCMAKE_BUILD_TYPE="Release" \
       -DDAKOTA_NO_FIND_TRILINOS:BOOL=TRUE \
       -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
-      .. &> "$TRACE_DIR/dakota_build.log"
+      ..
 
 # set DYLD-path to include our libs
 export "DYLD_LIBRARY_PATH=$INSTALL_DIR/lib:$INSTALL_DIR/bin"
 write_to_setenv "export DYLD_LIBRARY_PATH" "$DYLD_LIBRARY_PATH"
 
 echo "Building and Installing Dakota, logging to $TRACE_DIR/dakota_install.log"
-make -j"$(getconf _NPROCESSORS_ONLN)" install &> "$TRACE_DIR/dakota_install.log"
+make -j"$(getconf _NPROCESSORS_ONLN)" install
 
 echo "Installed Dakota to $INSTALL_DIR"
 echo "Done"
