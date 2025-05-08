@@ -19,13 +19,14 @@ touch /github/workspace/trace/env
 
 # VERY IMPORTANT: extract python dev headers,
 # more info: https://github.com/pypa/manylinux/pull/1250
-pushd /opt/_internal && tar -xJf static-libs-for-embedding-only.tar.xz && popd
+# pushd /opt/_internal && tar -xJf static-libs-for-embedding-only.tar.xz && popd
 
 echo "pushd /opt/_internal && tar -xJf static-libs-for-embedding-only.tar.xz && popd" >> /github/workspace/trace/env
 echo "INSTALL_DIR=$INSTALL_DIR" >> /github/workspace/trace/env
 
-yum install lapack-devel -y
-yum install python3-devel.x86_64 -y
+yum install -y lapack-devel
+#yum install -y epel-release
+#yum install -y python3.13-devel
 yum install -y wget
 cd /tmp
 
@@ -34,11 +35,13 @@ wget --quiet https://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION}
 python_exec=$(which python$1)
 $python_exec -m venv myvenv
 source ./myvenv/bin/activate
+pip install -U pip
 pip install numpy
 pip install pybind11[global]
+pip install "cmake<4"
 
-PYTHON_DEV_HEADERS_DIR=$(rpm -ql python3-devel.x86_64 | grep '\.h$' | head -n 1 | xargs dirname)
-NUMPY_INCLUDE_PATH=$(find /tmp -type d -path "*site-packages/numpy/core/include")
+PYTHON_DEV_HEADERS_DIR="/opt/python/cp313-cp313/include/python3.13"
+NUMPY_INCLUDE_PATH=$(python -c "import numpy; print(numpy.get_include())")
 PYTHON_INCLUDE_PATH=$(python -c "from sysconfig import get_paths; print(get_paths()['include'])")
 python_root=$(python -c "import sys; print(sys.prefix)")
 python_version=$(python --version | sed -E 's/.*([0-9]+\.[0-9]+)\.([0-9]+).*/\1/')
@@ -46,6 +49,9 @@ python_version_no_dots="$(echo "${python_version//\./}")"
 python_bin_include_lib="    using python : $python_version : $(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"$python_exec : {g['include']} : {g['stdlib']} ;\")")"
 PYTHON_INCLUDE_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['include']} \")")"
 PYTHON_LIB_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['stdlib']} \")")"
+
+export PYTHONHOME="/opt/python/cp313-cp313"
+export PATH="$PYTHONHOME/bin:$PATH"
 
 echo "Found dev headers $PYTHON_DEV_HEADERS_DIR"
 echo "Found numpy include path $NUMPY_INCLUDE_PATH"
@@ -108,10 +114,10 @@ export PATH="$PATH:$INSTALL_DIR/bin"
 numpy_lib_dir=$(find /tmp/myvenv/ -name numpy.libs)
 export LD_LIBRARY_PATH="$PYTHON_LIB_DIR:/usr/lib:/usr/lib64:$INSTALL_DIR/lib:$INSTALL_DIR/bin:$numpy_lib_dir:$NUMPY_INCLUDE_PATH:$PYTHON_DEV_HEADERS_DIR"
 export CMAKE_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed 's/::/:/g' | sed 's/:/;/g')
-export PYTHON_LIBRARIES="/usr/lib64/"
-export PYTHON_INCLUDE_DIR="/usr/include/python3.6m"
+export PYTHON_LIBRARIES="/opt/python/cp313-cp313/lib/libpython3.13.so"
+export PYTHON_INCLUDE_DIR="/opt/python/cp313-cp313/include/python3.13"
 
-export CMAKE_LINK_OPTS="-Wl,--copy-dt-needed-entries,-l pthread"
+export CMAKE_LINK_OPTS="-Wl,--copy-dt-needed-entries -lpthread -lpython3.13"
 
 export PYTHON_INCLUDE_DIR=$PYTHON_DEV_HEADERS_DIR
 
@@ -124,11 +130,21 @@ echo "export PYTHON_LIBRARIES=\"$PYTHON_LIBRARIES\"" >> /github/workspace/trace/
 echo "export PYTHON_INCLUDE_DIR=\"$PYTHON_INCLUDE_DIR\"" >> /github/workspace/trace/env
 echo "export CMAKE_LINK_OPTS=\"$CMAKE_LINK_OPTS\"" >> /github/workspace/trace/env
 
-cmake_command="""
+# Define all required system libraries in one place
+export REQUIRED_LIBS="-lm -lpthread -ldl -lutil -lrt -lz"
+
+# Update linker flags to include these libraries
+export CMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS} ${REQUIRED_LIBS}"
+export CMAKE_SHARED_LINKER_FLAGS="${CMAKE_SHARED_LINKER_FLAGS} ${REQUIRED_LIBS}"
+
+PYTHON_ROOT="/opt/python/cp313-cp313"
+
 cmake \
       -DCMAKE_CXX_STANDARD=14 \
       -DBUILD_SHARED_LIBS=ON \
-      -DCMAKE_CXX_FLAGS=\"-I$PYTHON_INCLUDE_DIR\" \
+      -DCMAKE_CXX_FLAGS="-I$PYTHON_INCLUDE_DIR" \
+      -DCMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS}" \
+      -DCMAKE_SHARED_LINKER_FLAGS="${CMAKE_SHARED_LINKER_FLAGS}" \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
       -DDAKOTA_DLL_API=OFF \
@@ -139,14 +155,21 @@ cmake \
       -DDAKOTA_NO_FIND_TRILINOS:BOOL=TRUE \
       -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
       -DPYTHON_LIBRARIES=$PYTHON_LIBRARIES \
-      -DCMAKE_LINK_OPTIONS=\"$CMAKE_LINK_OPTS\" \
-      .. &> "$INSTALL_DIR/dakota_bootstrap.log"
+      -DCMAKE_LINK_OPTIONS="$CMAKE_LINK_OPTS" \
+      -DPYTHON_EXECUTABLE="$PYTHON_EXECUTABLE" \
+      -DPYTHON_INCLUDE_DIR="$PYTHON_INCLUDE_DIRS" \
+      -DPYTHON_LIBRARY="$PYTHON_LIBRARIES" \
+      -DPYTHON_NumPy_INCLUDE_DIR="$PYTHON_NUMPY_INCLUDE_DIRS" \
+      -DPython_ROOT_DIR="$PYTHON_ROOT" \
+      -DPython_EXECUTABLE="$PYTHON_EXECUTABLE" \
+      -DPython_INCLUDE_DIRS="$PYTHON_INCLUDE_DIRS" \
+      -DPython_NumPy_INCLUDE_DIRS="$PYTHON_NUMPY_INCLUDE_DIRS" \
+      -DCMAKE_PREFIX_PATH="$PYTHON_ROOT" \
+      -DCMAKE_THREAD_LIBS_INIT="-lpthread" \
+      -DTHREADS_PREFER_PTHREAD_FLAG=ON \
+      -DTHREADS_HAVE_PTHREAD_ARG=ON \
+      ..
 
-"""
-echo "# $cmake_command" >> /github/workspace/trace/env
-
-echo "Boostrapping Dakota ..."
-$($cmake_command &> /github/workspace/trace/dakota_bootstrap.log)
 
 echo "# make --debug=b -j8 install" >> /github/workspace/trace/env
 echo "Building Dakota ..."

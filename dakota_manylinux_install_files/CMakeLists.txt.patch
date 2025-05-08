@@ -4,7 +4,7 @@
  # Perl is required for examples, docs, and system tests
  find_package(Perl REQUIRED)
  
-+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wall -lpthread -lutil -lpython3.6m")
++set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wall -lpthread -lutil -lpython3.13")
  # Python is optionally required by Dakota, Teuchos, and Acro; probe
  # for components here at top-level:
 +include_directories(${PYTHON_INCLUDE_DIRS})
