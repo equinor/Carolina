@@ -2,15 +2,16 @@
 set -e
 
 if [ -z "$1" ]; then
-  echo "Please provide a Python version as an argument (e.g., 3.10)"
+  echo "Please provide a Python version as an argument (e.g., 3.13)"
   exit 1
 fi
 
-cd /tmp
-INSTALL_DIR=/tmp/INSTALL_DIR
+# Set up environment
+INSTALL_DIR=/github/workspace/deps_build
 
+# Create directories and log files
 mkdir -p $INSTALL_DIR
-mkdir /github/workspace/trace
+mkdir -p /github/workspace/trace
 touch /github/workspace/trace/boost_bootstrap.log
 touch /github/workspace/trace/boost_install.log
 touch /github/workspace/trace/dakota_bootstrap.log
@@ -19,167 +20,118 @@ touch /github/workspace/trace/env
 
 # VERY IMPORTANT: extract python dev headers,
 # more info: https://github.com/pypa/manylinux/pull/1250
-# pushd /opt/_internal && tar -xJf static-libs-for-embedding-only.tar.xz && popd
+pushd /opt/_internal && tar -xJf static-libs-for-embedding-only.tar.xz && popd
 
-echo "pushd /opt/_internal && tar -xJf static-libs-for-embedding-only.tar.xz && popd" >> /github/workspace/trace/env
-echo "INSTALL_DIR=$INSTALL_DIR" >> /github/workspace/trace/env
+# Install dependencies
+yum install -y lapack-devel wget gcc-c++ gcc
+yum install -y glibc-devel libstdc++-devel
 
-yum install -y lapack-devel
-#yum install -y epel-release
-#yum install -y python3.13-devel
-yum install -y wget
-cd /tmp
-
-BOOST_VERSION_UNDERSCORES=$(echo $BOOST_VERSION | sed 's/\./_/g')
-wget --quiet https://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION}/boost_${BOOST_VERSION_UNDERSCORES}.tar.bz2 --no-check-certificate > /dev/null
+# Set up Python environment
 python_exec=$(which python$1)
-$python_exec -m venv myvenv
-source ./myvenv/bin/activate
+echo "Using Python executable: $python_exec"
+$python_exec -m venv /tmp/myvenv
+source /tmp/myvenv/bin/activate
+
+# Install Python dependencies
 pip install -U pip
 pip install numpy
 pip install pybind11[global]
-pip install "cmake<4"
+pip install "cmake<3.25"  # More stable CMake version
 
-PYTHON_DEV_HEADERS_DIR="/opt/python/cp313-cp313/include/python3.13"
+# Build Boost
+cd /tmp
+BOOST_VERSION_UNDERSCORES=$(echo $BOOST_VERSION | sed 's/\./_/g')
+wget --quiet https://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION}/boost_${BOOST_VERSION_UNDERSCORES}.tar.bz2 --no-check-certificate
+tar xf boost_${BOOST_VERSION_UNDERSCORES}.tar.bz2
+cd boost_${BOOST_VERSION_UNDERSCORES}
+
+# Get Python paths using Python itself - more reliable
+PYTHON_EXECUTABLE=$(which python)
+PYTHON_VERSION=$(python --version | sed -E 's/.*([0-9]+\.[0-9]+)\.([0-9]+).*/\1/')
+PYTHON_VERSION_NODOTS=${PYTHON_VERSION//./}
+PYTHON_INCLUDE_DIR=$(python -c "from sysconfig import get_paths as gp; print(gp()['include'])")
+PYTHON_STDLIB_DIR=$(python -c "from sysconfig import get_paths as gp; print(gp()['stdlib'])")
 NUMPY_INCLUDE_PATH=$(python -c "import numpy; print(numpy.get_include())")
-PYTHON_INCLUDE_PATH=$(python -c "from sysconfig import get_paths; print(get_paths()['include'])")
-python_root=$(python -c "import sys; print(sys.prefix)")
-python_version=$(python --version | sed -E 's/.*([0-9]+\.[0-9]+)\.([0-9]+).*/\1/')
-python_version_no_dots="$(echo "${python_version//\./}")"
-python_bin_include_lib="    using python : $python_version : $(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"$python_exec : {g['include']} : {g['stdlib']} ;\")")"
-PYTHON_INCLUDE_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['include']} \")")"
-PYTHON_LIB_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['stdlib']} \")")"
 
-export PYTHONHOME="/opt/python/cp313-cp313"
-export PATH="$PYTHONHOME/bin:$PATH"
+echo "Python executable: $PYTHON_EXECUTABLE"
+echo "Python version: $PYTHON_VERSION"
+echo "Python include directory: $PYTHON_INCLUDE_DIR"
+echo "Python stdlib directory: $PYTHON_STDLIB_DIR"
+echo "NumPy include path: $NUMPY_INCLUDE_PATH"
 
-echo "Found dev headers $PYTHON_DEV_HEADERS_DIR"
-echo "Found numpy include path $NUMPY_INCLUDE_PATH"
-echo "Found python include path $PYTHON_INCLUDE_PATH"
-echo "Found python root $python_root"
-echo "Found PYTHON_INCLUDE_DIR $PYTHON_INCLUDE_DIR"
-echo "Found PYTHON_LIB_DIR $PYTHON_LIB_DIR"
+# Configure Boost with Python
+python_bin_include_lib="    using python : $PYTHON_VERSION : $(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"$PYTHON_EXECUTABLE : {g['include']} : {g['stdlib']} ;\")")"
+./bootstrap.sh --with-libraries=python,filesystem,program_options,regex,serialization,system --with-python=$PYTHON_EXECUTABLE &> /github/workspace/trace/boost_bootstrap.log
 
-tar xf boost_$BOOST_VERSION_UNDERSCORES.tar.bz2
-cd boost_$BOOST_VERSION_UNDERSCORES
-
-echo "python_exec=$python_exec" >> /github/workspace/trace/env
-echo "PYTHON_DEV_HEADERS_DIR=$PYTHON_DEV_HEADERS_DIR" >> /github/workspace/trace/env
-echo "NUMPY_INCLUDE_PATH=$NUMPY_INCLUDE_PATH" >> /github/workspace/trace/env
-echo "PYTHON_INCLUDE_PATH=$PYTHON_INCLUDE_PATH" >> /github/workspace/trace/env
-echo "python_root=$python_root" >> /github/workspace/trace/env
-echo "python_version=$python_version" >> /github/workspace/trace/env
-echo "python_version_no_dots=$python_version_no_dots" >> /github/workspace/trace/env
-echo "python_bin_include_lib=$python_bin_include_lib" >> /github/workspace/trace/env
-echo "bootstrap_cmd=./bootstrap.sh --with-libraries=python,filesystem,program_options,regex,serialization,system --with-python=$(which python) --with-python-root=$python_root &> "$INSTALL_DIR/boost_bootstrap.log"" >> /github/workspace/trace/env
-
-./bootstrap.sh --with-libraries=python,filesystem,program_options,regex,serialization,system --with-python=$(which python) --with-python-root="$python_root" &> "$INSTALL_DIR/boost_bootstrap.log"
+# Update the Boost Python configuration
 sed -i -e "s|.*using python.*|$python_bin_include_lib|" project-config.jam
-echo "# sed -i -e \"s|.*using python.*|$python_bin_include_lib|\" project-config.jam" >> /github/workspace/trace/env
-
 ./b2 install -j8 -a cxxflags="-std=c++17" --prefix="$INSTALL_DIR" &> /github/workspace/trace/boost_install.log
-echo "# ./b2 install -j8 -a cxxflags="-std=c++17" --prefix="$INSTALL_DIR" &> /github/workspace/trace/boost_install.log" >> /github/workspace/trace/env
 
-cd $INSTALL_DIR
-DAKOTA_INSTALL_DIR=/tmp/INSTALL_DIR/dakota
-mkdir -p $DAKOTA_INSTALL_DIR
-echo "DAKOTA_INSTALL_DIR=$DAKOTA_INSTALL_DIR" >> /github/workspace/trace/env
-
-wget https://github.com/snl-dakota/dakota/releases/download/v$DAKOTA_VERSION/dakota-$DAKOTA_VERSION-public-src-cli.tar.gz > /dev/null
+# Download and build Dakota
+cd /tmp
+wget --quiet https://github.com/snl-dakota/dakota/releases/download/v$DAKOTA_VERSION/dakota-$DAKOTA_VERSION-public-src-cli.tar.gz
 tar xf dakota-$DAKOTA_VERSION-public-src-cli.tar.gz
 
-CAROLINA_DIR=/github/workspace
+# Apply patches
 cd dakota-$DAKOTA_VERSION-public-src-cli
-
+CAROLINA_DIR=/github/workspace
 patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/CMakeLists.txt.patch
 patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/DakotaFindPython.cmake.patch
 patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/workdirhelper_boost_filesystem.patch
 patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/CMakeLists_includes.patch
-mkdir build
+
+# Create build directory
+mkdir -p build
 cd build
 
-export PATH=/tmp/INSTALL_DIR/bin:$PATH
-export PYTHON_INCLUDE_DIRS="$PYTHON_INCLUDE_PATH $PYTHON_DEV_HEADERS_DIR /tmp/INSTALL_DIR/lib"
-export PYTHON_EXECUTABLE=$(which python)
+# Set up environment variables for build
+export PATH="$INSTALL_DIR/bin:$PATH"
+export LD_LIBRARY_PATH="$PYTHON_STDLIB_DIR:/usr/lib:/usr/lib64:$INSTALL_DIR/lib"
+export BOOST_ROOT="$INSTALL_DIR"
+export BOOST_PYTHON="boost_python$PYTHON_VERSION_NODOTS"
+export PYTHON_INCLUDE_DIRS="$PYTHON_INCLUDE_DIR"
 
-echo "export PATH=$PATH" >> /github/workspace/trace/env
-echo "export PYTHON_INCLUDE_DIRS=$PYTHON_INCLUDE_DIRS" >> /github/workspace/trace/env
-echo "export PYTHON_EXECUTABLE=$PYTHON_EXECUTABLE" >> /github/workspace/trace/env
+export PYTHON_EMBEDDING_LDFLAGS=$(python -c "import sysconfig; print(sysconfig.get_config_var('LDFLAGS') or '')")
+export PYTHON_EMBEDDING_CFLAGS=$(python -c "import sysconfig; print(sysconfig.get_config_var('CFLAGS') or '')")
+PYTHON_LINK_FLAGS="-Wl,-Bstatic -lpython${PYTHON_VERSION} -Wl,-Bdynamic"
 
-export BOOST_PYTHON="boost_python$python_version_no_dots"
-export BOOST_ROOT=$INSTALL_DIR
-export PATH="$PATH:$INSTALL_DIR/bin"
-
-# More stable approach: Go via python
-numpy_lib_dir=$(find /tmp/myvenv/ -name numpy.libs)
-export LD_LIBRARY_PATH="$PYTHON_LIB_DIR:/usr/lib:/usr/lib64:$INSTALL_DIR/lib:$INSTALL_DIR/bin:$numpy_lib_dir:$NUMPY_INCLUDE_PATH:$PYTHON_DEV_HEADERS_DIR"
-export CMAKE_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed 's/::/:/g' | sed 's/:/;/g')
-export PYTHON_LIBRARIES="/opt/python/cp313-cp313/lib/libpython3.13.so"
-export PYTHON_INCLUDE_DIR="/opt/python/cp313-cp313/include/python3.13"
-
-export CMAKE_LINK_OPTS="-Wl,--copy-dt-needed-entries -lpthread -lpython3.13"
-
-export PYTHON_INCLUDE_DIR=$PYTHON_DEV_HEADERS_DIR
-
-echo "export BOOST_PYTHON=$BOOST_PYTHON" >> /github/workspace/trace/env
-echo "export BOOST_ROOT=$BOOST_ROOT" >> /github/workspace/trace/env
-echo "export PATH=$PATH" >> /github/workspace/trace/env
-echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH" >> /github/workspace/trace/env
-echo "export CMAKE_LIBRARY_PATH=\"$CMAKE_LIBRARY_PATH\"" >> /github/workspace/trace/env
-echo "export PYTHON_LIBRARIES=\"$PYTHON_LIBRARIES\"" >> /github/workspace/trace/env
-echo "export PYTHON_INCLUDE_DIR=\"$PYTHON_INCLUDE_DIR\"" >> /github/workspace/trace/env
-echo "export CMAKE_LINK_OPTS=\"$CMAKE_LINK_OPTS\"" >> /github/workspace/trace/env
-
-# Define all required system libraries in one place
-export REQUIRED_LIBS="-lm -lpthread -ldl -lutil -lrt -lz"
-
-# Update linker flags to include these libraries
-export CMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS} ${REQUIRED_LIBS}"
-export CMAKE_SHARED_LINKER_FLAGS="${CMAKE_SHARED_LINKER_FLAGS} ${REQUIRED_LIBS}"
-
-PYTHON_ROOT="/opt/python/cp313-cp313"
-
+set +e
+# Clean CMake command with proper Python detection
 cmake \
-      -DCMAKE_CXX_STANDARD=14 \
-      -DBUILD_SHARED_LIBS=ON \
-      -DCMAKE_CXX_FLAGS="-I$PYTHON_INCLUDE_DIR" \
-      -DCMAKE_EXE_LINKER_FLAGS="${CMAKE_EXE_LINKER_FLAGS}" \
-      -DCMAKE_SHARED_LINKER_FLAGS="${CMAKE_SHARED_LINKER_FLAGS}" \
-      -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
-      -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
-      -DDAKOTA_DLL_API=OFF \
-      -DHAVE_X_GRAPHICS=OFF \
-      -DDAKOTA_ENABLE_TESTS=OFF \
-      -DDAKOTA_ENABLE_TPL_TESTS=OFF \
-      -DCMAKE_BUILD_TYPE="Release" \
-      -DDAKOTA_NO_FIND_TRILINOS:BOOL=TRUE \
-      -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
-      -DPYTHON_LIBRARIES=$PYTHON_LIBRARIES \
-      -DCMAKE_LINK_OPTIONS="$CMAKE_LINK_OPTS" \
-      -DPYTHON_EXECUTABLE="$PYTHON_EXECUTABLE" \
-      -DPYTHON_INCLUDE_DIR="$PYTHON_INCLUDE_DIRS" \
-      -DPYTHON_LIBRARY="$PYTHON_LIBRARIES" \
-      -DPYTHON_NumPy_INCLUDE_DIR="$PYTHON_NUMPY_INCLUDE_DIRS" \
-      -DPython_ROOT_DIR="$PYTHON_ROOT" \
-      -DPython_EXECUTABLE="$PYTHON_EXECUTABLE" \
-      -DPython_INCLUDE_DIRS="$PYTHON_INCLUDE_DIRS" \
-      -DPython_NumPy_INCLUDE_DIRS="$PYTHON_NUMPY_INCLUDE_DIRS" \
-      -DCMAKE_PREFIX_PATH="$PYTHON_ROOT" \
-      -DCMAKE_THREAD_LIBS_INIT="-lpthread" \
-      -DTHREADS_PREFER_PTHREAD_FLAG=ON \
-      -DTHREADS_HAVE_PTHREAD_ARG=ON \
-      ..
+  -DCMAKE_CXX_STANDARD=14 \
+  -DBUILD_SHARED_LIBS=ON \
+  -DCMAKE_CXX_FLAGS="-I$PYTHON_INCLUDE_DIR -pthread -fPIC" \
+  -DCMAKE_EXE_LINKER_FLAGS="-Wall -pthread -lutil $PYTHON_LINK_FLAGS" \
+  -DCMAKE_SHARED_LINKER_FLAGS="-Wall -pthread -lutil $PYTHON_LINK_FLAGS" \
+  -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
+  -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
+  -DDAKOTA_DLL_API=OFF \
+  -DHAVE_X_GRAPHICS=OFF \
+  -DDAKOTA_ENABLE_TESTS=OFF \
+  -DDAKOTA_ENABLE_TPL_TESTS=OFF \
+  -DCMAKE_BUILD_TYPE="Release" \
+  -DDAKOTA_NO_FIND_TRILINOS:BOOL=TRUE \
+  -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
+  -DPYTHON_EXECUTABLE="$PYTHON_EXECUTABLE" \
+  -DPYTHON_INCLUDE_DIR="$PYTHON_INCLUDE_DIR" \
+  -DTHREADS_PREFER_PTHREAD_FLAG=ON \
+  ..
 
+if [ $? -ne 0 ]; then
+  echo "CMake configuration failed. Printing error logs:"
+  cat CMakeFiles/CMakeError.log
+  cat CMakeFiles/CMakeOutput.log
+  exit 1
+fi
 
-echo "# make --debug=b -j8 install" >> /github/workspace/trace/env
-echo "Building Dakota ..."
-make --debug=b -j8 install &> /github/workspace/trace/dakota_install.log
+# Build and install Dakota
+echo "Building Dakota..."
+make -j8 install
 
+if [ $? -ne 0 ]; then
+  echo "Make failed. Printing last 200 lines of build log:"
+  tail -n 200 /github/workspace/trace/dakota_install.log
+  exit 1
+fi
 
-DEPS_BUILD=/github/workspace/deps_build
-
-mkdir -p $DEPS_BUILD
-
-cp -r $INSTALL_DIR/bin $DEPS_BUILD
-cp -r $INSTALL_DIR/lib $DEPS_BUILD
-cp -r $INSTALL_DIR/include $DEPS_BUILD
+echo "Build completed successfully!"
