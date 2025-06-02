@@ -24,41 +24,39 @@ pushd /opt/_internal && tar -xJf static-libs-for-embedding-only.tar.xz && popd
 echo "pushd /opt/_internal && tar -xJf static-libs-for-embedding-only.tar.xz && popd" >> /github/workspace/trace/env
 echo "INSTALL_DIR=$INSTALL_DIR" >> /github/workspace/trace/env
 
-yum install lapack-devel -y
-yum install python3-devel.x86_64 -y
-yum install -y wget
+yum install lapack-devel wget -y
 cd /tmp
 
 BOOST_VERSION_UNDERSCORES=$(echo $BOOST_VERSION | sed 's/\./_/g')
 wget --quiet https://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION}/boost_${BOOST_VERSION_UNDERSCORES}.tar.bz2 --no-check-certificate > /dev/null
-python_exec=$(which python$1)
-$python_exec -m venv myvenv
-source ./myvenv/bin/activate
-pip install numpy
-pip install pybind11[global]
 
-PYTHON_DEV_HEADERS_DIR=$(rpm -ql python3-devel.x86_64 | grep '\.h$' | head -n 1 | xargs dirname)
-NUMPY_INCLUDE_PATH=$(find /tmp -type d -path "*site-packages/numpy/core/include")
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv python install $1
+
+uv venv -p $1 myvenv
+source ./myvenv/bin/activate
+uv pip install numpy
+uv pip install pybind11[global]
+uv pip install "cmake<4"
+
+NUMPY_INCLUDE_PATH=$(python3 -c "import numpy; print(numpy.get_include())")
 PYTHON_INCLUDE_PATH=$(python -c "from sysconfig import get_paths; print(get_paths()['include'])")
 python_root=$(python -c "import sys; print(sys.prefix)")
 python_version=$(python --version | sed -E 's/.*([0-9]+\.[0-9]+)\.([0-9]+).*/\1/')
 python_version_no_dots="$(echo "${python_version//\./}")"
 python_bin_include_lib="    using python : $python_version : $(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"$python_exec : {g['include']} : {g['stdlib']} ;\")")"
 PYTHON_INCLUDE_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['include']} \")")"
-PYTHON_LIB_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['stdlib']} \")")"
 
 echo "Found dev headers $PYTHON_DEV_HEADERS_DIR"
 echo "Found numpy include path $NUMPY_INCLUDE_PATH"
 echo "Found python include path $PYTHON_INCLUDE_PATH"
 echo "Found python root $python_root"
 echo "Found PYTHON_INCLUDE_DIR $PYTHON_INCLUDE_DIR"
-echo "Found PYTHON_LIB_DIR $PYTHON_LIB_DIR"
 
 tar xf boost_$BOOST_VERSION_UNDERSCORES.tar.bz2
 cd boost_$BOOST_VERSION_UNDERSCORES
 
-echo "python_exec=$python_exec" >> /github/workspace/trace/env
-echo "PYTHON_DEV_HEADERS_DIR=$PYTHON_DEV_HEADERS_DIR" >> /github/workspace/trace/env
 echo "NUMPY_INCLUDE_PATH=$NUMPY_INCLUDE_PATH" >> /github/workspace/trace/env
 echo "PYTHON_INCLUDE_PATH=$PYTHON_INCLUDE_PATH" >> /github/workspace/trace/env
 echo "python_root=$python_root" >> /github/workspace/trace/env
@@ -93,7 +91,7 @@ mkdir build
 cd build
 
 export PATH=/tmp/INSTALL_DIR/bin:$PATH
-export PYTHON_INCLUDE_DIRS="$PYTHON_INCLUDE_PATH $PYTHON_DEV_HEADERS_DIR /tmp/INSTALL_DIR/lib"
+export PYTHON_INCLUDE_DIRS="$PYTHON_INCLUDE_PATH /tmp/INSTALL_DIR/lib"
 export PYTHON_EXECUTABLE=$(which python)
 
 echo "export PATH=$PATH" >> /github/workspace/trace/env
@@ -106,14 +104,11 @@ export PATH="$PATH:$INSTALL_DIR/bin"
 
 # More stable approach: Go via python
 numpy_lib_dir=$(find /tmp/myvenv/ -name numpy.libs)
-export LD_LIBRARY_PATH="$PYTHON_LIB_DIR:/usr/lib:/usr/lib64:$INSTALL_DIR/lib:$INSTALL_DIR/bin:$numpy_lib_dir:$NUMPY_INCLUDE_PATH:$PYTHON_DEV_HEADERS_DIR"
+export PYTHON_LIBRARIES=$(python3 -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))")
+export LD_LIBRARY_PATH="$PYTHON_LIBRARIES:/usr/lib:/usr/lib64:$INSTALL_DIR/lib:$INSTALL_DIR/bin:/lib64:$numpy_lib_dir:$NUMPY_INCLUDE_PATH:$LD_LIBRARY_PATH"
 export CMAKE_LIBRARY_PATH=$(echo $LD_LIBRARY_PATH | sed 's/::/:/g' | sed 's/:/;/g')
-export PYTHON_LIBRARIES="/usr/lib64/"
-export PYTHON_INCLUDE_DIR="/usr/include/python3.6m"
+export CMAKE_LINK_OPTS="-Wl,--copy-dt-needed-entries, -lpthread"
 
-export CMAKE_LINK_OPTS="-Wl,--copy-dt-needed-entries,-l pthread"
-
-export PYTHON_INCLUDE_DIR=$PYTHON_DEV_HEADERS_DIR
 
 echo "export BOOST_PYTHON=$BOOST_PYTHON" >> /github/workspace/trace/env
 echo "export BOOST_ROOT=$BOOST_ROOT" >> /github/workspace/trace/env
@@ -124,29 +119,25 @@ echo "export PYTHON_LIBRARIES=\"$PYTHON_LIBRARIES\"" >> /github/workspace/trace/
 echo "export PYTHON_INCLUDE_DIR=\"$PYTHON_INCLUDE_DIR\"" >> /github/workspace/trace/env
 echo "export CMAKE_LINK_OPTS=\"$CMAKE_LINK_OPTS\"" >> /github/workspace/trace/env
 
-cmake_command="""
+echo "Bootstrapping Dakota ..."
 cmake \
-      -DCMAKE_CXX_STANDARD=14 \
-      -DBUILD_SHARED_LIBS=ON \
-      -DCMAKE_CXX_FLAGS=\"-I$PYTHON_INCLUDE_DIR\" \
-      -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
-      -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
-      -DDAKOTA_DLL_API=OFF \
-      -DHAVE_X_GRAPHICS=OFF \
-      -DDAKOTA_ENABLE_TESTS=OFF \
-      -DDAKOTA_ENABLE_TPL_TESTS=OFF \
-      -DCMAKE_BUILD_TYPE="Release" \
-      -DDAKOTA_NO_FIND_TRILINOS:BOOL=TRUE \
-      -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
-      -DPYTHON_LIBRARIES=$PYTHON_LIBRARIES \
-      -DCMAKE_LINK_OPTIONS=\"$CMAKE_LINK_OPTS\" \
-      .. &> "$INSTALL_DIR/dakota_bootstrap.log"
-
-"""
-echo "# $cmake_command" >> /github/workspace/trace/env
-
-echo "Boostrapping Dakota ..."
-$($cmake_command &> /github/workspace/trace/dakota_bootstrap.log)
+  -DCMAKE_CXX_STANDARD=14 \
+  -DBUILD_SHARED_LIBS=ON \
+  -DCMAKE_CXX_FLAGS="-I$PYTHON_INCLUDE_DIR" \
+  -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
+  -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
+  -DDAKOTA_DLL_API=OFF \
+  -DHAVE_X_GRAPHICS=OFF \
+  -DDAKOTA_ENABLE_TESTS=OFF \
+  -DDAKOTA_ENABLE_TPL_TESTS=OFF \
+  -DCMAKE_BUILD_TYPE="Release" \
+  -DDAKOTA_NO_FIND_TRILINOS:BOOL=TRUE \
+  -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
+  -DPYTHON_LIBRARIES=$PYTHON_LIBRARIES \
+  -DCMAKE_LINK_OPTIONS="$CMAKE_LINK_OPTS" \
+  -DCMAKE_EXE_LINKER_FLAGS="-L${PYTHON_LIBRARIES} -lpython$1" \
+  -DTHREADS_PREFER_PTHREAD_FLAG=ON \
+  .. &> /github/workspace/trace/dakota_bootstrap.log
 
 echo "# make --debug=b -j8 install" >> /github/workspace/trace/env
 echo "Building Dakota ..."
