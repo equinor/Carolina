@@ -103,6 +103,7 @@ jobs:
         run: |
           ls dist
           pip install twine
+          pip install packaging==25.0
           twine check dist/*
 
           # remove carolina dev-wheels if any
