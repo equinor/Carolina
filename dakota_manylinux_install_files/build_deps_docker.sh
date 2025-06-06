@@ -145,7 +145,7 @@ echo "export CMAKE_LINK_OPTS=\"$CMAKE_LINK_OPTS\"" >> $WORKSPACE/trace/env
 
 cmake_command="""
 cmake \
-      -DCMAKE_CXX_STANDARD=14 \
+      -DCMAKE_CXX_STANDARD=17 \
       -DBUILD_SHARED_LIBS=ON \
       -DCMAKE_CXX_FLAGS=\"-I$PYTHON_INCLUDE_DIR\" \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
