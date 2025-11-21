@@ -84,7 +84,7 @@ jobs:
         path: ${{ github.workspace }}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz
 
     - name: Checkout Carolina
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
@@ -219,7 +219,7 @@ jobs:
         echo "DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${HOME}/${INSTALL_DIR}/lib:$INSTALL_DIR/bin" >> ${GITHUB_ENV}
 
     - name: Checkout Carolina
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
@@ -314,7 +314,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
