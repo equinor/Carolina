@@ -38,7 +38,7 @@ jobs:
       NO_PROJECT_RES: ${{ inputs.NO_PROJECT_RES }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
@@ -77,7 +77,7 @@ jobs:
         args: '-c "sh dakota_manylinux_install_files/build_wheels_gha.sh ${{ matrix.python-version }}"'
 
     - name: Checkout Carolina
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
         path: carolina-main
