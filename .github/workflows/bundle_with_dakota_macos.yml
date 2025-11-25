@@ -29,8 +29,8 @@ jobs:
       fail-fast: true
       matrix:
         # https://github.com/actions/runner-images?tab=readme-ov-file#available-images
-        python-version: [ '3.11', '3.12', '3.13']
-        os: [ 'macos-14' ]
+        python-version: [ '3.11' ]
+        os: [ 'macos-latest' ]
 
     runs-on: ${{ matrix.os }}
     name: "Build 🛞 (${{ matrix.python-version }}, ${{ matrix.os }})"
@@ -89,13 +89,29 @@ jobs:
         fetch-depth: 0
 
     - name: Install brew gcc
-      run: brew install gcc
+      run: brew install gcc@13
+
+    - name: Install brew clang@16
+      run: brew install llvm@16
 
     - name: Install dependencies
       if: steps.cache-package.outputs.cache-hit != 'true'
       run: |
         python -m pip install -U pip
         python -m pip install numpy
+        python -m pip install cmake==3.31.10
+
+    - name: Show deps
+      if: steps.cache-package.outputs.cache-hit != 'true'
+      run: |
+        echo "-------------------------------------------------"
+        python -m cmake --version
+        echo "-------------------------------------------------"
+        gcc --version
+        echo "-------------------------------------------------"
+        clang --version
+        echo "-------------------------------------------------"
+        return 1
 
     - name: Build needed boost libraries
       if: steps.cache-package.outputs.cache-hit != 'true'
@@ -123,6 +139,9 @@ jobs:
 
         export PYTHON_EXECUTABLE=$(which python)
         export PYTHON_INCLUDE_DIR=$(python -c "from sysconfig import get_paths as gp; print(gp()['include'])")
+
+        python -m cmake --version
+        gcc --version
 
         mkdir -p /tmp/build
         cd /tmp/build
@@ -167,7 +186,7 @@ jobs:
         mkdir -p build
         cd build
 
-        cmake \
+        python -m cmake \
           -DCMAKE_CXX_STANDARD=14 \
           -DBUILD_SHARED_LIBS=ON \
           -DCMAKE_CXX_FLAGS="-I$PYTHON_INCLUDE_DIR" \
@@ -309,8 +328,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ '3.11', '3.12', '3.13']
-        os: [ 'macos-14' ]
+        python-version: [ '3.11' ]
+        os: [ 'macos-latest' ]
 
     runs-on: ${{ matrix.os }}
     steps:
