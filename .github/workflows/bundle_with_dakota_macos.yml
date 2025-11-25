@@ -89,7 +89,7 @@ jobs:
         fetch-depth: 0
 
     - name: Install brew gcc
-      run: brew install gcc
+      run: brew install gcc@13
 
     - name: Install dependencies
       if: steps.cache-package.outputs.cache-hit != 'true'
@@ -124,6 +124,9 @@ jobs:
 
         export PYTHON_EXECUTABLE=$(which python)
         export PYTHON_INCLUDE_DIR=$(python -c "from sysconfig import get_paths as gp; print(gp()['include'])")
+
+        python -m cmake --version
+        gcc --version
 
         mkdir -p /tmp/build
         cd /tmp/build
@@ -167,8 +170,6 @@ jobs:
 
         mkdir -p build
         cd build
-
-        python -m cmake --version
 
         python -m cmake \
           -DCMAKE_CXX_STANDARD=14 \
