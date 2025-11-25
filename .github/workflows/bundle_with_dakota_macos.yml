@@ -96,6 +96,7 @@ jobs:
       run: |
         python -m pip install -U pip
         python -m pip install numpy
+        python -m pip install cmake==3.31.10
 
     - name: Build needed boost libraries
       if: steps.cache-package.outputs.cache-hit != 'true'
@@ -167,7 +168,9 @@ jobs:
         mkdir -p build
         cd build
 
-        cmake \
+        python -m cmake --version
+
+        python -m cmake \
           -DCMAKE_CXX_STANDARD=14 \
           -DBUILD_SHARED_LIBS=ON \
           -DCMAKE_CXX_FLAGS="-I$PYTHON_INCLUDE_DIR" \
