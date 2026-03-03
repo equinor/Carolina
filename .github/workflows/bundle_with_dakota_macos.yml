@@ -29,14 +29,15 @@ jobs:
       fail-fast: true
       matrix:
         # https://github.com/actions/runner-images?tab=readme-ov-file#available-images
-        python-version: [ '3.11', '3.12', '3.13']
-        os: [ 'macos-14' ]
+        python-version: [ '3.11', '3.12', '3.13', '3.14' ]
+        os: [ 'macos-15' ]
 
     runs-on: ${{ matrix.os }}
     name: "Build 🛞 (${{ matrix.python-version }}, ${{ matrix.os }})"
     env:
       INSTALL_DIR: ${{ inputs.INSTALL_DIR }}
       SYSTEM_VERSION_COMPAT: 0
+      MACOSX_DEPLOYMENT_TARGET: '15.0'
     steps:
 
     - name: Echo env and inputs
@@ -53,7 +54,7 @@ jobs:
 
     - name: Cache Homebrew Bundler RubyGems
       id: cache
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ${{ steps.set-up-homebrew.outputs.gems-path }}
         key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
@@ -64,7 +65,7 @@ jobs:
       run: brew install-bundler-gems
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -77,14 +78,14 @@ jobs:
         which python
         which pip
         python -c "import platform; mac_version=platform.mac_ver(); print('macOS version: '+mac_version[0])"
-    - uses: actions/cache@v4
+    - uses: actions/cache@v5
       id: cache-package
       with:
         key: ${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
         path: ${{ github.workspace }}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz
 
     - name: Checkout Carolina
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
@@ -96,6 +97,7 @@ jobs:
       run: |
         python -m pip install -U pip
         python -m pip install numpy
+        python -m pip install "cmake<4"
 
     - name: Build needed boost libraries
       if: steps.cache-package.outputs.cache-hit != 'true'
@@ -162,15 +164,23 @@ jobs:
         patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/workdirhelper_boost_filesystem.patch
         patch -p1 < $CAROLINA_DIR/dakota_manylinux_install_files/CMakeLists_includes.patch
 
+        # Fix JEGA keyed_registry.hpp.inl bug (upstream fix: dakota-packages commit b837a87)
+        JEGA_KEYED_REG=$(find . -path '*/JEGA/eddy/utilities/include/inline/keyed_registry.hpp.inl')
+        if [ -n "$JEGA_KEYED_REG" ]; then
+          echo "Applying JEGA keyed_registry fix to $JEGA_KEYED_REG ..."
+          sed -i '' 's/const KeyType& value/const KeyType\& key/' "$JEGA_KEYED_REG"
+          sed -i '' 's/this->find(this->key)/this->find(key)/' "$JEGA_KEYED_REG"
+        fi
+
         PYTHON_INCLUDE_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['include']} \")")"
 
         mkdir -p build
         cd build
 
         cmake \
-          -DCMAKE_CXX_STANDARD=14 \
+          -DCMAKE_CXX_STANDARD=17 \
           -DBUILD_SHARED_LIBS=ON \
-          -DCMAKE_CXX_FLAGS="-I$PYTHON_INCLUDE_DIR" \
+          -DCMAKE_CXX_FLAGS="-I$PYTHON_INCLUDE_DIR -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION -D_LIBCPP_ENABLE_CXX17_REMOVED_BINDERS" \
           -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
           -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
           -DDAKOTA_DLL_API=OFF \
@@ -192,12 +202,12 @@ jobs:
 
     - name: Cache boost and dakota
       if: steps.cache-package.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v4
+      uses: actions/cache/save@v5
       with:
         path: ${{ github.workspace }}/python-${{ matrix.python-version}}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}.tar.gz
         key: ${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
 
-    - uses: actions/cache/restore@v4
+    - uses: actions/cache/restore@v5
       id: restore-cached-package
       with:
         key: ${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
@@ -219,7 +229,7 @@ jobs:
         echo "DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${HOME}/${INSTALL_DIR}/lib:$INSTALL_DIR/bin" >> ${GITHUB_ENV}
 
     - name: Checkout Carolina
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
@@ -230,17 +240,10 @@ jobs:
         arch_ver=$(uname -m)
 
         # hint regarding architecture to avoid universal wheel generated
-        export _PYTHON_HOST_PLATFORM="macosx-11.0-$arch_ver"
+        export _PYTHON_HOST_PLATFORM="macosx-${MACOSX_DEPLOYMENT_TARGET}-$arch_ver"
         export ARCHFLAGS="-arch $arch_ver"
 
-        target_version=$(sw_vers --productVersion | cut -d . -f 1)
-
-        # the arm64 builds require deployment targets >= 13.0
-        if [ "$arch_ver" == "arm64" ]; then
-          export MACOSX_DEPLOYMENT_TARGET="${target_version}.0"
-        fi
-
-        pip install delocate==0.10.7
+        pip install delocate
         python -m pip install .
         PYTHON_VERSION_TRIM=$(echo ${{ matrix.python-version }} | tr -d ".")
         echo $PYTHON_VERSION_TRIM
@@ -293,7 +296,7 @@ jobs:
         DYLD_LIBRARY_PATH=${EXTENDED_DYLD_LIBRARY_PATH} delocate-wheel -w /tmp/carolina_dist -v $unfixed_wheel_path 
         echo "Output new carolina wheel to /tmp/carolina_dist"
         ls -lh /tmp/carolina_dist
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       id: cache-carolina_wheel
       with:
         name: ${{ matrix.os }}_py-${{ matrix.python-version }}_wheel
@@ -309,17 +312,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ '3.11', '3.12', '3.13']
-        os: [ 'macos-14' ]
+        python-version: [ '3.11', '3.12', '3.13', '3.14' ]
+        os: [ 'macos-15' ]
 
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
         cache: "pip"
@@ -328,13 +331,14 @@ jobs:
           pyproject.toml
 
     - name: Download Carolina artifact
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v8
       with:
         path: /tmp/artifacts
 
     - name: Find the Carolina wheel
       run: |
         python --version
+        pip install -U pip
 
         pyver_nodot=$(echo ${{ matrix.python-version }} | sed 's/\.//g')
         arch_ver=$(uname -m)

@@ -36,7 +36,7 @@ jobs:
       NEEDS_REBUILD: ${{ env.NEEDS_REBUILD }}
 
     steps:
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         name: Check cache for already built wheels
         id: cache-package
         with:
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Download built artifacts"
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           path: artifacts
     
@@ -88,12 +88,12 @@ jobs:
       
       - name: Cache wheels folder
         if: steps.cache-package.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: dist
           key: carolina_wheels_boost${{ needs.build-settings.outputs.BOOST_VERSION }}_dakota${{ needs.build-settings.outputs.DAKOTA_VERSION }}
 
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         id: restore-cached-package
         with:
           key: carolina_wheels_boost${{ needs.build-settings.outputs.BOOST_VERSION }}_dakota${{ needs.build-settings.outputs.DAKOTA_VERSION }}
@@ -102,8 +102,9 @@ jobs:
       - name: Validate dist with twine check
         run: |
           ls dist
+          pip install -U pip
           pip install twine
-          pip install packaging==25.0
+          pip install -U packaging
           twine check dist/*
 
           # remove carolina dev-wheels if any
@@ -115,7 +116,7 @@ jobs:
           ls dist
 
       - name: Publish to pypi
-        uses: pypa/gh-action-pypi-publish@v1.12.4
+        uses: pypa/gh-action-pypi-publish@v1.13.0
         if: >
           (github.event_name == 'workflow_dispatch' && inputs.publish) ||
           (github.event_name == 'push' && startsWith(github.ref, 'refs/tags'))

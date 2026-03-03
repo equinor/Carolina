@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ '3.11', '3.12', '3.13' ]
+        python-version: [ '3.11', '3.12', '3.13', '3.14' ]
         os: [ ubuntu-24.04 ]
     runs-on: ${{ matrix.os }}
     env:
@@ -38,11 +38,11 @@ jobs:
       NO_PROJECT_RES: ${{ inputs.NO_PROJECT_RES }}
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
-    - uses: actions/cache@v4
+    - uses: actions/cache@v5
       id: cache-package-check
       with:
         key: carolina_deps_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
@@ -50,7 +50,7 @@ jobs:
 
     - name: Build Boost & Dakota
       if: steps.cache-package-check.outputs.cache-hit != 'true'
-      uses: docker://quay.io/pypa/manylinux2014_x86_64
+      uses: docker://quay.io/pypa/manylinux_2_28
       env:
         PYTHON_VERSION: ${{ matrix.python-version }}
         BOOST_VERSION: ${{ inputs.BOOST_VERSION }}
@@ -59,7 +59,7 @@ jobs:
         entrypoint: /bin/bash
         args: '-c "sh dakota_manylinux_install_files/build_deps_gha.sh ${{ matrix.python-version }}"'
 
-    - uses: actions/cache/save@v4
+    - uses: actions/cache/save@v5
       if: steps.cache-package-check.outputs.cache-hit != 'true'
       id: cache-package-store
       with:
@@ -67,7 +67,7 @@ jobs:
         path: ./deps_build
 
     - name: Build Linux Wheel
-      uses: docker://quay.io/pypa/manylinux2014_x86_64
+      uses: docker://quay.io/pypa/manylinux_2_28
       env:
         PYTHON_VERSION: ${{ matrix.python-version }}
         BOOST_VERSION: ${{ inputs.BOOST_VERSION }}
@@ -77,13 +77,13 @@ jobs:
         args: '-c "sh dakota_manylinux_install_files/build_wheels_gha.sh ${{ matrix.python-version }}"'
 
     - name: Checkout Carolina
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
         path: carolina-main
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -93,6 +93,7 @@ jobs:
     - name: Install Carolina from wheel
       run: |
         source othervenv/bin/activate
+        pip install -U pip
         pyver_nodot=$(echo ${{ matrix.python-version }} | sed 's/\.//g')
         wheel_path=$(find carolina_dist -name "carolina*$pyver_nodot*whl")
         echo "Found Carolina wheel at $wheel_path"
@@ -103,12 +104,12 @@ jobs:
         source othervenv/bin/activate
         pip install pytest numpy
         cd carolina-main/tests
-        python -m pytest .
+        pytest . -sv
         cd -
 
     - name: Upload wheel as artifact
       if: always()
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ matrix.os }} Python ${{ matrix.python-version }} wheel
         path: |
