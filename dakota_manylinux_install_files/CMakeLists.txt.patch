@@ -1,6 +1,6 @@
 --- a/CMakeLists.txt	2023-11-24 10:57:08
 +++ b/CMakeLists.txt	2023-11-24 15:13:47
-@@ -150,10 +150,19 @@
+@@ -150,10 +150,15 @@
  # Perl is required for examples, docs, and system tests
  find_package(Perl REQUIRED)
  
@@ -9,18 +9,14 @@
  # for components here at top-level:
 +include_directories(${PYTHON_INCLUDE_DIRS})
 +include_directories(/usr/include)
-+include_directories(/usr/lib64)
-+include_directories(/tmp/INSTALL_DIR/dakota-6.21.0-public-src-cli/packages/external/eigen3/include/)
 +find_package(Threads REQUIRED)
-+set (PYBIND11_PYTHON_VERSION "3.11")
 +
  include(DakotaFindPython)
  dakota_find_python()
-+add_link_options()
  
  # Conditionally find Java JDK needed for input spec, docs, Java API
  include(DakotaFindJava)
-@@ -194,6 +203,8 @@
+@@ -194,6 +199,8 @@
    endif()
  endif()
  

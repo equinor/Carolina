@@ -1,11 +1,12 @@
 #! /bin/bash
 # exit early if encounter failure
-set -e
+set -eu
+
 
 BOOST_VERSION="1.87.0"
 DAKOTA_VERSION="6.21.0"
 
-BOOST_VER_NODOTS=$(echo $BOOST_VERSION | sed 's/\./_/g')
+BOOST_VER_NODOTS=$(echo "$BOOST_VERSION" | sed 's/\./_/g')
 
 INSTALL_DIR="$(pwd)/everdeps"
 CACHE_DIR="$(pwd)/download_cache"
@@ -23,7 +24,7 @@ else
   exit
 fi
 
-VENV_BASE=$1
+VENV_BASE=${1:-}
 if [ -z "$VENV_BASE" ]; then
   echo "The virtual environment must be explicitly declared;"
   echo "Please supply the path of the virtual environment as the first argument"
@@ -50,9 +51,9 @@ write_to_setenv() {
 
 write_to_setenv INSTALL_DIR "$INSTALL_DIR"
 
-python_version=$(python --version | sed -E 's/.*([0-9]+\.[0-9]+)\.([0-9]+).*/\1/')
+python_version=$(python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 python_bin_include_lib="    using python : $python_version : $(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"$(which python) : {g['include']} : {g['stdlib']} ;\")")"
-PYTHON_INCLUDE_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(f\"{g['include']} \")")"
+PYTHON_INCLUDE_DIR="$(python -c "from sysconfig import get_paths as gp; g=gp(); print(g['include'])")"
 echo "Detected python version $python_version"
 
 write_to_setenv python_version "$python_version"
@@ -63,16 +64,16 @@ touch "$TRACE_DIR/boost_bootstrap.log"
 touch "$TRACE_DIR/boost_install.log"
 
 echo "Downloading and extracting Boost .."
-boost_file=boost_$BOOST_VER_NODOTS.tar.bz2
+boost_file="boost_${BOOST_VER_NODOTS}.tar.bz2"
 
 if [ ! -f "$CACHE_DIR/$boost_file" ]; then
-  wget --quiet https://sourceforge.net/projects/boost/files/boost/$BOOST_VERSION/boost_${$BOOST_VER_NODOTS}.tar.bz2 -P "$CACHE_DIR"
+  wget --quiet "https://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION}/boost_${BOOST_VER_NODOTS}.tar.bz2" -P "$CACHE_DIR"
 else
   echo "Found $boost_file in download cache .."
 fi
 
 tar xf "$CACHE_DIR"/$boost_file
-cd boost_$BOOST_VER_NODOTS
+cd "boost_${BOOST_VER_NODOTS}"
 
 echo "Bootstrapping Boost .."
 ./bootstrap.sh --with-libraries=python,filesystem,program_options,regex,serialization,system --with-python-version="$python_version" &> "$TRACE_DIR/boost_bootstrap.log"
@@ -98,33 +99,41 @@ touch "$TRACE_DIR/dakota_install.log"
 # If it is installed under arm64 arch, this will fail,
 # solution is to uninstall and reinstall when in intel arch
 pip install numpy
-pip install cmake
+pip install "cmake<4"
 
 echo "Download and extract Dakota .."
 
-dakota_file=dakota-$DAKOTA_VERSION-public-src-cli.tar.gz
+dakota_file="dakota-${DAKOTA_VERSION}-public-src-cli.tar.gz"
 
 if [ ! -f "$CACHE_DIR"/$dakota_file ]; then
-  wget https://github.com/snl-dakota/dakota/releases/download/v$DAKOTA_VERSION/$dakota_file -P "$CACHE_DIR"
+  wget "https://github.com/snl-dakota/dakota/releases/download/v${DAKOTA_VERSION}/${dakota_file}" -P "$CACHE_DIR"
 else
   echo "Found $dakota_file in download cache .."
 fi
 
 tar xf "$CACHE_DIR"/$dakota_file
 
-cd dakota-$DAKOTA_VERSION-public-src-cli
+cd "dakota-${DAKOTA_VERSION}-public-src-cli"
 
 patch -p1 < ../../../dakota_manylinux_install_files/workdirhelper_boost_filesystem.patch
 patch -p1 < ../../../dakota_manylinux_install_files/CMakeLists_includes.patch
+
+# Fix JEGA keyed_registry.hpp.inl bug (upstream fix: dakota-packages commit b837a87)
+JEGA_KEYED_REG=$(find . -path '*/JEGA/eddy/utilities/include/inline/keyed_registry.hpp.inl')
+if [ -n "$JEGA_KEYED_REG" ]; then
+  echo "Applying JEGA keyed_registry fix to $JEGA_KEYED_REG ..."
+  sed -i '' 's/const KeyType& value/const KeyType\& key/' "$JEGA_KEYED_REG"
+  sed -i '' 's/this->find(this->key)/this->find(key)/' "$JEGA_KEYED_REG"
+fi
 
 mkdir -p build
 cd build
 
 echo "Building Dakota with cmake, logging to $TRACE_DIR/dakota_build.log"
 cmake \
-      -DCMAKE_CXX_STANDARD=14 \
+      -DCMAKE_CXX_STANDARD=17 \
       -DBUILD_SHARED_LIBS=ON \
-      -DCMAKE_CXX_FLAGS="-I$PYTHON_INCLUDE_DIR" \
+      -DCMAKE_CXX_FLAGS="-I$PYTHON_INCLUDE_DIR -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION -D_LIBCPP_ENABLE_CXX17_REMOVED_BINDERS" \
       -DDAKOTA_PYTHON_SURROGATES=ON \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE=ON \
       -DDAKOTA_PYTHON_DIRECT_INTERFACE_NUMPY=ON \
@@ -171,25 +180,23 @@ write_to_setenv "export BOOST_PYTHON" "$BOOST_PYTHON"
 
 echo "Building Carolina .."
 pip install . &> "$TRACE_DIR/carolina_install.log"
-echo "Done"
 
 cd "$INSTALL_DIR"
 
 site_packages_dir=$(python -c "import site; print(site.getsitepackages()[0])")
-carolina_so_path=$(find "$site_packages_dir" -name "carolina.cpython-$python_version_no_dots-darwin.so")
+carolina_so_path=$(find "$site_packages_dir" -name "carolina.cpython-${python_version_no_dots}-darwin.so")
 fortran_dylib_path=$(find /usr -name "libgfortran.dylib" | head -n 1)
 
 echo "found site packages @ $site_packages_dir"
-echo "found carolina.cpython-$python_version_no_dots-darwin.so @ $carolina_so_path"
+echo "found carolina.cpython-${python_version_no_dots}-darwin.so @ $carolina_so_path"
 echo "found libgfortran.dylib @ $fortran_dylib_path"
 
 fortran_dylib_dir=$(dirname "$fortran_dylib_path")
 install_lib_dir="$INSTALL_DIR/lib"
 
-echo "Adding required rpaths to $carolina_so_path, like this:"
-
-echo "install_name_tool -add_rpath $fortran_dylib_dir $carolina_so_path"
-echo "install_name_tool -add_rpath $install_lib_dir $carolina_so_path"
+echo "Adding required rpaths to $carolina_so_path:"
+echo "  install_name_tool -add_rpath $fortran_dylib_dir $carolina_so_path"
+echo "  install_name_tool -add_rpath $install_lib_dir $carolina_so_path"
 
 install_name_tool -add_rpath "$fortran_dylib_dir" "$carolina_so_path"
 install_name_tool -add_rpath "$install_lib_dir" "$carolina_so_path"
