@@ -10,7 +10,7 @@ fi
 PYTHON_VERSION_ARG="$1"
 
 BOOST_VERSION="1.87.0"
-DAKOTA_VERSION="6.21.0"
+DAKOTA_VERSION="6.23.0"
 
 cd /tmp
 INSTALL_DIR=/tmp/INSTALL_DIR
@@ -103,23 +103,7 @@ cd "dakota-${DAKOTA_VERSION}-public-src-cli"
 
 echo "Applying patches ..."
 patch -p1 < "$CAROLINA_DIR/dakota_manylinux_install_files/CMakeLists.txt.patch"
-patch -p1 < "$CAROLINA_DIR/dakota_manylinux_install_files/DakotaFindPython.cmake.patch"
-patch -p1 < "$CAROLINA_DIR/dakota_manylinux_install_files/workdirhelper_boost_filesystem.patch"
 patch -p1 < "$CAROLINA_DIR/dakota_manylinux_install_files/CMakeLists_includes.patch"
-
-# FIX: GCC 14 no longer transitively provides std::uint32_t etc. via <string>.
-# Trilinos's Teuchos_BigUIntDecl.hpp needs an explicit #include <cstdint>.
-echo "Applying GCC 14 compatibility fix (cstdint) ..."
-sed -i '/#ifndef TEUCHOS_BIG_UINT_DECL_HPP/a #include <cstdint>' \
-  packages/external/trilinos/packages/teuchos/core/src/Teuchos_BigUIntDecl.hpp
-
-# Fix JEGA keyed_registry.hpp.inl bug (upstream fix: dakota-packages commit b837a87)
-JEGA_KEYED_REG=$(find . -path '*/JEGA/eddy/utilities/include/inline/keyed_registry.hpp.inl')
-if [ -n "$JEGA_KEYED_REG" ]; then
-  echo "Applying JEGA keyed_registry fix to $JEGA_KEYED_REG ..."
-  sed -i 's/const KeyType& value/const KeyType\& key/' "$JEGA_KEYED_REG"
-  sed -i 's/this->find(this->key)/this->find(key)/' "$JEGA_KEYED_REG"
-fi
 
 mkdir build
 cd build
@@ -153,7 +137,7 @@ echo "export CMAKE_LIBRARY_PATH=\"$CMAKE_LIBRARY_PATH\"" >> "$WORKSPACE/trace/en
 echo "export PYTHON_LIBRARIES=\"$PYTHON_LIBRARIES\"" >> "$WORKSPACE/trace/env"
 echo "export PYTHON_INCLUDE_DIR=\"$PYTHON_INCLUDE_DIR\"" >> "$WORKSPACE/trace/env"
 
-echo "Boostrapping Dakota ..."
+echo "Bootstrapping Dakota ..."
 cmake \
   -DCMAKE_CXX_STANDARD=17 \
   -DBUILD_SHARED_LIBS=ON \
@@ -167,6 +151,7 @@ cmake \
   -DCMAKE_BUILD_TYPE="Release" \
   -DDAKOTA_NO_FIND_TRILINOS:BOOL=TRUE \
   -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" \
+  -DCMAKE_INSTALL_LIBDIR=lib \
   -DPYTHON_LIBRARIES="$PYTHON_LIBRARIES" \
   -DCMAKE_EXE_LINKER_FLAGS="-L${PYTHON_LIBRARIES} -lpython${PYTHON_VERSION_ARG} -lpthread" \
   -DTHREADS_PREFER_PTHREAD_FLAG=ON \
