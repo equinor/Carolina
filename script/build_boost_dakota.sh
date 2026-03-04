@@ -4,7 +4,7 @@ set -eu
 
 
 BOOST_VERSION="1.87.0"
-DAKOTA_VERSION="6.21.0"
+DAKOTA_VERSION="6.23.0"
 
 BOOST_VER_NODOTS=$(echo "$BOOST_VERSION" | sed 's/\./_/g')
 
@@ -115,16 +115,7 @@ tar xf "$CACHE_DIR"/$dakota_file
 
 cd "dakota-${DAKOTA_VERSION}-public-src-cli"
 
-patch -p1 < ../../../dakota_manylinux_install_files/workdirhelper_boost_filesystem.patch
 patch -p1 < ../../../dakota_manylinux_install_files/CMakeLists_includes.patch
-
-# Fix JEGA keyed_registry.hpp.inl bug (upstream fix: dakota-packages commit b837a87)
-JEGA_KEYED_REG=$(find . -path '*/JEGA/eddy/utilities/include/inline/keyed_registry.hpp.inl')
-if [ -n "$JEGA_KEYED_REG" ]; then
-  echo "Applying JEGA keyed_registry fix to $JEGA_KEYED_REG ..."
-  sed -i '' 's/const KeyType& value/const KeyType\& key/' "$JEGA_KEYED_REG"
-  sed -i '' 's/this->find(this->key)/this->find(key)/' "$JEGA_KEYED_REG"
-fi
 
 mkdir -p build
 cd build
