@@ -36,7 +36,7 @@ jobs:
       NEEDS_REBUILD: ${{ env.NEEDS_REBUILD }}
 
     steps:
-      - uses: actions/cache@v5
+      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         name: Check cache for already built wheels
         id: cache-package
         with:
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Download built artifacts"
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: artifacts
     
@@ -88,12 +88,12 @@ jobs:
       
       - name: Cache wheels folder
         if: steps.cache-package.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: dist
           key: carolina_wheels_boost${{ needs.build-settings.outputs.BOOST_VERSION }}_dakota${{ needs.build-settings.outputs.DAKOTA_VERSION }}
 
-      - uses: actions/cache/restore@v5
+      - uses: actions/cache/restore@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         id: restore-cached-package
         with:
           key: carolina_wheels_boost${{ needs.build-settings.outputs.BOOST_VERSION }}_dakota${{ needs.build-settings.outputs.DAKOTA_VERSION }}
@@ -116,7 +116,7 @@ jobs:
           ls dist
 
       - name: Publish to pypi
-        uses: pypa/gh-action-pypi-publish@v1.13.0
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
         if: >
           (github.event_name == 'workflow_dispatch' && inputs.publish) ||
           (github.event_name == 'push' && startsWith(github.ref, 'refs/tags'))

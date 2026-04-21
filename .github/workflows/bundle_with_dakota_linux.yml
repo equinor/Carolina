@@ -38,11 +38,11 @@ jobs:
       NO_PROJECT_RES: ${{ inputs.NO_PROJECT_RES }}
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         fetch-depth: 0
 
-    - uses: actions/cache@v5
+    - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       id: cache-package-check
       with:
         key: carolina_deps_${{ matrix.os }}_python-${{ matrix.python-version }}_boost-${{ inputs.BOOST_VERSION }}_dakota-${{ inputs.DAKOTA_VERSION }}
@@ -59,7 +59,7 @@ jobs:
         entrypoint: /bin/bash
         args: '-c "sh dakota_manylinux_install_files/build_deps_gha.sh ${{ matrix.python-version }}"'
 
-    - uses: actions/cache/save@v5
+    - uses: actions/cache/save@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       if: steps.cache-package-check.outputs.cache-hit != 'true'
       id: cache-package-store
       with:
@@ -77,13 +77,13 @@ jobs:
         args: '-c "sh dakota_manylinux_install_files/build_wheels_gha.sh ${{ matrix.python-version }}"'
 
     - name: Checkout Carolina
-      uses: actions/checkout@v6
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       with:
         fetch-depth: 0
         path: carolina-main
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -109,7 +109,7 @@ jobs:
 
     - name: Upload wheel as artifact
       if: always()
-      uses: actions/upload-artifact@v7
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: ${{ matrix.os }} Python ${{ matrix.python-version }} wheel
         path: |
