@@ -15,12 +15,11 @@ authors = [
   { name = "National Renewable Energy Laboratory (NREL)" },
 ]
 readme = "README.md"
-license = {text = "Apache 2.0"}
+license = "Apache-2.0"
 dynamic = ["version", "dependencies"]
 
 classifiers = ['Intended Audience :: Science/Research',
                'Natural Language :: English',
-               'License :: OSI Approved :: Apache Software License',
                'Operating System :: OS Independent',
                'Programming Language :: Python',
                'Programming Language :: Python :: 3.11',
