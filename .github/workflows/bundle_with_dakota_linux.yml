@@ -1,4 +1,6 @@
 name: linux-run-tests-build-docs
+permissions:
+  contents: read
 
 on:
   workflow_call:
