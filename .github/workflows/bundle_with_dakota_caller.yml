@@ -1,6 +1,6 @@
 name: 🏎️ Make & Test Wheels 🏎️
 permissions:
-  contents: read
+  contents: write
 
 env: 
   ERT_SHOW_BACKTRACE: 1

@@ -1,6 +1,6 @@
 name: macos-run-tests-build-docs
 permissions:
-  contents: read
+  contents: write
 
 on:
   workflow_call:
