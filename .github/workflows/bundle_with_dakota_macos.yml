@@ -4,10 +4,6 @@ permissions:
 
 on:
   workflow_call:
-    secrets:
-      DEPENDENCY_ACCESS_TOKEN:
-        required: true
-
     inputs:
       ERT_SHOW_BACKTRACE:
         required: true
