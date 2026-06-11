@@ -345,4 +345,4 @@ jobs:
         python --version
 
         pip install pytest numpy
-        python -m pytest ./tests
+        python -m pytest tests -sv
