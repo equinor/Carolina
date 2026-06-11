@@ -35,8 +35,6 @@ cd "$CAROLINA_DIR"
 pip install .
 pip list | grep carolina
 
-pytest tests
-
 mkdir -p /tmp/wheels
 mkdir -p /github/workspace/carolina_dist
 

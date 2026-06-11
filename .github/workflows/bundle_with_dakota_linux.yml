@@ -105,8 +105,8 @@ jobs:
       run: |
         source othervenv/bin/activate
         pip install pytest numpy
-        cd carolina-main/tests
-        pytest . -sv
+        cd carolina-main
+        pytest tests -sv
         cd -
 
     - name: Upload wheel as artifact
