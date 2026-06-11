@@ -1,0 +1,14 @@
+--- a/cmake/install_macos_libs.py
++++ b/cmake/install_macos_libs.py
+@@ -297,6 +297,11 @@
+ if __name__ == '__main__':
+     logging.basicConfig(filename='process_external_tpls.log', level=logging.DEBUG)
+ 
++    # Carolina: Dakota's macOS dylib post-processing does not scale to the
++    # 6.24 install tree (multi-hour otool/install_name_tool walk) and is
++    # redundant here -- delocate-wheel makes the Carolina wheel relocatable.
++    sys.exit(0)
++
+     if len(sys.argv) == 2:
+         os.chdir(sys.argv[1])
+ 
