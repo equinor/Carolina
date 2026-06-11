@@ -42,7 +42,7 @@ import weakref
 _USER_DATA = weakref.WeakValueDictionary()
 
 
-class DakotaBase(object):
+class DakotaBase:
     """ Base class for a DAKOTA 'driver'. """
 
     def __init__(self, dakota_input):
@@ -90,7 +90,7 @@ class DakotaBase(object):
         raise NotImplementedError('dakota_callback')
 
 
-class DakotaInput(object):
+class DakotaInput:
     """
     Simple mechanism where we store the strings that will go in each section
     of the DAKOTA input file.  The ``interface`` section defaults to a
@@ -147,9 +147,9 @@ class DakotaInput(object):
         with open(infile, 'w') as out:
             for section in ('environment', 'method', 'model', 'variables', 'interface', 'responses'):
                 # Write the section and all its sub keywords
-                out.write('%s\n' % section)
+                out.write(f'{section}\n')
                 for line in getattr(self, section):
-                    out.write("\t%s\n" % line)
+                    out.write(f"\t{line}\n")
 
                 # Write the driver instance id as analysis_components
                 if section == 'interface':
@@ -161,7 +161,7 @@ class DakotaInput(object):
                                                'in the driver object.')
 
                     # Write the id of the driver instance to the interface section
-                    out.write("\t  analysis_components = '%s'\n" % ident)
+                    out.write(f"\t  analysis_components = '{ident}'\n")
 
 
 def fetch_data(ident, dat):
@@ -175,7 +175,7 @@ def fetch_data(ident, dat):
     return dat[ident]
 
 
-class _ExcInfo(object):
+class _ExcInfo:
     """ Used to hold exception return information. """
 
     def __init__(self):
@@ -272,7 +272,7 @@ def dakota_callback(kwargs):
     """
     acs = kwargs['analysis_components']
     if not acs:
-        msg = 'dakota_callback (%s): No analysis_components' % os.getpid()
+        msg = f'dakota_callback ({os.getpid()}): No analysis_components'
         logging.error(msg)
         raise RuntimeError(msg)
 
@@ -281,7 +281,7 @@ def dakota_callback(kwargs):
         driver = fetch_data(acs[0], _USER_DATA)
 
     except KeyError:
-        msg = 'dakota_callback (%s): identifier %s not found in user data' % (os.getpid(), acs[0])
+        msg = f'dakota_callback ({os.getpid()}): identifier {acs[0]} not found in user data'
         logging.error(msg)
         raise RuntimeError(msg)
 

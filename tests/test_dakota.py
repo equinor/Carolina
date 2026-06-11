@@ -18,7 +18,6 @@ Trivial carolina test which runs an optimization on a 'model' which is the
 Rosenbrock function.
 """
 
-from __future__ import print_function
 from numpy import array
 from traceback import print_exc
 import sys
@@ -45,7 +44,7 @@ class TestDriver(DakotaBase):
                 "analytic_gradients",
                 "no_hessians", ]
         )
-        super(TestDriver, self).__init__(dakota_input)
+        super().__init__(dakota_input)
 
         self.force_exception = force_exception
 
