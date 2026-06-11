@@ -30,7 +30,7 @@ pushd /opt/_internal && tar -xJf static-libs-for-embedding-only.tar.xz && popd
 echo "pushd /opt/_internal && tar -xJf static-libs-for-embedding-only.tar.xz && popd" >> /github/workspace/trace/env
 echo "INSTALL_DIR=$INSTALL_DIR" >> /github/workspace/trace/env
 
-yum install lapack-devel wget -y
+yum install lapack-devel wget perl-JSON-PP -y
 cd /tmp
 
 if [ -z "${BOOST_VERSION:-}" ]; then

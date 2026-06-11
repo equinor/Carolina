@@ -13,7 +13,7 @@ fi
 PYTHON_VERSION_ARG="$1"
 
 BOOST_VERSION="1.87.0"
-DAKOTA_VERSION="6.23.0"
+DAKOTA_VERSION="6.24.0"
 
 cd /tmp
 INSTALL_DIR=/tmp/INSTALL_DIR
@@ -36,7 +36,7 @@ pushd /opt/_internal && tar -xJf static-libs-for-embedding-only.tar.xz && popd
 echo "pushd /opt/_internal && tar -xJf static-libs-for-embedding-only.tar.xz && popd" >> "$WORKSPACE/trace/env"
 echo "INSTALL_DIR=$INSTALL_DIR" >> "$WORKSPACE/trace/env"
 
-yum install lapack-devel -y
+yum install lapack-devel perl-JSON-PP -y
 yum install python3-devel.x86_64 -y
 yum install -y wget
 cd /tmp

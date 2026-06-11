@@ -69,6 +69,9 @@ def get_dakota_libs(macros):
     libs = macros["Dakota_LIBRARIES"]
     libs = [name[2:] if name.startswith("-l") else name for name in libs]
     libs = [name.split("::")[-1] if "::" in name else name for name in libs]
+    # dakota_ir is a static lib linked into libdakota_src; Dakota exports it in
+    # Dakota_LIBRARIES but does not install it, so drop it (its symbols are in dakota_src).
+    libs = [name for name in libs if name != "dakota_ir"]
     return libs
 
 

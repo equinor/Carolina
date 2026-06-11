@@ -4,7 +4,7 @@ set -eu
 
 
 BOOST_VERSION="1.87.0"
-DAKOTA_VERSION="6.23.0"
+DAKOTA_VERSION="6.24.0"
 
 BOOST_VER_NODOTS=$(echo "$BOOST_VERSION" | sed 's/\./_/g')
 
@@ -116,6 +116,7 @@ tar xf "$CACHE_DIR"/$dakota_file
 cd "dakota-${DAKOTA_VERSION}-public-src-cli"
 
 patch -p1 < ../../../dakota_manylinux_install_files/CMakeLists_includes.patch
+patch -p1 < ../../../dakota_manylinux_install_files/install_macos_libs.patch
 
 mkdir -p build
 cd build
