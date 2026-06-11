@@ -1,6 +1,9 @@
 #!/bin/bash
 set -eu
 
+# The manylinux container runs as a different user than the host that owns
+# /github/workspace. Without this, git (and setuptools_scm) refuses to operate.
+git config --global --add safe.directory /github/workspace
 
 if [ -z "${1:-}" ]; then
   echo "Please provide a Python version as an argument (e.g., 3.10)"
