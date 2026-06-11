@@ -20,12 +20,6 @@
 #include <boost/python.hpp>
 namespace bp = boost::python;
 
-#if BOOST_VERSION < 106500
-namespace bpn = boost::python::numeric;
-#endif
-
-
-
 #define MAKE_ARGV \
   char *argv[10]; \
   int argc = 0; \
@@ -66,25 +60,11 @@ void translator(const int& exc)
 }
 
 
-#include <boost/python.hpp>
 #include <numpy/arrayobject.h>
 using namespace boost::python;
 BOOST_PYTHON_MODULE(carolina)
 {
-
-#if BOOST_VERSION < 106500
-  using namespace bpn;
-#endif
-
-#if PY_MAJOR_VERSION >= 3
   import_array1();
-#else
-  import_array();
-#endif
-
-#if BOOST_VERSION < 106500
-  array::set_module_and_type("numpy", "ndarray");
-#endif
 
   register_exception_translator<int>(&translator);
 
