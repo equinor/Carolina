@@ -6,7 +6,7 @@ set -euo pipefail
 git config --global --add safe.directory /github/workspace
 
 if [ -z "${1:-}" ]; then
-  echo "Please provide a Python version as an argument (e.g., 3.10)"
+  echo "Please provide a Python version as an argument (e.g., 3.12)"
   exit 1
 fi
 
