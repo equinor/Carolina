@@ -287,7 +287,7 @@ jobs:
         DYLD_LIBRARY_PATH=${EXTENDED_DYLD_LIBRARY_PATH} delocate-wheel -w /tmp/carolina_dist -v $unfixed_wheel_path 
         echo "Output new carolina wheel to /tmp/carolina_dist"
         ls -lh /tmp/carolina_dist
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       id: cache-carolina_wheel
       with:
         name: ${{ matrix.os }}_py-${{ matrix.python-version }}_wheel
