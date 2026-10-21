@@ -37,7 +37,8 @@ echo "pushd /opt/_internal && tar -xJf static-libs-for-embedding-only.tar.xz && 
 echo "INSTALL_DIR=$INSTALL_DIR" >> "$WORKSPACE/trace/env"
 
 yum install lapack-devel perl-JSON-PP -y
-yum install python3-devel.x86_64 -y
+ARCH=$(uname -m)
+yum install "python3-devel.${ARCH}" -y
 yum install -y wget
 cd /tmp
 
@@ -57,7 +58,7 @@ pip install numpy
 pip install "pybind11[global]"
 pip install "cmake<4"
 
-PYTHON_DEV_HEADERS_DIR=$(rpm -ql python3-devel.x86_64 | grep '\.h$' | head -n 1 | xargs dirname)
+PYTHON_DEV_HEADERS_DIR=$(rpm -ql "python3-devel.${ARCH}" | grep '\.h$' | head -n 1 | xargs dirname)
 PYTHON_INCLUDE_PATH=$(python -c "from sysconfig import get_paths; print(get_paths()['include'])")
 python_root=$(python -c "import sys; print(sys.prefix)")
 python_version=$(python -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
